@@ -1,8 +1,7 @@
 "use server";
 
-import { cookies } from "next/headers";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
 
 /**
  * Server Action: Trigger Unified Scraping Process
