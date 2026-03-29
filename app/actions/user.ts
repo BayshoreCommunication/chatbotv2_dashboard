@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { auth } from "@/auth";
 import { unstable_cache } from "next/cache";
@@ -62,7 +62,7 @@ async function getAuthContext() {
   const userId = session?.user?.id;
 
   return {
-    apiUrl: process.env.NEXT_PUBLIC_API_URL,
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com",
     token,
     userId,
   };
@@ -328,7 +328,7 @@ export async function userSubscriptionByIds(
     });
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/subscription/${userId}?${queryParams}`,
+      `${process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com"}/api/subscription/${userId}?${queryParams}`,
       {
         method: "GET",
         headers: {
@@ -379,7 +379,7 @@ export async function userSubscriptionById(
     }).toString();
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/subscription/${userId}?${queryParams}`,
+      `${process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com"}/api/subscription/${userId}?${queryParams}`,
       {
         method: "GET",
         headers: {
@@ -412,7 +412,7 @@ export async function userSubscriptionById(
 
 export async function getUserDataTest(headers: HeadersInit): Promise<UserDataResponse<UserProfile>> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com"}/api/user`, {
       method: "GET",
       headers,
       next: { tags: ["user_profile"], revalidate: 360 },

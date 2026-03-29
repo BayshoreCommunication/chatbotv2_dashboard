@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   providers: [
@@ -12,8 +12,9 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-
+ 
         try {
+          console.log("Attempting sign-in for:", credentials.email, "at", `${BACKEND_URL}/api/v1/auth/signin`);
           const res = await fetch(`${BACKEND_URL}/api/v1/auth/signin`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -23,14 +24,22 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             }),
             cache: "no-store",
           });
-
-          if (!res.ok) return null;
-
+ 
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("Sign-in failed with status:", res.status, errorText);
+            return null;
+          }
+ 
           const data = await res.json();
-
+          console.log("Sign-in response data received successfully");
+ 
           // FastAPI returns: access_token, user_id, company_name, role
-          if (!data?.access_token || !data?.user_id) return null;
-
+          if (!data?.access_token || !data?.user_id) {
+            console.error("Response missing required fields:", data);
+            return null;
+          }
+ 
           return {
             id: data.user_id,
             email: credentials.email as string,
@@ -39,7 +48,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             role: data.role,
             companyName: data.company_name,
           };
-        } catch {
+        } catch (error) {
+          console.error("Authorize function crashed:", error);
           return null;
         }
       },

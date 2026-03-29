@@ -25,7 +25,7 @@ export async function createSubscriptionCheckoutSession(
     return { error: "You must be logged in to subscribe.", ok: false };
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
   if (!apiUrl) {
     console.error("API URL is not defined in environment variables.");
     return { error: "Internal server error.", ok: false };
@@ -78,7 +78,7 @@ export async function cancelSubscription(): Promise<ActionResponse> {
     return { error: "You must be logged in to perform this action.", ok: false };
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
 
   try {
     const token = (session.user as any).accessToken;

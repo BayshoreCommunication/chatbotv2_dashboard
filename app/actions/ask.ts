@@ -70,7 +70,7 @@ export async function askChatAction(
     return { ok: false, error: "Session ID is required." };
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
   if (!apiUrl) {
     return { ok: false, error: "API URL is not configured." };
   }

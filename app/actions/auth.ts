@@ -3,7 +3,7 @@
 import { signIn, signOut } from "@/auth";
 import { cookies } from "next/headers";
 
-const API = `${process.env.BACKEND_URL || "http://localhost:8000"}/api/v1`;
+const API = `${process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com"}/api/v1`;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
