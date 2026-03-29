@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   BiDownload,
   BiEnvelope,
@@ -8,52 +8,59 @@ import {
   BiGroup,
   BiRefresh,
   BiUser,
+  BiTrash,
 } from "react-icons/bi";
-
-// Dummy leads data
-const dummyLeads = [
-  {
-    id: 1,
-    name: "Sahak",
-    email: "arsahak@gmail.com",
-    phone: "None",
-    inquiry:
-      "Hello | Do you take personal injury cases? | How much fee do you take for this?",
-    sessionId: "test_ses...",
-  },
-  {
-    id: 2,
-    name: "John Doe",
-    email: "johndoe@gmail.com",
-    phone: "+1 (555) 123-4567",
-    inquiry: "I need help with a car accident case. Can you assist?",
-    sessionId: "sess_abc123",
-  },
-  {
-    id: 3,
-    name: "Jane Smith",
-    email: "janesmith@email.com",
-    phone: "None",
-    inquiry: "Looking for legal consultation regarding property dispute",
-    sessionId: "sess_def456",
-  },
-  {
-    id: 4,
-    name: "Mike Johnson",
-    email: "mikej@company.com",
-    phone: "+1 (555) 987-6543",
-    inquiry: "Need information about business law services",
-    sessionId: "sess_ghi789",
-  },
-];
+import { getLeadsAction, deleteLeadAction, Lead } from "@/app/actions/leads";
+import { toast } from "react-hot-toast";
 
 const LeadsDetailsView = () => {
-  const [leads] = useState(dummyLeads);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchLeads = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getLeadsAction();
+      if (response.ok && response.data) {
+        setLeads(response.data);
+      } else {
+        setError(response.error || "Failed to fetch leads");
+        toast.error(response.error || "Failed to fetch leads");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLeads();
+  }, [fetchLeads]);
+
+  const handleDeleteLead = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this lead?")) return;
+
+    try {
+      const res = await deleteLeadAction(id);
+      if (res.ok) {
+        setLeads((prev) => prev.filter((l) => l.id !== id));
+        toast.success("Lead deleted successfully");
+      } else {
+        toast.error(res.error || "Failed to delete lead");
+      }
+    } catch (err) {
+      toast.error("Failed to delete lead");
+    }
+  };
 
   // Calculate statistics
   const totalLeads = leads.length;
-  const withEmail = leads.filter((lead) => lead.email !== "").length;
-  const withName = leads.filter((lead) => lead.name !== "").length;
+  const withEmail = leads.filter((lead) => !!lead.email).length;
+  const withName = leads.filter((lead) => !!lead.name).length;
   const totalProfiles = leads.length;
 
   const stats = [
@@ -91,12 +98,38 @@ const LeadsDetailsView = () => {
     },
   ];
 
-  const handleRefresh = () => {
-    console.log("Refreshing leads...");
-  };
-
   const handleDownloadCSV = () => {
-    console.log("Downloading CSV...");
+    if (leads.length === 0) {
+      toast.error("No leads to download");
+      return;
+    }
+
+    // Define headers
+    const headers = ["ID", "Name", "Email", "Phone", "Message", "Session ID", "Date"];
+    
+    // Create CSV rows
+    const csvRows = [
+      headers.join(","), // Header row
+      ...leads.map((lead) => [
+        `"${lead.id}"`,
+        `"${lead.name || ""}"`,
+        `"${lead.email || ""}"`,
+        `"${lead.phone || ""}"`,
+        `"${(lead.message || "").replace(/"/g, '""')}"`,
+        `"${lead.session_id}"`,
+        `"${new Date(lead.created_at).toLocaleString()}"`,
+      ].join(",")),
+    ];
+
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `leads_export_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("CSV download started");
   };
 
   return (
@@ -113,15 +146,17 @@ const LeadsDetailsView = () => {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={handleRefresh}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={fetchLeads}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
-              <BiRefresh size={18} />
+              <BiRefresh size={18} className={loading ? "animate-spin" : ""} />
               Refresh
             </button>
             <button
               onClick={handleDownloadCSV}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+              disabled={leads.length === 0}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
               <BiDownload size={18} />
               Download CSV
@@ -148,7 +183,11 @@ const LeadsDetailsView = () => {
               </h3>
             </div>
             <p className="mb-1 text-3xl font-bold text-gray-900">
-              {stat.value}
+              {loading ? (
+                <span className="block h-8 w-16 bg-gray-100 animate-pulse rounded"></span>
+              ) : (
+                stat.value
+              )}
             </p>
             <p className="text-xs text-gray-500">{stat.subtitle}</p>
           </div>
@@ -174,56 +213,86 @@ const LeadsDetailsView = () => {
                   Inquiry
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Session ID
+                  Date
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Action
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {leads.map((lead) => (
-                <tr
-                  key={lead.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {lead.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">{lead.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div
-                      className={`text-sm ${
-                        lead.phone === "None"
-                          ? "text-yellow-600 font-medium"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {lead.phone}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-700 max-w-md truncate">
-                      {lead.inquiry}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 font-mono">
-                      {lead.sessionId}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-100 animate-pulse rounded"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 w-32 bg-gray-100 animate-pulse rounded"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 w-20 bg-gray-100 animate-pulse rounded"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 w-48 bg-gray-100 animate-pulse rounded"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 w-28 bg-gray-100 animate-pulse rounded"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 w-8 bg-gray-100 animate-pulse rounded ml-auto"></div></td>
+                  </tr>
+                ))
+              ) : leads.length > 0 ? (
+                leads.map((lead) => (
+                  <tr
+                    key={lead.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {lead.name || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-700">{lead.email || "N/A"}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div
+                        className={`text-sm ${
+                          !lead.phone
+                            ? "text-yellow-600 font-medium"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {lead.phone || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-700 max-w-xs truncate" title={lead.message || ""}>
+                        {lead.message || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {new Date(lead.created_at).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <button
+                        onClick={() => handleDeleteLead(lead.id)}
+                        className="text-red-500 hover:text-red-700 transition-colors p-1"
+                        title="Delete Lead"
+                      >
+                        <BiTrash size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : null}
             </tbody>
           </table>
         </div>
 
         {/* Empty State */}
-        {leads.length === 0 && (
-          <div className="text-center py-12">
-            <BiUser size={48} className="mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500 text-sm">No leads found</p>
+        {!loading && leads.length === 0 && (
+          <div className="text-center py-20 bg-white">
+            <div className="mx-auto w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+              <BiUser size={32} className="text-gray-300" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">No leads captured yet</h3>
+            <p className="text-gray-500 text-sm max-w-xs mx-auto">
+              Once your chatbot starts capturing visitor information, they will appear here.
+            </p>
           </div>
         )}
       </div>
@@ -232,3 +301,4 @@ const LeadsDetailsView = () => {
 };
 
 export default LeadsDetailsView;
+
