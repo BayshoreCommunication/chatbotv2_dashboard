@@ -1,5 +1,7 @@
+import WidgetSettingView from "@/components/widgetSettings/WidgetSettingView";
+
 const page = () => {
-  return <div>page</div>;
+  return <div><WidgetSettingView/></div>;
 };
 
 export default page;

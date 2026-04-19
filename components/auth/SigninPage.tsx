@@ -3,7 +3,7 @@
 import { signinAction } from "@/app/actions/auth";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { BiEnvelope, BiLockAlt, BiLogIn } from "react-icons/bi";
 import { FiEye, FiEyeOff } from "react-icons/fi";
@@ -15,12 +15,16 @@ const SigninPage = () => {
     error: "",
   });
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   useEffect(() => {
     if (state.ok) {
-      router.replace(state.redirectTo || "/dashboard");
+      // Full page navigation so server components (layout, navbar) re-render
+      // with the fresh session cookie instead of serving a stale RSC cache.
+      window.location.href = state.redirectTo || callbackUrl;
     }
-  }, [state.ok, state.redirectTo, router]);
+  }, [state.ok, state.redirectTo, callbackUrl]);
 
   // Shared styles
   const inputWrapperClass = "relative flex items-center";
@@ -69,6 +73,7 @@ const SigninPage = () => {
           className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/40"
         >
           <form action={formAction} className="space-y-5">
+            <input type="hidden" name="callbackUrl" value={callbackUrl} />
             {/* Email Field */}
             <div className="space-y-1.5">
               <label
@@ -183,7 +188,7 @@ const SigninPage = () => {
           <div className="mt-8 text-center text-sm">
             <span className="text-gray-500 dark:text-gray-400">New here? </span>
             <Link
-              href="/sign-up"
+              href={`/sign-up${callbackUrl !== "/dashboard" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
               className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400"
             >
               Create an account

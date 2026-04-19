@@ -1,24 +1,19 @@
 "use client";
 
 import {
-  checkOrSignupAction,
-  sendOTPQuickAction,
-  verifyOTPQuickAction,
-} from "@/actions/authCheck";
-import {
-  buildKnowledgeBaseAction,
-  checkKnowledgeBaseAction,
-} from "@/actions/knowledgeBase";
+  getKnowledgeStatusAction,
+  trainKnowledgeBaseAction,
+  type TrainResult,
+  type TrainStatus,
+} from "@/app/actions/knowledgeBase";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   BiBuilding,
   BiCheckCircle,
-  BiEnvelope,
   BiGlobe,
   BiLoaderAlt,
-  BiLockAlt,
 } from "react-icons/bi";
 
 const fadeInUp = {
@@ -35,6 +30,31 @@ const staggerContainer = {
     },
   },
 };
+
+// --- Helpers ---
+function qualityLabel(score: number): string {
+  if (score >= 75) return "excellent";
+  if (score >= 45) return "good";
+  return "needs improvement";
+}
+
+function statusToKB(status: TrainStatus, name: string) {
+  return {
+    companyName: status.company_name || name,
+    totalSources: status.entries_stored,
+    quality: qualityLabel(status.quality_score),
+    qualityPercentage: Math.round(status.quality_score),
+    updatedAt: status.last_updated,
+  };
+}
+
+function resultToTraining(result: TrainResult) {
+  return {
+    totalSources: result.entries_stored,
+    quality: qualityLabel(result.quality_score),
+    qualityPercentage: Math.round(result.quality_score),
+  };
+}
 
 // --- Interfaces ---
 interface Session {
@@ -59,6 +79,7 @@ interface TrainLeftSideFormProps {
   companyName: string;
   setCompanyName: (name: string) => void;
   onTrainingComplete?: (data: TrainingData) => void;
+  onCompanyIdFound?: (id: string) => void;
 }
 
 const TrainLeftSideForm = ({
@@ -66,24 +87,43 @@ const TrainLeftSideForm = ({
   companyName,
   setCompanyName,
   onTrainingComplete,
+  onCompanyIdFound,
 }: TrainLeftSideFormProps) => {
   const router = useRouter();
-  const [website, setWebsite] = useState("");
-  const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
+  const FORM_DRAFT_KEY = "free_trial_draft";
+
+  const [website, setWebsite] = useState(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      return (
+        JSON.parse(localStorage.getItem(FORM_DRAFT_KEY) || "{}").website || ""
+      );
+    } catch {
+      return "";
+    }
+  });
+  const [companyType, setCompanyType] = useState(() => {
+    if (typeof window === "undefined") return "other";
+    try {
+      return (
+        JSON.parse(localStorage.getItem(FORM_DRAFT_KEY) || "{}").companyType ||
+        "other"
+      );
+    } catch {
+      return "other";
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<
     | "form"
-    | "otp"
     | "checking"
     | "training"
     | "training-form"
     | "already-trained"
     | "success"
-  >("form");
+  >(session?.user ? "form" : "training-form");
   const [logs, setLogs] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [authToken, setAuthToken] = useState<string | null>(null);
   const [existingKB, setExistingKB] = useState<any>(null);
   const [trainingResult, setTrainingResult] = useState<{
     totalSources?: number;
@@ -94,57 +134,96 @@ const TrainLeftSideForm = ({
   const isUserLoggedIn = !!session?.user;
   const addLog = (msg: string) => setLogs((prev) => [...prev, msg]);
 
+  // Restore companyName from draft on first render
+  useEffect(() => {
+    if (companyName) return;
+    try {
+      const draft = JSON.parse(localStorage.getItem(FORM_DRAFT_KEY) || "{}");
+      if (draft.companyName) setCompanyName(draft.companyName);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-save draft whenever fields change
+  useEffect(() => {
+    if (!website && !companyName && companyType === "other") return;
+    try {
+      localStorage.setItem(
+        FORM_DRAFT_KEY,
+        JSON.stringify({ companyName, website, companyType }),
+      );
+    } catch {}
+  }, [companyName, website, companyType]);
+
+  const resolveCompanyId = (): string => {
+    if (session?.user?.id) return session.user.id;
+    return "";
+  };
+
+  const PENDING_KEY = "free_trial_pending";
+
   /**
-   * Auto-check for existing knowledge base on component mount for logged-in users
+   * On mount: restore pending training data (post-login redirect) OR auto-check KB
    */
   useEffect(() => {
-    const checkExistingKB = async () => {
-      if (isUserLoggedIn && step === "form") {
-        const token =
-          session.user?.accessToken || localStorage.getItem("token");
-        console.log("check acessTOkenvalue", token);
+    const init = async () => {
+      const cid = session?.user?.id;
 
-        if (token) {
-          setIsLoading(true);
-          setStep("checking");
-
+      // Restore saved form data after sign-in/sign-up redirect
+      if (isUserLoggedIn && cid) {
+        const raw = sessionStorage.getItem(PENDING_KEY);
+        if (raw) {
           try {
-            const checkResult = await checkKnowledgeBaseAction(token);
-
-            console.log("check acessTOkenvalue 2", checkResult);
-
-            if (checkResult.hasKnowledgeBase && checkResult.knowledgeBase) {
-              // User already has knowledge base - show it directly
-              setStep("already-trained");
-              setExistingKB(checkResult.knowledgeBase);
-
-              if (onTrainingComplete) {
-                onTrainingComplete({
-                  totalSources: checkResult.knowledgeBase.totalSources,
-                  quality: checkResult.knowledgeBase.quality,
-                  qualityPercentage:
-                    checkResult.knowledgeBase.qualityPercentage,
-                  companyName: checkResult.knowledgeBase.companyName,
-                  alreadyTrained: true,
-                });
-              }
-            } else {
-              // No knowledge base - show training form to collect company details
-              setStep("training-form");
-            }
-          } catch (error) {
-            console.error("Auto-check KB error:", error);
-            setStep("training-form");
-          } finally {
-            setIsLoading(false);
+            const pending = JSON.parse(raw) as {
+              companyName: string;
+              website: string;
+              companyType: string;
+            };
+            sessionStorage.removeItem(PENDING_KEY);
+            setCompanyName(pending.companyName);
+            setWebsite(pending.website);
+            setCompanyType(pending.companyType);
+            onCompanyIdFound?.(cid);
+            await startTraining(
+              cid,
+              pending.website,
+              pending.companyName,
+              pending.companyType,
+            );
+            return;
+          } catch {
+            sessionStorage.removeItem(PENDING_KEY);
           }
         }
       }
+
+      // Normal auto-check for logged-in users
+      if (!isUserLoggedIn || step !== "form") return;
+      if (!cid) return;
+
+      setIsLoading(true);
+      setStep("checking");
+      try {
+        const res = await getKnowledgeStatusAction(cid);
+        if (res.ok && res.data?.is_trained) {
+          const kb = statusToKB(res.data, companyName);
+          setExistingKB(kb);
+          setStep("already-trained");
+          onTrainingComplete?.({ ...kb, alreadyTrained: true });
+          onCompanyIdFound?.(cid);
+        } else {
+          setStep("training-form");
+        }
+      } catch {
+        setStep("training-form");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    checkExistingKB();
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run once on mount
+  }, []);
 
   /**
    * Handle start - for logged in users
@@ -154,204 +233,43 @@ const TrainLeftSideForm = ({
     setStep("checking");
     addLog("🔐 Authenticated user detected");
 
+    const cid = session?.user?.id;
+    if (!cid) {
+      setError("Please log in again");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const token = session?.user?.accessToken || localStorage.getItem("token");
-      if (!token) {
-        setError("Please log in again");
-        setIsLoading(false);
-        return;
-      }
-
       addLog("🔍 Checking existing knowledge base...");
-      const checkResult = await checkKnowledgeBaseAction(token);
+      const res = await getKnowledgeStatusAction(cid);
 
-      if (checkResult.hasKnowledgeBase && checkResult.knowledgeBase) {
-        // User already has knowledge base
+      if (res.ok && res.data?.is_trained) {
+        const kb = statusToKB(res.data, companyName);
+        setExistingKB(kb);
         setStep("already-trained");
-        setExistingKB(checkResult.knowledgeBase);
-        addLog(
-          `✅ Found existing knowledge base: ${checkResult.knowledgeBase.companyName}`
-        );
-        addLog(
-          `📊 Quality: ${checkResult.knowledgeBase.quality} (${checkResult.knowledgeBase.qualityPercentage}%)`
-        );
-        addLog(
-          `📚 Sources: ${checkResult.knowledgeBase.totalSources} websites`
-        );
-
-        if (onTrainingComplete) {
-          onTrainingComplete({
-            totalSources: checkResult.knowledgeBase.totalSources,
-            quality: checkResult.knowledgeBase.quality,
-            qualityPercentage: checkResult.knowledgeBase.qualityPercentage,
-            companyName: checkResult.knowledgeBase.companyName,
-            alreadyTrained: true,
-          });
-        }
-        setIsLoading(false);
+        addLog(`✅ Found existing knowledge base: ${kb.companyName}`);
+        addLog(`📊 Quality: ${kb.quality} (${kb.qualityPercentage}%)`);
+        addLog(`📚 Sources: ${kb.totalSources} entries`);
+        onTrainingComplete?.({ ...kb, alreadyTrained: true });
+        onCompanyIdFound?.(cid);
       } else {
-        // No knowledge base - show form to collect training data
         addLog("📝 No existing knowledge base found");
         addLog("✨ Please provide your company details to start training");
         setStep("training-form");
-        setIsLoading(false);
       }
     } catch (error: unknown) {
-      console.error("Check KB error:", error);
       addLog(
-        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`
+        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
       setError("Failed to check knowledge base");
+    } finally {
       setIsLoading(false);
     }
   };
 
   /**
-   * Handle form submission - for non-logged-in users
-   */
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!companyName || !website || !email) {
-      setError("Please fill all fields");
-      return;
-    }
-
-    setError(null);
-    setIsLoading(true);
-    setStep("checking");
-    addLog("🚀 Starting authentication process...");
-
-    try {
-      // Step 1: Check if email exists or auto-signup
-      addLog("📧 Checking email...");
-      const checkResult = await checkOrSignupAction(email, companyName);
-
-      if (!checkResult.success) {
-        setError(checkResult.message || "Failed to authenticate");
-        setIsLoading(false);
-        setStep("form");
-        return;
-      }
-
-      if (checkResult.isNewUser) {
-        addLog(
-          `✅ New user created with password: ${checkResult.defaultPassword}`
-        );
-      } else {
-        addLog("✅ Existing user found");
-      }
-
-      // Step 2: Send OTP for verification
-      addLog("📨 Sending OTP to your email...");
-      const otpResult = await sendOTPQuickAction(email);
-
-      if (!otpResult.success) {
-        setError(otpResult.message || "Failed to send OTP");
-        setIsLoading(false);
-        setStep("form");
-        return;
-      }
-
-      addLog("✅ OTP sent successfully");
-      if (otpResult.otp) {
-        addLog(`🔢 Development OTP: ${otpResult.otp}`);
-      }
-
-      // Store token temporarily
-      if (checkResult.token) {
-        setAuthToken(checkResult.token);
-      }
-
-      setStep("otp");
-      setIsLoading(false);
-    } catch (error: unknown) {
-      console.error("Form submit error:", error);
-      addLog(
-        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-      setError("An error occurred during authentication");
-      setIsLoading(false);
-      setStep("form");
-    }
-  };
-
-  /**
-   * Handle OTP verification and start training
-   */
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!otp || otp.length !== 6) {
-      setError("Please enter valid 6-digit OTP");
-      return;
-    }
-
-    setError(null);
-    setIsLoading(true);
-    addLog("🔐 Verifying OTP...");
-
-    try {
-      const verifyResult = await verifyOTPQuickAction(email, otp);
-
-      if (!verifyResult.success) {
-        setError(verifyResult.message || "Invalid OTP");
-        setIsLoading(false);
-        return;
-      }
-
-      addLog("✅ OTP verified successfully");
-
-      // Store token in localStorage only for non-logged-in users
-      const token = verifyResult.token || authToken;
-      if (token) {
-        if (!isUserLoggedIn) {
-          localStorage.setItem("token", token);
-        }
-        setAuthToken(token);
-      }
-
-      // Check if user already has knowledge base
-      addLog("🔍 Checking existing knowledge base...");
-      const checkResult = await checkKnowledgeBaseAction(token!);
-
-      if (checkResult.hasKnowledgeBase && checkResult.knowledgeBase) {
-        // Already trained
-        setStep("already-trained");
-        setExistingKB(checkResult.knowledgeBase);
-        addLog(
-          `✅ Found existing knowledge base: ${checkResult.knowledgeBase.companyName}`
-        );
-        addLog(
-          `📊 Quality: ${checkResult.knowledgeBase.quality} (${checkResult.knowledgeBase.qualityPercentage}%)`
-        );
-
-        if (onTrainingComplete) {
-          onTrainingComplete({
-            totalSources: checkResult.knowledgeBase.totalSources,
-            quality: checkResult.knowledgeBase.quality,
-            qualityPercentage: checkResult.knowledgeBase.qualityPercentage,
-            companyName: checkResult.knowledgeBase.companyName,
-            alreadyTrained: true,
-          });
-        }
-        setIsLoading(false);
-      } else {
-        // Start training
-        await startTraining(token!);
-      }
-    } catch (error: unknown) {
-      console.error("Verify OTP error:", error);
-      addLog(
-        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-      setError("Failed to verify OTP");
-      setIsLoading(false);
-    }
-  };
-
-  /**
-   * Handle training form submission for logged-in users
+   * Handle training form submission — redirect to sign-in if not authenticated
    */
   const handleLoggedInTrainingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -362,68 +280,68 @@ const TrainLeftSideForm = ({
     }
 
     setError(null);
-    const token = session?.user?.accessToken || localStorage.getItem("token");
-    if (!token) {
+
+    if (!isUserLoggedIn) {
+      sessionStorage.setItem(
+        PENDING_KEY,
+        JSON.stringify({ companyName, website, companyType }),
+      );
+      router.push(
+        `/sign-in?callbackUrl=${encodeURIComponent("/start-free-trial")}`,
+      );
+      return;
+    }
+
+    const cid = resolveCompanyId();
+    if (!cid) {
       setError("Please log in again");
       return;
     }
 
-    await startTraining(token);
+    await startTraining(cid);
   };
 
   /**
    * Start knowledge base training
    */
-  const startTraining = async (token: string) => {
+  const startTraining = async (
+    cid: string,
+    siteUrl = website,
+    name = companyName,
+    type = companyType,
+  ) => {
     setStep("training");
+    setIsLoading(true);
     addLog("🚀 Starting knowledge base training...");
-    addLog(`🏢 Company: ${companyName}`);
-    addLog(`🌐 Website: ${website}`);
+    addLog(`🏢 Company: ${name}`);
+    addLog(`🌐 Website: ${siteUrl}`);
 
     try {
-      const buildResult = await buildKnowledgeBaseAction(
-        token,
-        companyName,
-        website
-      );
+      const res = await trainKnowledgeBaseAction(cid, siteUrl, name, type);
 
-      if (!buildResult.success) {
-        addLog(`❌ Training failed: ${buildResult.message}`);
-        setError(buildResult.message || "Training failed");
+      if (!res.ok) {
+        addLog(`❌ Training failed: ${res.error}`);
+        setError(res.error || "Training failed");
         setIsLoading(false);
         return;
       }
 
+      const result = resultToTraining(res.data!);
       addLog("✅ Knowledge base created successfully!");
-      addLog(
-        `📚 Total sources: ${buildResult.knowledgeBase?.totalSources || 0}`
-      );
-      addLog(`📊 Quality: ${buildResult.knowledgeBase?.quality}`);
+      addLog(`📚 Total entries: ${result.totalSources}`);
+      addLog(`📊 Quality: ${result.quality} (${result.qualityPercentage}%)`);
 
-      // Store training result
-      setTrainingResult({
-        totalSources: buildResult.knowledgeBase?.totalSources || 0,
-        quality: buildResult.knowledgeBase?.quality || "medium",
-        qualityPercentage: buildResult.knowledgeBase?.qualityPercentage || 55,
-      });
-
+      setTrainingResult(result);
       setStep("success");
-
-      if (onTrainingComplete) {
-        onTrainingComplete({
-          totalSources: buildResult.knowledgeBase?.totalSources,
-          quality: buildResult.knowledgeBase?.quality,
-          qualityPercentage: buildResult.knowledgeBase?.qualityPercentage,
-          companyName,
-          alreadyTrained: false,
-        });
-      }
-
+      try {
+        localStorage.removeItem(FORM_DRAFT_KEY);
+      } catch {}
+      onTrainingComplete?.({ ...result, companyName, alreadyTrained: false });
+      onCompanyIdFound?.(cid);
       setIsLoading(false);
     } catch (error: unknown) {
-      console.error("Training error:", error);
       addLog(
-        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`
+        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
       setError("Training failed");
       setIsLoading(false);
@@ -434,14 +352,13 @@ const TrainLeftSideForm = ({
    * Handle retrain for already trained users
    */
   const handleRetrain = async () => {
-    const token = session?.user?.accessToken || localStorage.getItem("token");
-    if (!token) {
+    const cid = resolveCompanyId();
+    if (!cid) {
       setError("Authentication required");
       return;
     }
-
     setLogs([]);
-    await startTraining(token);
+    await startTraining(cid);
   };
 
   return (
@@ -477,165 +394,31 @@ const TrainLeftSideForm = ({
       {/* Form Step */}
       {step === "form" && (
         <motion.div variants={fadeInUp}>
-          {isUserLoggedIn ? (
-            /* Logged-in user: Check for existing KB */
-            <div className="space-y-5">
-              <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center dark:border-blue-800 dark:bg-blue-900/20">
-                <BiBuilding className="mx-auto mb-3 h-12 w-12 text-blue-600 dark:text-blue-400" />
-                <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
-                  Check Knowledge Base
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Check if you have existing training data or start fresh
-                </p>
-              </div>
-
-              {error && (
-                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-                  {error}
-                </div>
-              )}
-
-              <button
-                onClick={handleStartLoggedInUser}
-                disabled={isLoading}
-                className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
-              >
-                {isLoading ? "Checking..." : "Check Knowledge Base"}
-              </button>
-            </div>
-          ) : (
-            /* Non-logged-in user: Full form */
-            <form onSubmit={handleFormSubmit} className="space-y-5">
-              {/* Company Name */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Company Name *
-                </label>
-                <div className="relative">
-                  <BiBuilding className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    placeholder="e.g., Acme Corporation"
-                    className="w-full rounded-xl border border-gray-300 bg-white py-3.5 pl-12 pr-4 text-gray-900 placeholder-gray-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Website URL */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Company Website *
-                </label>
-                <div className="relative">
-                  <BiGlobe className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="url"
-                    value={website}
-                    onChange={(e) => setWebsite(e.target.value)}
-                    placeholder="https://example.com"
-                    className="w-full rounded-xl border border-gray-300 bg-white py-3.5 pl-12 pr-4 text-gray-900 placeholder-gray-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Work Email *
-                </label>
-                <div className="relative">
-                  <BiEnvelope className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className="w-full rounded-xl border border-gray-300 bg-white py-3.5 pl-12 pr-4 text-gray-900 placeholder-gray-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
-              >
-                {isLoading ? "Processing..." : "Continue"}
-              </button>
-            </form>
-          )}
-        </motion.div>
-      )}
-
-      {/* OTP Step */}
-      {step === "otp" && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-5"
-        >
-          <div className="rounded-xl bg-blue-50 p-4 dark:bg-blue-900/20">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              We've sent a 6-digit code to <strong>{email}</strong>
-            </p>
-          </div>
-
-          <form onSubmit={handleVerifyOTP}>
-            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Enter OTP *
-            </label>
-            <div className="relative">
-              <BiLockAlt className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) =>
-                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
-                }
-                placeholder="123456"
-                className="w-full rounded-xl border border-gray-300 bg-white py-3.5 pl-12 pr-4 text-center text-2xl font-bold tracking-widest text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                required
-                maxLength={6}
-              />
+          <div className="space-y-5">
+            <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center dark:border-blue-800 dark:bg-blue-900/20">
+              <BiBuilding className="mx-auto mb-3 h-12 w-12 text-blue-600 dark:text-blue-400" />
+              <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
+                Check Knowledge Base
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Check if you have existing training data or start fresh
+              </p>
             </div>
 
             {error && (
-              <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+              <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
                 {error}
               </div>
             )}
 
             <button
-              type="submit"
-              disabled={isLoading || otp.length !== 6}
-              className="mt-5 w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
+              onClick={handleStartLoggedInUser}
+              disabled={isLoading}
+              className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
             >
-              {isLoading ? "Verifying..." : "Verify & Continue"}
+              {isLoading ? "Checking..." : "Check Knowledge Base"}
             </button>
-          </form>
-
-          {/* Logs */}
-          {logs.length > 0 && (
-            <div className="mt-5 max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-left text-sm dark:border-gray-700 dark:bg-gray-800">
-              {logs.map((log, i) => (
-                <div key={i} className="mb-1 text-gray-700 dark:text-gray-300">
-                  {log}
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
         </motion.div>
       )}
 
@@ -688,6 +471,26 @@ const TrainLeftSideForm = ({
                   required
                 />
               </div>
+            </div>
+
+            {/* Company Type */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Company Type *
+              </label>
+              <select
+                value={companyType}
+                onChange={(e) => setCompanyType(e.target.value)}
+                className="w-full rounded-xl border border-gray-300 bg-white py-3.5 pl-4 pr-4 text-gray-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                required
+              >
+                <option value="saas">Law Firms</option>
+                <option value="real_estate">Real Estate</option>
+                <option value="healthcare">Clinics</option>
+                <option value="agency">Agency</option>
+                <option value="consultancy">Consultancy</option>
+                <option value="other">Other</option>
+              </select>
             </div>
 
             {error && (
@@ -821,7 +624,7 @@ const TrainLeftSideForm = ({
                         year: "numeric",
                         hour: "2-digit",
                         minute: "2-digit",
-                      }
+                      },
                     )}
                   </span>
                 </div>

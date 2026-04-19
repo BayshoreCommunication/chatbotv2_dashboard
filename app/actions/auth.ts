@@ -92,6 +92,7 @@ export async function signinAction(
 ): Promise<SigninResult> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const callbackUrl = (formData.get("callbackUrl") as string) || "/dashboard";
 
   if (!email || !password) {
     return { ok: false, error: "Email and password are required." };
@@ -101,9 +102,9 @@ export async function signinAction(
     await signIn("credentials", {
       email,
       password,
-      redirect: false, // we handle redirect ourselves
+      redirect: false,
     });
-    return { ok: true, redirectTo: "/dashboard" };
+    return { ok: true, redirectTo: callbackUrl };
   } catch (error: any) {
     // NextAuth throws a specific error string on failed credentials
     const msg: string = error?.message || "";

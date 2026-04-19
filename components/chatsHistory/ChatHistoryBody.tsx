@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BiBell,
+  BiCheck,
+  BiCopy,
   BiDotsVerticalRounded,
+  BiDownArrowAlt,
   BiPaperclip,
   BiSearch,
   BiSend,
@@ -28,8 +31,39 @@ function formatTimestamp(value: string | null): string {
   return dt.toLocaleString();
 }
 
+async function copyToClipboard(text: string): Promise<void> {
+  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  if (typeof document === "undefined") {
+    throw new Error("Clipboard is not available.");
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "0";
+  textarea.style.left = "0";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+
+  const ok = document.execCommand("copy");
+  document.body.removeChild(textarea);
+
+  if (!ok) {
+    throw new Error("Copy failed.");
+  }
+}
+
 const ChatHistoryBody = ({ selectedSession }: ChatHistoryBodyProps) => {
   const [message, setMessage] = useState("");
+  const [copiedJson, setCopiedJson] = useState(false);
+  const endRef = useRef<HTMLDivElement | null>(null);
 
   const handleSendMessage = () => {
     if (message.trim()) {
@@ -37,6 +71,31 @@ const ChatHistoryBody = ({ selectedSession }: ChatHistoryBodyProps) => {
       setMessage("");
     }
   };
+
+  const handleCopyConversationJson = async () => {
+    if (!selectedSession) return;
+    const lastMessage =
+      selectedSession.messages[selectedSession.messages.length - 1] ?? null;
+    const payload = { messages: selectedSession.messages, lastMessage };
+
+    try {
+      await copyToClipboard(JSON.stringify(payload, null, 2));
+      setCopiedJson(true);
+      window.setTimeout(() => setCopiedJson(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy conversation JSON", err);
+      setCopiedJson(false);
+    }
+  };
+
+  const scrollToLatest = (behavior: ScrollBehavior = "smooth") => {
+    endRef.current?.scrollIntoView({ behavior, block: "end" });
+  };
+
+  useEffect(() => {
+    if (!selectedSession) return;
+    scrollToLatest("auto");
+  }, [selectedSession?.session_id]);
 
   if (!selectedSession) {
     return (
@@ -65,6 +124,33 @@ const ChatHistoryBody = ({ selectedSession }: ChatHistoryBodyProps) => {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopyConversationJson}
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2"
+            title="Copy full conversation as JSON"
+            type="button"
+          >
+            {copiedJson ? (
+              <>
+                <BiCheck size={18} className="text-gray-600" />
+                Copied
+              </>
+            ) : (
+              <>
+                <BiCopy size={18} className="text-gray-600" />
+                Copy JSON
+              </>
+            )}
+          </button>
+          <button
+            onClick={() => scrollToLatest("smooth")}
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2"
+            title="Jump to latest message"
+            type="button"
+          >
+            <BiDownArrowAlt size={18} className="text-gray-600" />
+            Latest
+          </button>
           <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2">
             <svg
               width="16"
@@ -152,6 +238,7 @@ const ChatHistoryBody = ({ selectedSession }: ChatHistoryBodyProps) => {
           {selectedSession.messages.length === 0 && (
             <p className="text-sm text-gray-500">No messages in this session.</p>
           )}
+          <div ref={endRef} />
         </div>
       </div>
 

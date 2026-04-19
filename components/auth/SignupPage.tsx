@@ -3,30 +3,25 @@
 import { signupAction, verifyOTPAction } from "@/app/actions/auth";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
-    BiBuilding,
-    BiCategory,
-    BiEnvelope,
-    BiGlobe,
-    BiLockAlt,
-    BiShield,
-    BiX,
+  BiBuilding,
+  BiCategory,
+  BiEnvelope,
+  BiGlobe,
+  BiLockAlt,
+  BiShield,
+  BiX,
 } from "react-icons/bi";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const companyTypes = [
   { label: "Law Firm", value: "law-firm" },
-  { label: "Tech Company", value: "tech-company" },
-  { label: "Healthcare Provider", value: "healthcare" },
-  { label: "Consulting", value: "consulting" },
-  { label: "Non-profit", value: "non-profit" },
-  { label: "Restaurant", value: "restaurant" },
   { label: "Real Estate", value: "real-estate" },
-  { label: "Education", value: "education" },
-  { label: "Financial Services", value: "financial" },
-  { label: "Manufacturing", value: "manufacturing" },
+  { label: "Clinics", value: "clinics" },
+  { label: "Agencies", value: "agencies" },
+  { label: "Consultancy", value: "consultancy" },
   { label: "Other", value: "other" },
 ] as const;
 
@@ -55,6 +50,8 @@ const SignupPage = () => {
   const [success, setSuccess] = useState("");
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   // Step 1: Submit Form → send all data to backend which emails OTP
   const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -99,7 +96,10 @@ const SignupPage = () => {
       setOtpTimer(120);
       const interval = setInterval(() => {
         setOtpTimer((prev) => {
-          if (prev <= 1) { clearInterval(interval); return 0; }
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
           return prev - 1;
         });
       }, 1000);
@@ -122,8 +122,14 @@ const SignupPage = () => {
         setError(result.message);
         return;
       }
-      setSuccess(result.message || "Account created! Redirecting to dashboard...");
-      setTimeout(() => router.push("/dashboard"), 1500);
+      setSuccess(
+        result.message || "Account created! Please sign in to continue...",
+      );
+      const signInUrl =
+        callbackUrl !== "/dashboard"
+          ? `/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}`
+          : "/sign-in";
+      setTimeout(() => router.push(signInUrl), 1500);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to verify OTP");
     } finally {
@@ -145,7 +151,10 @@ const SignupPage = () => {
       setOtpTimer(120);
       const interval = setInterval(() => {
         setOtpTimer((prev) => {
-          if (prev <= 1) { clearInterval(interval); return 0; }
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
           return prev - 1;
         });
       }, 1000);
@@ -212,7 +221,8 @@ const SignupPage = () => {
             {/* Company Name */}
             <div className="space-y-1">
               <label className={labelClasses} htmlFor="companyName">
-                <BiBuilding /> Company Name <span className="text-red-500">*</span>
+                <BiBuilding /> Company Name{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 id="companyName"
@@ -227,7 +237,8 @@ const SignupPage = () => {
             {/* Company Type */}
             <div className="space-y-1">
               <label className={labelClasses} htmlFor="companyType">
-                <BiCategory /> Company Type <span className="text-red-500">*</span>
+                <BiCategory /> Company Type{" "}
+                <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -237,7 +248,9 @@ const SignupPage = () => {
                   required
                   className={`${inputClasses} appearance-none`}
                 >
-                  <option value="" disabled>Select Company Type</option>
+                  <option value="" disabled>
+                    Select Company Type
+                  </option>
                   {companyTypes.map((type) => (
                     <option key={type.value} value={type.value}>
                       {type.label}
@@ -255,7 +268,8 @@ const SignupPage = () => {
             {/* Company Website URL */}
             <div className="space-y-1">
               <label className={labelClasses} htmlFor="website">
-                <BiGlobe /> Company Website URL <span className="text-red-500">*</span>
+                <BiGlobe /> Company Website URL{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 id="website"
@@ -270,7 +284,8 @@ const SignupPage = () => {
             {/* Email */}
             <div className="space-y-1">
               <label className={labelClasses} htmlFor="email">
-                <BiEnvelope /> Work Email <span className="text-red-500">*</span>
+                <BiEnvelope /> Work Email{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 id="email"
@@ -314,7 +329,8 @@ const SignupPage = () => {
 
               <div className="space-y-1">
                 <label className={labelClasses} htmlFor="confirmPassword">
-                  <BiLockAlt /> Confirm Password <span className="text-red-500">*</span>
+                  <BiLockAlt /> Confirm Password{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -361,13 +377,28 @@ const SignupPage = () => {
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
                     </svg>
                     Processing...
                   </span>
                 ) : (
-                  <><BiShield className="inline mr-2" />Create Account</>
+                  <>
+                    <BiShield className="inline mr-2" />
+                    Create Account
+                  </>
                 )}
               </button>
             </div>
@@ -430,7 +461,8 @@ const SignupPage = () => {
                     Verify Your Email
                   </h2>
                   <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    We&apos;ve sent a 6-digit code to <strong>{formData.email}</strong>
+                    We&apos;ve sent a 6-digit code to{" "}
+                    <strong>{formData.email}</strong>
                   </p>
                 </div>
 
@@ -442,7 +474,9 @@ const SignupPage = () => {
                       type="text"
                       placeholder="Enter 6-digit code"
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, ""))
+                      }
                       maxLength={6}
                       required
                       className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-3xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
@@ -493,7 +527,10 @@ const SignupPage = () => {
                   >
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
-                        <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                        <svg
+                          className="h-5 w-5 animate-spin"
+                          viewBox="0 0 24 24"
+                        >
                           <circle
                             className="opacity-25"
                             cx="12"

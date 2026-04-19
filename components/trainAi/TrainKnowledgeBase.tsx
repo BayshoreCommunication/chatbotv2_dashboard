@@ -44,15 +44,19 @@ function parseAssistantContent(content: string): ParsedAssistantContent {
     (_full, label, url) => {
       if (!calendlyUrl) calendlyUrl = url;
       return String(label);
-    }
+    },
   );
 
-  const rawCalendlyMatch = normalized.match(/https?:\/\/calendly\.com\/[^\s)]+/i);
+  const rawCalendlyMatch = normalized.match(
+    /https?:\/\/calendly\.com\/[^\s)]+/i,
+  );
   if (!calendlyUrl && rawCalendlyMatch) {
     calendlyUrl = rawCalendlyMatch[0];
   }
 
-  normalized = normalized.replace(/https?:\/\/calendly\.com\/[^\s)]+/gi, "").trim();
+  normalized = normalized
+    .replace(/https?:\/\/calendly\.com\/[^\s)]+/gi, "")
+    .trim();
 
   const slots: string[] = [];
   const keptLines: string[] = [];
@@ -71,7 +75,10 @@ function parseAssistantContent(content: string): ParsedAssistantContent {
   }
 
   return {
-    text: keptLines.join("\n").replace(/\n{3,}/g, "\n\n").trim(),
+    text: keptLines
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim(),
     calendlyUrl,
     slots: Array.from(new Set(slots)).slice(0, 8),
   };
@@ -84,8 +91,8 @@ function ScoreBadge({ score }: { score: number }) {
     score >= 75
       ? "bg-emerald-100 text-emerald-700 border-emerald-200"
       : score >= 45
-      ? "bg-amber-100 text-amber-700 border-amber-200"
-      : "bg-red-100 text-red-700 border-red-200";
+        ? "bg-amber-100 text-amber-700 border-amber-200"
+        : "bg-red-100 text-red-700 border-red-200";
   const label =
     score >= 75 ? "Excellent" : score >= 45 ? "Good" : "Needs improvement";
   return (
@@ -124,22 +131,22 @@ export default function TrainKnowledgeBase({
   websiteUrl = "",
 }: Props) {
   // â”€â”€ Training state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const [url, setUrl]           = useState(websiteUrl);
-  const [name, setName]         = useState(companyName);
-  const [type, setType]         = useState(companyType);
-  const [error, setError]       = useState<string | null>(null);
+  const [url, setUrl] = useState(websiteUrl);
+  const [name, setName] = useState(companyName);
+  const [type, setType] = useState(companyType);
+  const [error, setError] = useState<string | null>(null);
   const [trainResult, setTrainResult] = useState<TrainResult | null>(null);
-  const [status, setStatus]     = useState<TrainStatus | null>(null);
+  const [status, setStatus] = useState<TrainStatus | null>(null);
   const [isPending, startTransition] = useTransition();
 
   // â”€â”€ Chat tester state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const [messages, setMessages]   = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
-  const [isChatting, startChat]   = useTransition();
-  const [sessionId]               = useState(() => `test-${Date.now()}`);
-  const [copied, setCopied]       = useState(false);
-  const chatBottomRef             = useRef<HTMLDivElement>(null);
-  const [userTimezone]            = useState(() => {
+  const [isChatting, startChat] = useTransition();
+  const [sessionId] = useState(() => `test-${Date.now()}`);
+  const [copied, setCopied] = useState(false);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const [userTimezone] = useState(() => {
     try {
       if (typeof window !== "undefined") {
         return Intl.DateTimeFormat().resolvedOptions().timeZone || "";
@@ -165,15 +172,27 @@ export default function TrainKnowledgeBase({
   const handleTrain = () => {
     setError(null);
     setTrainResult(null);
-    if (!url.trim()) { setError("Website URL is required."); return; }
-    try { new URL(url.trim()); } catch {
-      setError("Please enter a valid URL (e.g. https://example.com)."); return;
+    if (!url.trim()) {
+      setError("Website URL is required.");
+      return;
+    }
+    try {
+      new URL(url.trim());
+    } catch {
+      setError("Please enter a valid URL (e.g. https://example.com).");
+      return;
     }
     startTransition(async () => {
       const res = await trainKnowledgeBaseAction(
-        companyId, url.trim(), name.trim() || companyName, type
+        companyId,
+        url.trim(),
+        name.trim() || companyName,
+        type,
       );
-      if (!res.ok) { setError(res.error || "Training failed."); return; }
+      if (!res.ok) {
+        setError(res.error || "Training failed.");
+        return;
+      }
       setTrainResult(res.data!);
       const statusRes = await getKnowledgeStatusAction(companyId);
       if (statusRes.ok && statusRes.data) setStatus(statusRes.data);
@@ -193,7 +212,12 @@ export default function TrainKnowledgeBase({
     setMessages((prev) => [...prev, userMsg]);
 
     startChat(async () => {
-      const res: AskActionResponse = await askChatAction(companyId, msg, sessionId, userTimezone);
+      const res: AskActionResponse = await askChatAction(
+        companyId,
+        msg,
+        sessionId,
+        userTimezone,
+      );
       if (!res.ok) {
         setMessages((prev) => [
           ...prev,
@@ -243,14 +267,16 @@ export default function TrainKnowledgeBase({
   // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="mx-auto w-full max-w-full space-y-6">
-
       {/* â”€â”€ Top header â”€â”€ */}
       <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-900 to-gray-700 p-6 text-white shadow-md">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold tracking-tight">AI Knowledge Base</h1>
+            <h1 className="text-xl font-bold tracking-tight">
+              AI Knowledge Base
+            </h1>
             <p className="mt-1 text-sm text-gray-300">
-              Train your chatbot from your website, then test it live - side by side.
+              Train your chatbot from your website, then test it live - side by
+              side.
             </p>
           </div>
           {status?.is_trained && (
@@ -263,7 +289,9 @@ export default function TrainKnowledgeBase({
           <div className="mt-4">
             <div className="mb-1 flex justify-between text-xs text-gray-400">
               <span>Training runs used</span>
-              <span>{status.update_count}/{status.update_limit}</span>
+              <span>
+                {status.update_count}/{status.update_limit}
+              </span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-600">
               <div
@@ -279,15 +307,16 @@ export default function TrainKnowledgeBase({
 
       {/* â”€â”€ Split panel â”€â”€ */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
         {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ LEFT: Train Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="flex flex-col gap-6">
-
           {/* Train form */}
           <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-gray-900">Train from Website</h2>
+            <h2 className="text-base font-semibold text-gray-900">
+              Train from Website
+            </h2>
             <p className="mt-0.5 text-sm text-gray-500">
-              We'll crawl up to 30 pages, search the web for context, and let the AI pick what's worth storing.
+              We'll crawl up to 30 pages, search the web for context, and let
+              the AI pick what's worth storing.
             </p>
 
             <div className="mt-4 space-y-3">
@@ -305,7 +334,9 @@ export default function TrainKnowledgeBase({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700">Company Name</label>
+                <label className="block text-xs font-medium text-gray-700">
+                  Company Name
+                </label>
                 <input
                   type="text"
                   value={name}
@@ -316,19 +347,20 @@ export default function TrainKnowledgeBase({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700">Company Type</label>
+                <label className="block text-xs font-medium text-gray-700">
+                  Company Type
+                </label>
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                   disabled={isPending}
                   className="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:opacity-50"
                 >
-                  <option value="law-firm">Law Firm</option>
-                  <option value="tech-company">Tech Company</option>
-                  <option value="healthcare-company">Healthcare</option>
-                  <option value="realestate-company">Real Estate</option>
-                  <option value="consultancy-company">Consultancy</option>
-                  <option value="agency-company">Agency</option>
+                  <option value="saas">Law Firms</option>
+                  <option value="real_estate">Real Estate</option>
+                  <option value="healthcare">Clinics</option>
+                  <option value="agency">Agency</option>
+                  <option value="consultancy">Consultancy</option>
                   <option value="other">Other</option>
                 </select>
               </div>
@@ -367,12 +399,30 @@ export default function TrainKnowledgeBase({
           {/* Training result */}
           {trainResult && (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-              <h2 className="text-sm font-semibold text-emerald-800">Training Complete</h2>
+              <h2 className="text-sm font-semibold text-emerald-800">
+                Training Complete
+              </h2>
               <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatCard icon="P" label="Pages crawled" value={trainResult.pages_crawled} />
-                <StatCard icon="S" label="Web results" value={trainResult.search_results} />
-                <StatCard icon="F" label="Facts stored" value={trainResult.entries_stored} />
-                <StatCard icon="Q" label="Quality score" value={trainResult.quality_score.toFixed(1)} />
+                <StatCard
+                  icon="P"
+                  label="Pages crawled"
+                  value={trainResult.pages_crawled}
+                />
+                <StatCard
+                  icon="S"
+                  label="Web results"
+                  value={trainResult.search_results}
+                />
+                <StatCard
+                  icon="F"
+                  label="Facts stored"
+                  value={trainResult.entries_stored}
+                />
+                <StatCard
+                  icon="Q"
+                  label="Quality score"
+                  value={trainResult.quality_score.toFixed(1)}
+                />
               </div>
               {trainResult.categories.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
@@ -397,22 +447,42 @@ export default function TrainKnowledgeBase({
           {status?.is_trained && (
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-base font-semibold text-gray-900">Current Knowledge Base</h2>
+                <h2 className="text-base font-semibold text-gray-900">
+                  Current Knowledge Base
+                </h2>
                 <ScoreBadge score={status.quality_score ?? 0} />
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatCard icon="F" label="Facts stored" value={status.entries_stored ?? 0} />
-                <StatCard icon="P" label="Pages crawled" value={status.pages_crawled ?? 0} />
-                <StatCard icon="R" label="Runs left" value={`${updatesLeft ?? 0}/${status.update_limit ?? 10}`} />
+                <StatCard
+                  icon="F"
+                  label="Facts stored"
+                  value={status.entries_stored ?? 0}
+                />
+                <StatCard
+                  icon="P"
+                  label="Pages crawled"
+                  value={status.pages_crawled ?? 0}
+                />
+                <StatCard
+                  icon="R"
+                  label="Runs left"
+                  value={`${updatesLeft ?? 0}/${status.update_limit ?? 10}`}
+                />
                 <StatCard
                   icon="L"
                   label="Last trained"
-                  value={status.last_updated ? new Date(status.last_updated).toLocaleDateString() : "-"}
+                  value={
+                    status.last_updated
+                      ? new Date(status.last_updated).toLocaleDateString()
+                      : "-"
+                  }
                 />
               </div>
               {status.categories?.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-xs font-medium text-gray-500">Extracted categories</p>
+                  <p className="text-xs font-medium text-gray-500">
+                    Extracted categories
+                  </p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
                     {status.categories.map((cat) => (
                       <span
@@ -426,11 +496,23 @@ export default function TrainKnowledgeBase({
                 </div>
               )}
               <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3 text-xs text-gray-500 space-y-1">
-                <p><span className="font-medium text-gray-700">Pinecone index:</span> {status.vector_store_id ?? "-"}</p>
-                <p><span className="font-medium text-gray-700">Namespace:</span> {status.namespace ?? "-"}</p>
                 <p>
-                  <span className="font-medium text-gray-700">Last updated:</span>{" "}
-                  {status.last_updated ? new Date(status.last_updated).toLocaleString() : "-"}
+                  <span className="font-medium text-gray-700">
+                    Pinecone index:
+                  </span>{" "}
+                  {status.vector_store_id ?? "-"}
+                </p>
+                <p>
+                  <span className="font-medium text-gray-700">Namespace:</span>{" "}
+                  {status.namespace ?? "-"}
+                </p>
+                <p>
+                  <span className="font-medium text-gray-700">
+                    Last updated:
+                  </span>{" "}
+                  {status.last_updated
+                    ? new Date(status.last_updated).toLocaleString()
+                    : "-"}
                 </p>
               </div>
             </div>
@@ -440,8 +522,12 @@ export default function TrainKnowledgeBase({
           {status && !status.is_trained && !trainResult && (
             <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500">
               <p className="text-2xl">-</p>
-              <p className="mt-1 font-medium text-gray-700">No knowledge base yet</p>
-              <p className="mt-0.5 text-xs">Enter your website URL above and click Train to get started.</p>
+              <p className="mt-1 font-medium text-gray-700">
+                No knowledge base yet
+              </p>
+              <p className="mt-0.5 text-xs">
+                Enter your website URL above and click Train to get started.
+              </p>
             </div>
           )}
         </div>
@@ -451,7 +537,9 @@ export default function TrainKnowledgeBase({
           {/* Chat header */}
           <div className="flex items-center justify-between gap-2 border-b border-gray-100 bg-gray-50 px-5 py-4">
             <div>
-              <h2 className="text-base font-semibold text-gray-900">Live Chat Test</h2>
+              <h2 className="text-base font-semibold text-gray-900">
+                Live Chat Test
+              </h2>
               <p className="text-xs text-gray-400">
                 Test your chatbot with real questions right here.
               </p>
@@ -467,11 +555,7 @@ export default function TrainKnowledgeBase({
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
-                  {copied ? (
-                    <>Copied!</>
-                  ) : (
-                    <>Copy JSON</>
-                  )}
+                  {copied ? <>Copied!</> : <>Copy JSON</>}
                 </button>
               )}
               {status?.is_trained ? (
@@ -492,10 +576,13 @@ export default function TrainKnowledgeBase({
               <div className="flex h-full items-center justify-center">
                 <div className="text-center text-sm text-gray-400">
                   <p className="text-3xl mb-2">-</p>
-                  <p className="font-medium text-gray-500">Send a message to test your chatbot</p>
+                  <p className="font-medium text-gray-500">
+                    Send a message to test your chatbot
+                  </p>
                   {!status?.is_trained && (
                     <p className="mt-1 text-xs text-amber-500">
-                      Tip: Train the knowledge base first for company-specific answers.
+                      Tip: Train the knowledge base first for company-specific
+                      answers.
                     </p>
                   )}
                 </div>
@@ -504,7 +591,9 @@ export default function TrainKnowledgeBase({
 
             {messages.map((msg, i) => {
               const parsedAssistant =
-                msg.role === "assistant" ? parseAssistantContent(msg.content) : null;
+                msg.role === "assistant"
+                  ? parseAssistantContent(msg.content)
+                  : null;
               const bubbleText =
                 msg.role === "assistant" && parsedAssistant
                   ? parsedAssistant.text || msg.content
@@ -520,8 +609,8 @@ export default function TrainKnowledgeBase({
                       msg.role === "user"
                         ? "bg-gray-900 text-white rounded-br-sm"
                         : msg.error
-                        ? "bg-red-50 text-red-700 border border-red-200 rounded-bl-sm"
-                        : "bg-gray-100 text-gray-900 rounded-bl-sm"
+                          ? "bg-red-50 text-red-700 border border-red-200 rounded-bl-sm"
+                          : "bg-gray-100 text-gray-900 rounded-bl-sm"
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{bubbleText}</p>
@@ -538,7 +627,11 @@ export default function TrainKnowledgeBase({
                               <button
                                 key={`${i}-${slot}`}
                                 type="button"
-                                onClick={() => sendChatMessage(`Please confirm this slot: ${slot}`)}
+                                onClick={() =>
+                                  sendChatMessage(
+                                    `Please confirm this slot: ${slot}`,
+                                  )
+                                }
                                 disabled={isChatting}
                                 className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-medium text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
                               >
@@ -568,18 +661,20 @@ export default function TrainKnowledgeBase({
                       )}
 
                     {/* Tools used badge */}
-                    {msg.role === "assistant" && msg.tools_used && msg.tools_used.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {msg.tools_used.map((tool) => (
-                          <span
-                            key={tool}
-                            className="rounded-full bg-white border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500"
-                          >
-                            Tool: {tool}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    {msg.role === "assistant" &&
+                      msg.tools_used &&
+                      msg.tools_used.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {msg.tools_used.map((tool) => (
+                            <span
+                              key={tool}
+                              className="rounded-full bg-white border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500"
+                            >
+                              Tool: {tool}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                   </div>
                 </div>
               );
@@ -607,7 +702,9 @@ export default function TrainKnowledgeBase({
                 type="text"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleChat()}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && !e.shiftKey && handleChat()
+                }
                 placeholder="Ask something about your company..."
                 disabled={isChatting}
                 className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:opacity-50"
@@ -622,7 +719,12 @@ export default function TrainKnowledgeBase({
                 {isChatting ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="h-4 w-4"
+                  >
                     <path d="M3.105 2.288a.75.75 0 0 0-.826.95l1.28 4.255A.75.75 0 0 0 4.272 8H10a.75.75 0 0 1 0 1.5H4.272a.75.75 0 0 0-.714.507l-1.279 4.255a.75.75 0 0 0 .826.95 28.896 28.896 0 0 0 15.293-7.154.75.75 0 0 0 0-1.115A28.897 28.897 0 0 0 3.105 2.288Z" />
                   </svg>
                 )}
@@ -637,4 +739,3 @@ export default function TrainKnowledgeBase({
     </div>
   );
 }
-
