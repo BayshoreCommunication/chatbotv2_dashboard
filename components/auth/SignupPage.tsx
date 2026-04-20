@@ -17,11 +17,12 @@ import {
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const companyTypes = [
+  { label: "Tech Company", value: "tech-company" },
   { label: "Law Firm", value: "law-firm" },
-  { label: "Real Estate", value: "real-estate" },
-  { label: "Clinics", value: "clinics" },
-  { label: "Agencies", value: "agencies" },
-  { label: "Consultancy", value: "consultancy" },
+  { label: "Healthcare", value: "healthcare-company" },
+  { label: "Real Estate", value: "realestate-company" },
+  { label: "Consultancy", value: "consultancy-company" },
+  { label: "Agency", value: "agency-company" },
   { label: "Other", value: "other" },
 ] as const;
 
@@ -86,7 +87,7 @@ const SignupPage = () => {
     try {
       const result = await signupAction(data);
       if (!result.success) {
-        setError(result.message);
+        setError(typeof result.message === "string" ? result.message : (result.message as any)?.msg || JSON.stringify(result.message));
         return;
       }
       setFormData(data);
@@ -119,7 +120,7 @@ const SignupPage = () => {
     try {
       const result = await verifyOTPAction(formData.email, otp);
       if (!result.success) {
-        setError(result.message);
+        setError(typeof result.message === "string" ? result.message : (result.message as any)?.msg || JSON.stringify(result.message));
         return;
       }
       setSuccess(
@@ -144,7 +145,7 @@ const SignupPage = () => {
     try {
       const result = await signupAction(formData);
       if (!result.success) {
-        setError(result.message);
+        setError(typeof result.message === "string" ? result.message : (result.message as any)?.msg || JSON.stringify(result.message));
         return;
       }
       setSuccess(result.message || "OTP resent!");

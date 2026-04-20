@@ -34,12 +34,11 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           const data = await res.json();
           console.log("Sign-in response data received successfully");
  
-          // FastAPI returns: access_token, user_id, company_name, role
           if (!data?.access_token || !data?.user_id) {
             console.error("Response missing required fields:", data);
             return null;
           }
- 
+
           return {
             id: data.user_id,
             email: credentials.email as string,
@@ -47,6 +46,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             accessToken: data.access_token,
             role: data.role,
             companyName: data.company_name,
+            has_paid_subscription: data.has_paid_subscription ?? false,
+            subscription_type: data.subscription_type ?? "free",
           };
         } catch (error) {
           console.error("Authorize function crashed:", error);
@@ -58,22 +59,24 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
   callbacks: {
     async jwt({ token, user }) {
-      // On first sign-in, user object is present — persist it in the token
       if (user) {
         token.id = user.id;
         token.accessToken = (user as any).accessToken;
         token.role = (user as any).role;
         token.companyName = (user as any).companyName;
+        token.has_paid_subscription = (user as any).has_paid_subscription ?? false;
+        token.subscription_type = (user as any).subscription_type ?? "free";
       }
       return token;
     },
     async session({ session, token }) {
-      // Expose data to useSession / getServerSession
       if (token) {
         session.user.id = token.id as string;
         (session.user as any).accessToken = token.accessToken;
         (session.user as any).role = token.role;
         (session.user as any).companyName = token.companyName;
+        (session.user as any).has_paid_subscription = token.has_paid_subscription;
+        (session.user as any).subscription_type = token.subscription_type;
       }
       return session;
     },

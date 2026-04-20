@@ -1,114 +1,183 @@
 "use server";
 
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 
-interface CheckoutSessionResponse {
-  sessionId: string;
-  url: string;
-}
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
 
-interface ActionResponse {
-  error?: string;
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type SubscriptionTier = "starter" | "professional" | "enterprise";
+type SubscriptionStatus =
+  | "active"
+  | "trialing"
+  | "past_due"
+  | "unpaid"
+  | "canceled"
+  | "incomplete"
+  | "incomplete_expired"
+  | "paused";
+type BillingCycle = "monthly" | "annual";
+
+export type SubscriptionData = {
+  company_id: string;
+  subscription_tier: SubscriptionTier;
+  subscription_status: SubscriptionStatus;
+  billing_cycle: BillingCycle;
+  payment_amount: number;
+  currency: string;
+  cancel_at_period_end: boolean;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  trial_end: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+type ActionResponse<T = unknown> = {
   ok: boolean;
-  message?: string;
-  url?: string;
+  data?: T;
+  error?: string;
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+async function getSession() {
+  const session = await auth();
+  const token = (session?.user as any)?.accessToken as string | undefined;
+  const companyId = (session?.user as any)?.id as string | undefined;
+  return { session, token, companyId };
 }
 
-export async function createSubscriptionCheckoutSession(
-  planId: string,
-  interval: "month" | "year"
-): Promise<ActionResponse> {
-  const session = await auth();
-
-  if (!session || !session.user || !(session.user as any).accessToken) {
-    return { error: "You must be logged in to subscribe.", ok: false };
-  }
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
-  if (!apiUrl) {
-    console.error("API URL is not defined in environment variables.");
-    return { error: "Internal server error.", ok: false };
-  }
-
+async function apiFetch<T>(
+  path: string,
+  options: RequestInit
+): Promise<ActionResponse<T>> {
   try {
-    const token = (session.user as any).accessToken;
+    const res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      cache: "no-store",
+    });
+    const text = await res.text();
+    let payload: unknown;
+    try {
+      payload = JSON.parse(text);
+    } catch {
+      payload = { message: text };
+    }
+    if (!res.ok) {
+      const p = payload as Record<string, unknown>;
+      const error =
+        (typeof p.detail === "string" ? p.detail : "") ||
+        (typeof p.message === "string" ? p.message : "") ||
+        "Request failed.";
+      return { ok: false, error };
+    }
+    return { ok: true, data: payload as T };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Network error.",
+    };
+  }
+}
 
-    const response = await fetch(`${apiUrl}/api/subscription/create-checkout-session`, {
+// ── Actions ───────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/v1/subscription/checkout/{companyId}
+ * Returns a Stripe Checkout URL for the chosen plan.
+ */
+export async function createCheckoutSessionAction(
+  tier: SubscriptionTier,
+  billingCycle: BillingCycle,
+  successUrl: string,
+  cancelUrl: string
+): Promise<ActionResponse<{ checkout_url: string }>> {
+  const { token, companyId } = await getSession();
+  if (!token || !companyId)
+    return { ok: false, error: "You must be logged in to subscribe." };
+
+  return apiFetch<{ checkout_url: string }>(
+    `/api/v1/subscription/checkout/${companyId}`,
+    {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        planId,
-        interval,
+        tier,
+        billing_cycle: billingCycle,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
       }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        error: data.message || "Failed to create checkout session.",
-        ok: false,
-      };
     }
-
-    // We can either return the URL for the client to redirect, or redirect from here
-    // If we redirect from here, the client-side promise won't resolve with the URL.
-    // Usually, returning the URL is better for client-side handling (e.g. generic loading states).
-    return {
-      ok: true,
-      url: data.url,
-    };
-  } catch (error) {
-    console.error("Error creating checkout session:", error);
-    return {
-      error: "An unexpected error occurred.",
-      ok: false,
-    };
-  }
+  );
 }
 
-export async function cancelSubscription(): Promise<ActionResponse> {
-  const session = await auth();
+/**
+ * POST /api/v1/subscription/portal/{companyId}
+ * Returns a Stripe Billing Portal URL so the user can manage their plan.
+ */
+export async function createPortalSessionAction(
+  returnUrl: string
+): Promise<ActionResponse<{ portal_url: string }>> {
+  const { token, companyId } = await getSession();
+  if (!token || !companyId)
+    return { ok: false, error: "You must be logged in." };
 
-  if (!session || !session.user || !(session.user as any).accessToken) {
-    return { error: "You must be logged in to perform this action.", ok: false };
-  }
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
-
-  try {
-    const token = (session.user as any).accessToken;
-
-    const response = await fetch(`${apiUrl}/api/subscription/cancel`, {
+  return apiFetch<{ portal_url: string }>(
+    `/api/v1/subscription/portal/${companyId}`,
+    {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        error: data.message || "Failed to cancel subscription.",
-        ok: false,
-      };
+      body: JSON.stringify({ return_url: returnUrl }),
     }
+  );
+}
 
-    return {
-      ok: true,
-      message: data.message || "Subscription cancelled successfully.",
-    };
-  } catch (error) {
-    console.error("Error cancelling subscription:", error);
-    return {
-      error: "An unexpected error occurred.",
-      ok: false,
-    };
-  }
+/**
+ * POST /api/v1/subscription/cancel/{companyId}
+ * Cancels the subscription. Default: at period end (user keeps access).
+ */
+export async function cancelSubscriptionAction(
+  immediately = false
+): Promise<ActionResponse<{ ok: boolean; message: string }>> {
+  const { token, companyId } = await getSession();
+  if (!token || !companyId)
+    return { ok: false, error: "You must be logged in." };
+
+  return apiFetch<{ ok: boolean; message: string }>(
+    `/api/v1/subscription/cancel/${companyId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ immediately }),
+    }
+  );
+}
+
+/**
+ * GET /api/v1/subscription/{companyId}
+ * Returns the current subscription status for the logged-in company.
+ */
+export async function getSubscriptionAction(): Promise<
+  ActionResponse<SubscriptionData>
+> {
+  const { token, companyId } = await getSession();
+  if (!token || !companyId)
+    return { ok: false, error: "You must be logged in." };
+
+  return apiFetch<SubscriptionData>(`/api/v1/subscription/${companyId}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }

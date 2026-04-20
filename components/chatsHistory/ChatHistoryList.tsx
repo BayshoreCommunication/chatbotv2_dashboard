@@ -4,10 +4,13 @@ import { useState } from "react";
 import { BiRefresh, BiSearch } from "react-icons/bi";
 import type { ConversationHistoryItem } from "@/types/conversation-history";
 
+type LiveActivity = Record<string, { lastMessage: string; updatedAt: string }>;
+
 interface ChatHistoryListProps {
   sessions: ConversationHistoryItem[];
   onChatSelect: (sessionId: string) => void;
   selectedSessionId: string | null;
+  liveActivity?: LiveActivity;
 }
 
 function formatTitle(session: ConversationHistoryItem): string {
@@ -36,6 +39,7 @@ const ChatHistoryList = ({
   sessions,
   onChatSelect,
   selectedSessionId,
+  liveActivity = {},
 }: ChatHistoryListProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
@@ -88,7 +92,9 @@ const ChatHistoryList = ({
       <div className="flex-1 overflow-y-auto">
         {filteredChats.map((chat) => {
           const title = formatTitle(chat);
-          const lastMessage = chat.messages[chat.messages.length - 1]?.content ?? "";
+          const live = liveActivity[chat.session_id];
+          const lastMessage = live?.lastMessage ?? chat.messages[chat.messages.length - 1]?.content ?? "";
+          const updatedAt = live?.updatedAt ?? chat.updated_at;
           return (
           <div
             key={chat.session_id}
@@ -111,7 +117,7 @@ const ChatHistoryList = ({
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-500">
                 <p className="truncate flex-1">{lastMessage}</p>
-                <span>{formatTime(chat.updated_at)}</span>
+                <span>{formatTime(updatedAt)}</span>
               </div>
             </div>
           </div>

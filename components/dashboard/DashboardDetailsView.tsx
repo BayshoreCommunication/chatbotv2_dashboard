@@ -20,108 +20,126 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import type {
+  ChartBucket,
+  DashboardSummary,
+  RecentSession,
+  VisitorStats,
+} from "@/app/actions/dashboard";
 
-// Dummy data for the chart
-const chartData = [
-  { month: "Feb", visitors: 5000, chats: 3000 },
-  { month: "Mar", visitors: 8000, chats: 5000 },
-  { month: "Apr", visitors: 6000, chats: 4000 },
-  { month: "May", visitors: 9000, chats: 6000 },
-  { month: "Jun", visitors: 12000, chats: 8000 },
-  { month: "Jul", visitors: 15000, chats: 11000 },
-  { month: "Aug", visitors: 22000, chats: 16000 },
-  { month: "Sep", visitors: 28000, chats: 20000 },
-  { month: "Oct", visitors: 18000, chats: 13000 },
-  { month: "Nov", visitors: 14000, chats: 10000 },
-  { month: "Dec", visitors: 10000, chats: 7000 },
-];
+interface DashboardDetailsViewProps {
+  summary: DashboardSummary | null;
+  chartThisYear: ChartBucket[];
+  chartLastYear: ChartBucket[];
+  visitors: VisitorStats | null;
+  recentSessions: RecentSession[];
+}
 
-// Dummy notifications data
-const notifications = [
-  {
-    id: 1,
-    title: "New message from John Doe",
-    time: "Just now",
-    icon: <BiMessageDetail size={16} />,
-  },
-  {
-    id: 2,
-    title: "New user registered",
-    time: "5 minutes ago",
-    icon: <BiUser size={16} />,
-  },
-  {
-    id: 3,
-    title: "System update completed",
-    time: "1 hour ago",
-    icon: <BiCheck size={16} />,
-  },
-  {
-    id: 4,
-    title: "Payment received",
-    time: "2 hours ago",
-    icon: <BiDollar size={16} />,
-  },
-  {
-    id: 5,
-    title: "New lead generated",
-    time: "3 hours ago",
-    icon: <BiTrendingUp size={16} />,
-  },
-];
+function fmt(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
 
-// Dummy active users data
-const activeUsers = [
-  { id: 1, name: "John Doe", initials: "JD", active: true },
-  { id: 2, name: "Jane Smith", initials: "JS", active: true },
-  { id: 3, name: "Mike Johnson", initials: "MJ", active: false },
-  { id: 4, name: "Sarah Wilson", initials: "SW", active: true },
-  { id: 5, name: "David Brown", initials: "DB", active: true },
-];
+function deltaLabel(pct: number): string {
+  if (pct > 0) return `+${pct}% vs prev 30d`;
+  if (pct < 0) return `${pct}% vs prev 30d`;
+  return "No change vs prev 30d";
+}
 
-const DashboardDetailsView = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState<"year" | "last-year">(
-    "year"
-  );
-  const [selectedTab, setSelectedTab] = useState<
-    "total-chat" | "total-visitors"
-  >("total-chat");
+const DashboardDetailsView = ({
+  summary,
+  chartThisYear,
+  chartLastYear,
+  visitors,
+  recentSessions,
+}: DashboardDetailsViewProps) => {
+  const [selectedPeriod, setSelectedPeriod] = useState<"year" | "last-year">("year");
+  const [selectedTab, setSelectedTab] = useState<"total-chat" | "total-visitors">("total-chat");
 
-  // Statistics cards data
+  const chartData = (selectedPeriod === "year" ? chartThisYear : chartLastYear).map((b) => ({
+    month:    b.label,
+    chats:    b.sessions,
+    visitors: b.visitors,
+  }));
+
   const stats = [
     {
-      title: "Total Users",
-      value: "743",
-      subtitle: "Unique visitors",
-      icon: <BiUser size={24} />,
-      color: "bg-blue-50",
+      title:     "Total Users",
+      value:     fmt(visitors?.total_visitors ?? 0),
+      subtitle:  visitors
+        ? `${fmt(visitors.new_visitors_30d)} new this month`
+        : "Unique visitors",
+      icon:      <BiUser size={24} />,
+      color:     "bg-blue-50",
       iconColor: "text-blue-600",
     },
     {
-      title: "API Calls",
-      value: "1,806",
-      subtitle: "Total conversations",
-      icon: <BiPhone size={24} />,
-      color: "bg-purple-50",
+      title:     "API Calls",
+      value:     fmt(summary?.total_sessions ?? 0),
+      subtitle:  summary
+        ? deltaLabel(summary.deltas.sessions_pct)
+        : "Total conversations",
+      icon:      <BiPhone size={24} />,
+      color:     "bg-purple-50",
       iconColor: "text-purple-600",
     },
     {
-      title: "Storage Used",
-      value: "0.38 MB",
-      subtitle: "Vector embeddings",
-      icon: <BiData size={24} />,
-      color: "bg-green-50",
+      title:     "Storage Used",
+      value:     fmt(summary?.entries_stored ?? 0),
+      subtitle:  "Vector embeddings",
+      icon:      <BiData size={24} />,
+      color:     "bg-green-50",
       iconColor: "text-green-600",
     },
     {
-      title: "Documents",
-      value: "20",
-      subtitle: "Uploaded files",
-      icon: <BiFile size={24} />,
-      color: "bg-orange-50",
+      title:     "Documents",
+      value:     fmt(summary?.pages_crawled ?? 0),
+      subtitle:  "Pages crawled",
+      icon:      <BiFile size={24} />,
+      color:     "bg-orange-50",
       iconColor: "text-orange-600",
     },
   ];
+
+  // Right sidebar: recent sessions as notifications
+  const notifications = recentSessions.length > 0
+    ? recentSessions.map((s, i) => ({
+        id:    i + 1,
+        title: s.lead_name
+          ? `${s.lead_name} — ${s.last_message.slice(0, 50)}`
+          : s.last_message.slice(0, 60) || "New conversation",
+        time:  s.updated_at
+          ? new Date(s.updated_at).toLocaleString()
+          : "",
+        icon:  s.lead_captured
+          ? <BiTrendingUp size={16} />
+          : <BiMessageDetail size={16} />,
+      }))
+    : [
+        { id: 1, title: "New message from John Doe",  time: "Just now",       icon: <BiMessageDetail size={16} /> },
+        { id: 2, title: "New user registered",         time: "5 minutes ago",  icon: <BiUser size={16} /> },
+        { id: 3, title: "System update completed",     time: "1 hour ago",     icon: <BiCheck size={16} /> },
+        { id: 4, title: "Payment received",            time: "2 hours ago",    icon: <BiDollar size={16} /> },
+        { id: 5, title: "New lead generated",          time: "3 hours ago",    icon: <BiTrendingUp size={16} /> },
+      ];
+
+  // Right sidebar: leads with contact info as "active users"
+  const activeUsers = summary
+    ? [
+        { id: 1, initials: fmt(summary.total_leads),      name: "Leads captured",    active: true },
+        { id: 2, initials: fmt(summary.total_messages),   name: "Total messages",    active: true },
+        { id: 3, initials: `${summary.kb_score.toFixed(0)}%`, name: "KB quality score", active: summary.kb_score > 50 },
+        { id: 4, initials: String(summary.total_train_runs), name: "Training runs",  active: summary.total_train_runs > 0 },
+        { id: 5, initials: fmt(visitors?.returning_visitors ?? 0), name: "Returning visitors", active: true },
+      ]
+    : [
+        { id: 1, name: "John Doe",     initials: "JD", active: true  },
+        { id: 2, name: "Jane Smith",   initials: "JS", active: true  },
+        { id: 3, name: "Mike Johnson", initials: "MJ", active: false },
+        { id: 4, name: "Sarah Wilson", initials: "SW", active: true  },
+        { id: 5, name: "David Brown",  initials: "DB", active: true  },
+      ];
 
   return (
     <div className="flex gap-6 bg-gray-50 min-h-screen">
@@ -131,18 +149,8 @@ const DashboardDetailsView = () => {
         <div className="mb-6 flex items-center justify-between rounded border border-gray-200 bg-white p-6">
           <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
           <button className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-white transition-colors">
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
@@ -154,12 +162,8 @@ const DashboardDetailsView = () => {
               key={index}
               className="rounded border border-gray-200 bg-white p-5 hover:shadow-sm transition-shadow"
             >
-              <h3 className="mb-2 text-sm font-medium text-gray-700">
-                {stat.title}
-              </h3>
-              <p className="mb-1 text-3xl font-bold text-gray-900">
-                {stat.value}
-              </p>
+              <h3 className="mb-2 text-sm font-medium text-gray-700">{stat.title}</h3>
+              <p className="mb-1 text-3xl font-bold text-gray-900">{stat.value}</p>
               <p className="text-xs text-gray-500">{stat.subtitle}</p>
             </div>
           ))}
@@ -173,9 +177,7 @@ const DashboardDetailsView = () => {
               <button
                 onClick={() => setSelectedTab("total-chat")}
                 className={`pb-3 text-sm font-semibold transition-all relative ${
-                  selectedTab === "total-chat"
-                    ? "text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
+                  selectedTab === "total-chat" ? "text-gray-900" : "text-gray-500 hover:text-gray-700"
                 }`}
               >
                 Total Chat
@@ -186,9 +188,7 @@ const DashboardDetailsView = () => {
               <button
                 onClick={() => setSelectedTab("total-visitors")}
                 className={`pb-3 text-sm font-semibold transition-all relative ${
-                  selectedTab === "total-visitors"
-                    ? "text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
+                  selectedTab === "total-visitors" ? "text-gray-900" : "text-gray-500 hover:text-gray-700"
                 }`}
               >
                 Total Visitors
@@ -231,27 +231,14 @@ const DashboardDetailsView = () => {
           {/* Chart */}
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={chartData}
-                margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-              >
+              <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <defs>
-                  <linearGradient
-                    id="colorGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                  <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.1} />
                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid
-                  strokeDasharray="5 5"
-                  stroke="#e5e7eb"
-                  vertical={false}
-                />
+                <CartesianGrid strokeDasharray="5 5" stroke="#e5e7eb" vertical={false} />
                 <XAxis
                   dataKey="month"
                   stroke="#9ca3af"
@@ -264,12 +251,7 @@ const DashboardDetailsView = () => {
                   style={{ fontSize: "13px", fontWeight: 500 }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => {
-                    if (value >= 10000) {
-                      return `${value / 1000}M`;
-                    }
-                    return value;
-                  }}
+                  tickFormatter={(v) => (v >= 10000 ? `${v / 1000}K` : v)}
                 />
                 <Tooltip
                   contentStyle={{
@@ -287,12 +269,7 @@ const DashboardDetailsView = () => {
                   stroke="#3b82f6"
                   strokeWidth={3}
                   dot={false}
-                  activeDot={{
-                    r: 6,
-                    fill: "#3b82f6",
-                    strokeWidth: 2,
-                    stroke: "#fff",
-                  }}
+                  activeDot={{ r: 6, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -318,12 +295,8 @@ const DashboardDetailsView = () => {
                     {notification.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
-                      {notification.title}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {notification.time}
-                    </p>
+                    <p className="text-sm font-semibold text-gray-900 truncate">{notification.title}</p>
+                    <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
                   </div>
                 </div>
               ))}
@@ -331,12 +304,12 @@ const DashboardDetailsView = () => {
           </div>
         </div>
 
-        {/* Active Users */}
+        {/* Active / Stats */}
         <div className="rounded border border-gray-200 bg-white overflow-y-auto flex flex-col">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-base font-bold text-gray-900">Active</h2>
           </div>
-          <div className="overflow-y-auto p-4 max-h-[305px] ">
+          <div className="overflow-y-auto p-4 max-h-[305px]">
             <div className="space-y-1">
               {activeUsers.map((user) => (
                 <div
@@ -345,7 +318,7 @@ const DashboardDetailsView = () => {
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-600 flex-shrink-0 group-hover:bg-gray-600 group-hover:text-white transition-colors">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-600 flex-shrink-0 group-hover:bg-gray-600 group-hover:text-white transition-colors text-xs font-bold">
                         {user.initials}
                       </div>
                       <div
@@ -354,9 +327,7 @@ const DashboardDetailsView = () => {
                         }`}
                       />
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">
-                      {user.name}
-                    </span>
+                    <span className="text-sm font-semibold text-gray-900">{user.name}</span>
                   </div>
                 </div>
               ))}

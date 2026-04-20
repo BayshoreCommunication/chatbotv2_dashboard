@@ -3,9 +3,11 @@
 import {
   getKnowledgeStatusAction,
   trainKnowledgeBaseAction,
+  type MissingInfoItem,
   type TrainResult,
   type TrainStatus,
 } from "@/app/actions/knowledgeBase";
+import { getUserData } from "@/app/actions/user";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -53,6 +55,7 @@ function resultToTraining(result: TrainResult) {
     totalSources: result.entries_stored,
     quality: qualityLabel(result.quality_score),
     qualityPercentage: Math.round(result.quality_score),
+    missingInfo: result.missing_info || [],
   };
 }
 
@@ -129,23 +132,37 @@ const TrainLeftSideForm = ({
     totalSources?: number;
     quality?: string;
     qualityPercentage?: number;
+    missingInfo?: MissingInfoItem[];
   } | null>(null);
 
   const isUserLoggedIn = !!session?.user;
   const addLog = (msg: string) => setLogs((prev) => [...prev, msg]);
 
-  // Restore companyName from draft on first render
+  // For logged-in users: fetch profile and pre-fill fields (profile > draft > empty)
   useEffect(() => {
-    if (companyName) return;
-    try {
-      const draft = JSON.parse(localStorage.getItem(FORM_DRAFT_KEY) || "{}");
-      if (draft.companyName) setCompanyName(draft.companyName);
-    } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!isUserLoggedIn) {
+      // Non-logged-in: restore from localStorage draft only
+      try {
+        const draft = JSON.parse(localStorage.getItem(FORM_DRAFT_KEY) || "{}");
+        if (draft.companyName && !companyName) setCompanyName(draft.companyName);
+        if (draft.website && !website) setWebsite(draft.website);
+        if (draft.companyType) setCompanyType(draft.companyType);
+      } catch {}
+      return;
+    }
+    getUserData().then((res) => {
+      if (res.data) {
+        if (res.data.companyName) setCompanyName(res.data.companyName);
+        if (res.data.website) setWebsite(res.data.website);
+        if (res.data.companyType) setCompanyType(res.data.companyType);
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-save draft whenever fields change
+  // Auto-save draft whenever fields change (used for non-logged-in users)
   useEffect(() => {
+    if (isUserLoggedIn) return;
     if (!website && !companyName && companyType === "other") return;
     try {
       localStorage.setItem(
@@ -484,11 +501,12 @@ const TrainLeftSideForm = ({
                 className="w-full rounded-xl border border-gray-300 bg-white py-3.5 pl-4 pr-4 text-gray-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                 required
               >
-                <option value="saas">Law Firms</option>
-                <option value="real_estate">Real Estate</option>
-                <option value="healthcare">Clinics</option>
-                <option value="agency">Agency</option>
-                <option value="consultancy">Consultancy</option>
+                <option value="tech-company">Tech Company</option>
+                <option value="law-firm">Law Firm</option>
+                <option value="healthcare-company">Healthcare</option>
+                <option value="realestate-company">Real Estate</option>
+                <option value="consultancy-company">Consultancy</option>
+                <option value="agency-company">Agency</option>
                 <option value="other">Other</option>
               </select>
             </div>
@@ -715,6 +733,32 @@ const TrainLeftSideForm = ({
               />
             </div>
           </div>
+
+          {/* Missing Info Alerts */}
+          {trainingResult.missingInfo && trainingResult.missingInfo.length > 0 && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-700 dark:bg-amber-900/20">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="text-lg">⚠️</span>
+                <span className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                  Missing Important Information
+                </span>
+              </div>
+              <p className="mb-3 text-xs text-amber-800 dark:text-amber-300">
+                The following info was not found on your website. Add it to improve your chatbot&apos;s answers:
+              </p>
+              <ul className="space-y-2">
+                {trainingResult.missingInfo.map((item) => (
+                  <li
+                    key={item.key}
+                    className="flex items-start gap-2 rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200"
+                  >
+                    <span className="mt-0.5 shrink-0 text-amber-500">•</span>
+                    <span>{item.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Info Card */}
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-900/20">

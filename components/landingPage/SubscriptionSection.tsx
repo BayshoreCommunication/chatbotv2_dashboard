@@ -1,6 +1,6 @@
 "use client";
 
-import { createSubscriptionCheckoutSession } from "@/app/actions/subscriptions";
+import { createCheckoutSessionAction } from "@/app/actions/subscriptions";
 import { PricingPlan, pricingPlans } from "@/config/pricing";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -48,13 +48,16 @@ const SubscriptionSection = ({
     setLoading(plan.id);
 
     try {
-      const result = await createSubscriptionCheckoutSession(
-        plan.id,
-        billingCycle === "yearly" ? "year" : "month"
+      const tier = plan.id === "trial" ? "starter" : (plan.id as "starter" | "professional" | "enterprise");
+      const result = await createCheckoutSessionAction(
+        tier,
+        billingCycle === "yearly" ? "annual" : "monthly",
+        `${window.location.origin}/dashboard?subscription=success`,
+        `${window.location.origin}/#pricing`,
       );
 
-      if (result.ok && result.url) {
-        window.location.href = result.url;
+      if (result.ok && result.data?.checkout_url) {
+        window.location.href = result.data.checkout_url;
       } else {
         alert(result.error || "Failed to start subscription.");
       }

@@ -4,8 +4,6 @@ import {
   BiCalendar,
   BiCode,
   BiCog,
-  BiGridAlt,
-  BiHelpCircle,
   BiHome,
   BiListUl,
   BiMessage,
@@ -104,12 +102,12 @@ export const navigationConfig: NavItem[] = [
       //   href: "/apps",
       //   icon: <BiGridAlt size={18} />,
       // },
-      // {
-      //   id: "appointments",
-      //   title: "Appointments",
-      //   href: "/appointments",
-      //   icon: <BiCalendar size={18} />,
-      // },
+      {
+        id: "appointments",
+        title: "Appointments",
+        href: "/appointments",
+        icon: <BiCalendar size={18} />,
+      },
       // {
       //   id: "unknown-questions",
       //   title: "Unknown Questions",

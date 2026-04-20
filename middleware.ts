@@ -1,12 +1,12 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { auth } from "./auth";
+import { fetchUserProfile } from "./lib/fetchUserProfile";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. PUBLIC PATHS: Accessible to everyone (Guests + Users)
-  // Removed "/start-free-trial" so it forces a login first.
   const publicPaths = [
     "/",
     "/sign-in",
@@ -36,10 +36,19 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/auth/callback") {
     try {
       const session = await auth();
+
       if (!session || !session.user) {
         return NextResponse.redirect(new URL("/sign-in", request.url));
       }
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+
+      const token = (session.user as { accessToken?: string }).accessToken;
+      const user = token ? await fetchUserProfile(token) : null;
+
+      if (user?.is_subscribed) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      } else {
+        return NextResponse.redirect(new URL("/start-free-trial", request.url));
+      }
     } catch (error) {
       console.error("💥 [Middleware] Callback Error:", error);
       return NextResponse.redirect(new URL("/sign-in", request.url));
@@ -49,11 +58,9 @@ export async function middleware(request: NextRequest) {
   const session = await auth();
 
   // --- AUTH PAGE REDIRECT (UX Improvement) ---
-  // If user is already logged in, don't let them see Sign-In/Up pages.
-  // Honor callbackUrl so the post-auth redirect flow works correctly.
+  // If user is already logged in, don't let them see Sign-In/Up pages
   if (session?.user && (pathname === "/sign-in" || pathname === "/sign-up")) {
-    const callbackUrl = request.nextUrl.searchParams.get("callbackUrl") || "/dashboard";
-    return NextResponse.redirect(new URL(callbackUrl, request.url));
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // Allow other public paths
@@ -69,10 +76,34 @@ export async function middleware(request: NextRequest) {
 
   // 1. Require Authentication
   if (!session || !session.user) {
-    // Redirect to sign-in, but remember where they wanted to go
     const url = new URL("/sign-in", request.url);
     url.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(url);
+  }
+
+  // 2. Subscription Check logic
+  // These paths require auth but are allowed WITHOUT an active subscription
+  const subscriptionExemptPaths = [
+    "/start-free-trial",
+    "/confirm-subscription",
+    "/paymenttest",
+  ];
+
+  if (subscriptionExemptPaths.some((path) => pathname.startsWith(path))) {
+    return NextResponse.next();
+  }
+
+  // For all other protected paths, require active subscription (checked fresh from API)
+  const token = (session.user as { accessToken?: string }).accessToken;
+
+  if (!token) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  const user = await fetchUserProfile(token);
+
+  if (!user?.is_subscribed) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

@@ -32,6 +32,11 @@ export type TrainStatus = {
   namespace: string | null;
 };
 
+export type MissingInfoItem = {
+  key: string;
+  label: string;
+};
+
 export type TrainResult = {
   message: string;
   company_id: string;
@@ -43,6 +48,7 @@ export type TrainResult = {
   vector_store_id: string;
   namespace: string;
   last_updated: string;
+  missing_info: MissingInfoItem[];
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -138,6 +144,64 @@ export async function trainKnowledgeBaseAction(
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+export type FillMissingItem = {
+  key: string;
+  label: string;
+  content: string;
+};
+
+export type FillMissingResult = {
+  message: string;
+  entries_added: number;
+  remaining_missing: MissingInfoItem[];
+};
+
+/**
+ * GET /api/v1/knowledge/missing-info/{companyId}
+ * Returns current missing_info list from the knowledge_base document.
+ */
+export async function getMissingInfoAction(
+  companyId: string
+): Promise<ActionResponse<{ missing_info: MissingInfoItem[] }>> {
+  if (!companyId) return { ok: false, error: "Missing company ID." };
+
+  const token = await getToken();
+
+  return apiCall<{ missing_info: MissingInfoItem[] }>(
+    `${API_URL}/api/v1/knowledge/missing-info/${companyId}`,
+    {
+      method: "GET",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }
+  );
+}
+
+/**
+ * POST /api/v1/knowledge/fill-missing/{companyId}
+ * User-provided values for missing required info — stored in Pinecone + MongoDB.
+ */
+export async function fillMissingInfoAction(
+  companyId: string,
+  items: FillMissingItem[]
+): Promise<ActionResponse<FillMissingResult>> {
+  if (!companyId) return { ok: false, error: "Missing company ID." };
+  if (!items.length) return { ok: false, error: "No items provided." };
+
+  const token = await getToken();
+
+  return apiCall<FillMissingResult>(
+    `${API_URL}/api/v1/knowledge/fill-missing/${companyId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ items }),
+    }
+  );
 }
 
 /**

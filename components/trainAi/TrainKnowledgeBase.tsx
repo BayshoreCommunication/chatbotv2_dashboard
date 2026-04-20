@@ -1,15 +1,23 @@
-﻿"use client";
+"use client";
 
-import { askChatAction, type AskActionResponse } from "@/app/actions/ask";
 import {
+  fillMissingInfoAction,
   getKnowledgeStatusAction,
+  getMissingInfoAction,
   trainKnowledgeBaseAction,
+  type FillMissingItem,
+  type MissingInfoItem,
   type TrainResult,
   type TrainStatus,
 } from "@/app/actions/knowledgeBase";
-import { useEffect, useRef, useState, useTransition } from "react";
-
-// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+import { getUserData } from "@/app/actions/user";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
 
 type Props = {
   companyId: string;
@@ -18,88 +26,44 @@ type Props = {
   websiteUrl?: string;
 };
 
-type ChatMessage = {
-  role: "user" | "assistant";
-  content: string;
-  tools_used?: string[];
-  error?: boolean;
+type FormState = {
+  companyName: string;
+  companyType: string;
+  websiteUrl: string;
 };
 
-type ParsedAssistantContent = {
-  text: string;
-  calendlyUrl: string | null;
-  slots: string[];
-};
+const COMPANY_TYPE_OPTIONS = [
+  { value: "tech-company", label: "Tech Company" },
+  { value: "law-firm", label: "Law Firm" },
+  { value: "healthcare-company", label: "Healthcare" },
+  { value: "realestate-company", label: "Real Estate" },
+  { value: "consultancy-company", label: "Consultancy" },
+  { value: "agency-company", label: "Agency" },
+  { value: "other", label: "Other" },
+];
 
-function stripMarkdown(value: string): string {
-  return value.replace(/\*\*/g, "").replace(/`/g, "").trim();
-}
-
-function parseAssistantContent(content: string): ParsedAssistantContent {
-  let calendlyUrl: string | null = null;
-  let normalized = content;
-
-  normalized = normalized.replace(
-    /\[([^\]]+)\]\((https?:\/\/calendly\.com\/[^)\s]+)\)/gi,
-    (_full, label, url) => {
-      if (!calendlyUrl) calendlyUrl = url;
-      return String(label);
-    },
+function formatCompanyType(value: string) {
+  return (
+    COMPANY_TYPE_OPTIONS.find((option) => option.value === value)?.label ??
+    value.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
   );
-
-  const rawCalendlyMatch = normalized.match(
-    /https?:\/\/calendly\.com\/[^\s)]+/i,
-  );
-  if (!calendlyUrl && rawCalendlyMatch) {
-    calendlyUrl = rawCalendlyMatch[0];
-  }
-
-  normalized = normalized
-    .replace(/https?:\/\/calendly\.com\/[^\s)]+/gi, "")
-    .trim();
-
-  const slots: string[] = [];
-  const keptLines: string[] = [];
-
-  for (const line of normalized.split("\n")) {
-    const trimmed = line.trim();
-    const slotMatch = trimmed.match(/^\d+[\.\)]\s*(.+)$/);
-    if (slotMatch) {
-      const candidate = stripMarkdown(slotMatch[1]);
-      if (/(AM|PM|UTC|\d{1,2}:\d{2})/i.test(candidate)) {
-        slots.push(candidate);
-        continue;
-      }
-    }
-    keptLines.push(line);
-  }
-
-  return {
-    text: keptLines
-      .join("\n")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim(),
-    calendlyUrl,
-    slots: Array.from(new Set(slots)).slice(0, 8),
-  };
 }
-
-// â”€â”€ Small reusable UI pieces â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ScoreBadge({ score }: { score: number }) {
-  const color =
+  const tone =
     score >= 75
-      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
       : score >= 45
-        ? "bg-amber-100 text-amber-700 border-amber-200"
-        : "bg-red-100 text-red-700 border-red-200";
-  const label =
-    score >= 75 ? "Excellent" : score >= 45 ? "Good" : "Needs improvement";
+        ? "border-amber-200 bg-amber-50 text-amber-700"
+        : "border-rose-200 bg-rose-50 text-rose-700";
+
+  const label = score >= 75 ? "Excellent" : score >= 45 ? "Good" : "Needs work";
+
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${color}`}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${tone}`}
     >
-      {score.toFixed(1)} / 100 - {label}
+      {score.toFixed(1)} / 100 {label}
     </span>
   );
 }
@@ -107,22 +71,213 @@ function ScoreBadge({ score }: { score: number }) {
 function StatCard({
   label,
   value,
-  icon,
+  hint,
 }: {
   label: string;
   value: string | number;
-  icon: string;
+  hint?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-      <span className="text-lg">{icon}</span>
-      <span className="text-2xl font-bold text-gray-900">{value}</span>
-      <span className="text-xs text-gray-500">{label}</span>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+        {label}
+      </p>
+      <p className="mt-3 text-2xl font-semibold text-slate-900">{value}</p>
+      {hint ? <p className="mt-1 text-xs text-slate-500">{hint}</p> : null}
     </div>
   );
 }
 
-// â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function SectionLabel({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+      <p className="mt-1 text-sm text-slate-500">{description}</p>
+    </div>
+  );
+}
+
+function FieldShell({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function MissingInfoPanel({
+  companyId,
+  items,
+  onResolved,
+}: {
+  companyId: string;
+  items: MissingInfoItem[];
+  onResolved: (remaining: MissingInfoItem[]) => void;
+}) {
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const [isSaving, startSave] = useTransition();
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+
+  const values = useMemo(
+    () =>
+      Object.fromEntries(
+        items.map((item) => [item.key, overrides[item.key] ?? ""]),
+      ),
+    [items, overrides],
+  );
+
+  const filledItems = items.filter((item) => values[item.key]?.trim());
+
+  const handleConfirm = () => {
+    if (!filledItems.length) return;
+
+    setSaveError(null);
+    setSaveSuccess(null);
+
+    const payload: FillMissingItem[] = filledItems.map((item) => ({
+      key: item.key,
+      label: item.label,
+      content: values[item.key].trim(),
+    }));
+
+    startSave(async () => {
+      const res = await fillMissingInfoAction(companyId, payload);
+      if (!res.ok) {
+        setSaveError(res.error || "Failed to save missing information.");
+        return;
+      }
+
+      setSaveSuccess(res.data?.message || "Information saved successfully.");
+      onResolved(res.data?.remaining_missing ?? []);
+    });
+  };
+
+  if (!items.length) return null;
+
+  return (
+    <div className="rounded-md border border-amber-200 bg-amber-50/80 p-6 shadow-sm">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <SectionLabel
+          title="Missing website details"
+          description="We could not find these details on your website. Add them here so your AI can answer with better company context."
+        />
+        <span className="inline-flex w-fit rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700">
+          {items.length} item{items.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        {items.map((item) => (
+          <FieldShell key={item.key} label={item.label}>
+            <input
+              type="text"
+              value={values[item.key] ?? ""}
+              onChange={(event) =>
+                setOverrides((prev) => ({
+                  ...prev,
+                  [item.key]: event.target.value,
+                }))
+              }
+              placeholder={`Enter ${item.label.toLowerCase()}`}
+              disabled={isSaving}
+              className="w-full rounded-2xl border border-amber-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+            />
+          </FieldShell>
+        ))}
+      </div>
+
+      {saveError ? (
+        <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {saveError}
+        </div>
+      ) : null}
+
+      {saveSuccess ? (
+        <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {saveSuccess}
+        </div>
+      ) : null}
+
+      <button
+        type="button"
+        onClick={handleConfirm}
+        disabled={isSaving || !filledItems.length}
+        className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-amber-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {isSaving
+          ? "Saving details..."
+          : `Confirm and save ${filledItems.length}/${items.length}`}
+      </button>
+    </div>
+  );
+}
+
+function ProfileSummary({
+  form,
+  profileLoaded,
+}: {
+  form: FormState;
+  profileLoaded: boolean;
+}) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <SectionLabel
+          title="Company information"
+          description={
+            profileLoaded
+              ? "Loaded from your account profile. You can adjust anything before training."
+              : "Fill in your company details before starting training."
+          }
+        />
+        <span className="inline-flex w-fit rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+          {profileLoaded ? "Profile synced" : "Manual entry"}
+        </span>
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-white bg-white px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+            Company
+          </p>
+          <p className="mt-2 text-sm font-medium text-slate-800">
+            {form.companyName || "Not set"}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-white bg-white px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+            Website
+          </p>
+          <p className="mt-2 truncate text-sm font-medium text-slate-800">
+            {form.websiteUrl || "Not set"}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-white bg-white px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+            Type
+          </p>
+          <p className="mt-2 text-sm font-medium text-slate-800">
+            {formatCompanyType(form.companyType)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function TrainKnowledgeBase({
   companyId,
@@ -130,612 +285,442 @@ export default function TrainKnowledgeBase({
   companyType = "other",
   websiteUrl = "",
 }: Props) {
-  // â”€â”€ Training state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const [url, setUrl] = useState(websiteUrl);
-  const [name, setName] = useState(companyName);
-  const [type, setType] = useState(companyType);
+  const [form, setForm] = useState<FormState>({
+    companyName,
+    companyType: companyType || "other",
+    websiteUrl,
+  });
   const [error, setError] = useState<string | null>(null);
+  const [profileNotice, setProfileNotice] = useState<string | null>(null);
   const [trainResult, setTrainResult] = useState<TrainResult | null>(null);
   const [status, setStatus] = useState<TrainStatus | null>(null);
+  const [missingInfo, setMissingInfo] = useState<MissingInfoItem[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // â”€â”€ Chat tester state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [isChatting, startChat] = useTransition();
-  const [sessionId] = useState(() => `test-${Date.now()}`);
-  const [copied, setCopied] = useState(false);
-  const chatBottomRef = useRef<HTMLDivElement>(null);
-  const [userTimezone] = useState(() => {
-    try {
-      if (typeof window !== "undefined") {
-        return Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-      }
-    } catch {}
-    return "";
-  });
-
-  // â”€â”€ Load status on mount â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
-    if (!companyId) return;
-    getKnowledgeStatusAction(companyId).then((res) => {
-      if (res.ok && res.data) setStatus(res.data);
-    });
-  }, [companyId]);
+    let active = true;
 
-  // â”€â”€ Auto-scroll chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // â”€â”€ Handle training â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const handleTrain = () => {
-    setError(null);
-    setTrainResult(null);
-    if (!url.trim()) {
-      setError("Website URL is required.");
-      return;
-    }
-    try {
-      new URL(url.trim());
-    } catch {
-      setError("Please enter a valid URL (e.g. https://example.com).");
-      return;
-    }
-    startTransition(async () => {
-      const res = await trainKnowledgeBaseAction(
-        companyId,
-        url.trim(),
-        name.trim() || companyName,
-        type,
-      );
-      if (!res.ok) {
-        setError(res.error || "Training failed.");
+    const loadData = async () => {
+      if (!companyId) {
+        if (active) setIsBootstrapping(false);
         return;
       }
-      setTrainResult(res.data!);
-      const statusRes = await getKnowledgeStatusAction(companyId);
-      if (statusRes.ok && statusRes.data) setStatus(statusRes.data);
-    });
-  };
 
-  // â”€â”€ Handle chat send â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const sendChatMessage = (rawMessage: string) => {
-    const msg = rawMessage.trim();
-    if (!msg || isChatting) return;
+      setIsBootstrapping(true);
 
-    if (rawMessage === chatInput) {
-      setChatInput("");
-    }
-
-    const userMsg: ChatMessage = { role: "user", content: msg };
-    setMessages((prev) => [...prev, userMsg]);
-
-    startChat(async () => {
-      const res: AskActionResponse = await askChatAction(
-        companyId,
-        msg,
-        sessionId,
-        userTimezone,
-      );
-      if (!res.ok) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: res.companyNotFound
-              ? "Company not found. Check the company ID."
-              : res.error || "Something went wrong.",
-            error: true,
-          },
-        ]);
-        return;
-      }
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: res.data!.reply,
-          tools_used: res.data!.tools_used,
-        },
+      const [userRes, statusRes, missingRes] = await Promise.all([
+        getUserData(),
+        getKnowledgeStatusAction(companyId),
+        getMissingInfoAction(companyId),
       ]);
-    });
-  };
 
-  const handleChat = () => {
-    sendChatMessage(chatInput);
-  };
+      if (!active) return;
+
+      if (userRes.ok && userRes.data) {
+        setProfileNotice(null);
+        setForm((prev) => ({
+          companyName:
+            userRes.data?.companyName?.trim() ||
+            prev.companyName ||
+            companyName,
+          websiteUrl:
+            userRes.data?.website?.trim() || prev.websiteUrl || websiteUrl,
+          companyType:
+            userRes.data?.companyType?.trim() ||
+            prev.companyType ||
+            companyType ||
+            "other",
+        }));
+        setProfileLoaded(true);
+      } else if (!userRes.ok && !companyName && !websiteUrl) {
+        setProfileNotice(
+          userRes.error || "Could not load company data from your profile.",
+        );
+      }
+
+      if (statusRes.ok && statusRes.data) {
+        setStatus(statusRes.data);
+        if (statusRes.data.company_name?.trim()) {
+          setForm((prev) => ({
+            ...prev,
+            companyName:
+              prev.companyName || statusRes.data?.company_name || companyName,
+          }));
+        }
+      }
+
+      if (missingRes.ok && missingRes.data) {
+        setMissingInfo(missingRes.data.missing_info);
+      }
+
+      setIsBootstrapping(false);
+    };
+
+    loadData();
+
+    return () => {
+      active = false;
+    };
+  }, [companyId, companyName, companyType, websiteUrl]);
 
   const updatesLeft = status
     ? (status.update_limit ?? 10) - (status.update_count ?? 0)
     : null;
+  const isTrained = status?.is_trained ?? false;
+  const trainingDisabled = isPending || !form.websiteUrl.trim();
 
-  // â”€â”€ Copy conversation as JSON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const handleCopyConversation = async () => {
-    const pairs: { user: string; ai: string }[] = [];
-    for (let i = 0; i < messages.length - 1; i++) {
-      if (messages[i].role === "user" && messages[i + 1].role === "assistant") {
-        pairs.push({ user: messages[i].content, ai: messages[i + 1].content });
-        i++; // skip the assistant message we just consumed
-      }
-    }
-    await navigator.clipboard.writeText(JSON.stringify(pairs, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleFieldChange = (field: keyof FormState, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const handleTrain = () => {
+    setError(null);
+    setTrainResult(null);
+
+    if (!form.companyName.trim()) {
+      setError("Company name is required.");
+      return;
+    }
+
+    if (!form.websiteUrl.trim()) {
+      setError("Website URL is required.");
+      return;
+    }
+
+    try {
+      new URL(form.websiteUrl.trim());
+    } catch {
+      setError(
+        "Please enter a valid website URL, for example https://example.com.",
+      );
+      return;
+    }
+
+    startTransition(async () => {
+      const res = await trainKnowledgeBaseAction(
+        companyId,
+        form.websiteUrl.trim(),
+        form.companyName.trim(),
+        form.companyType || "other",
+      );
+
+      if (!res.ok) {
+        setError(res.error || "Training failed.");
+        return;
+      }
+
+      setTrainResult(res.data ?? null);
+      setMissingInfo(res.data?.missing_info ?? []);
+
+      const statusRes = await getKnowledgeStatusAction(companyId);
+      if (statusRes.ok && statusRes.data) {
+        setStatus(statusRes.data);
+      }
+    });
+  };
+
+  if (isBootstrapping) {
+    return (
+      <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="animate-pulse space-y-4">
+          <div className="h-5 w-40 rounded bg-slate-200" />
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="h-24 rounded-2xl bg-slate-100" />
+            <div className="h-24 rounded-2xl bg-slate-100" />
+            <div className="h-24 rounded-2xl bg-slate-100" />
+          </div>
+          <div className="h-40 rounded-3xl bg-slate-100" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto w-full max-w-full space-y-6">
-      {/* â”€â”€ Top header â”€â”€ */}
-      <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-900 to-gray-700 p-6 text-white shadow-md">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">
-              AI Knowledge Base
-            </h1>
-            <p className="mt-1 text-sm text-gray-300">
-              Train your chatbot from your website, then test it live - side by
-              side.
+    <div className="space-y-6">
+      <div className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-600">
+              Train AI
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+              Build a cleaner knowledge base from your company website
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              We use your company profile and website to train the chatbot with
+              business-specific information. Review the details below before you
+              start.
             </p>
           </div>
-          {status?.is_trained && (
-            <span className="shrink-0 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">
-              Trained
-            </span>
-          )}
+
+          {isTrained ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <ScoreBadge score={status?.quality_score ?? 0} />
+              <button
+                type="button"
+                onClick={handleTrain}
+                disabled={
+                  isPending || (updatesLeft !== null && updatesLeft <= 0)
+                }
+                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isPending ? "Retraining..." : "Retrain knowledge base"}
+              </button>
+            </div>
+          ) : null}
         </div>
-        {status && (
-          <div className="mt-4">
-            <div className="mb-1 flex justify-between text-xs text-gray-400">
-              <span>Training runs used</span>
-              <span>
-                {status.update_count}/{status.update_limit}
-              </span>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-600">
-              <div
-                className="h-full rounded-full bg-emerald-400 transition-all"
-                style={{
-                  width: `${Math.min(100, ((status.update_count ?? 0) / (status.update_limit ?? 10)) * 100)}%`,
-                }}
-              />
-            </div>
+
+        {profileNotice ? (
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+            {profileNotice}
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* â”€â”€ Split panel â”€â”€ */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ LEFT: Train Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <div className="flex flex-col gap-6">
-          {/* Train form */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-gray-900">
-              Train from Website
-            </h2>
-            <p className="mt-0.5 text-sm text-gray-500">
-              We'll crawl up to 30 pages, search the web for context, and let
-              the AI pick what's worth storing.
-            </p>
+      {!isTrained && !trainResult ? (
+        <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+          <div className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+            <SectionLabel
+              title="Training details"
+              description="These values are prefilled from `getUserData` when available. Update them if needed before starting."
+            />
 
-            <div className="mt-4 space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700">
-                  Website URL <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://yourcompany.com"
-                  disabled={isPending}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:opacity-50"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700">
-                  Company Name
-                </label>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <FieldShell label="Company name">
                 <input
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Carter Injury Law"
+                  value={form.companyName}
+                  onChange={(event) =>
+                    handleFieldChange("companyName", event.target.value)
+                  }
+                  placeholder="Your company name"
                   disabled={isPending}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:opacity-50"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700">
-                  Company Type
-                </label>
+              </FieldShell>
+
+              <FieldShell label="Company type">
                 <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
+                  value={form.companyType}
+                  onChange={(event) =>
+                    handleFieldChange("companyType", event.target.value)
+                  }
                   disabled={isPending}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:opacity-50"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <option value="saas">Law Firms</option>
-                  <option value="real_estate">Real Estate</option>
-                  <option value="healthcare">Clinics</option>
-                  <option value="agency">Agency</option>
-                  <option value="consultancy">Consultancy</option>
-                  <option value="other">Other</option>
+                  {COMPANY_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
-              </div>
+              </FieldShell>
             </div>
 
-            {error && (
-              <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
-                <span>Warning</span>
-                <span>{error}</span>
+            <div className="mt-4">
+              <FieldShell label="Company website">
+                <input
+                  type="url"
+                  value={form.websiteUrl}
+                  onChange={(event) =>
+                    handleFieldChange("websiteUrl", event.target.value)
+                  }
+                  placeholder="https://example.com"
+                  disabled={isPending}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+              </FieldShell>
+            </div>
+
+            {error ? (
+              <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {error}
               </div>
-            )}
+            ) : null}
 
-            <button
-              type="button"
-              onClick={handleTrain}
-              disabled={isPending || (updatesLeft !== null && updatesLeft <= 0)}
-              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isPending ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Training... this can take 1-3 minutes
-                </>
-              ) : (
-                <>Start Training</>
-              )}
-            </button>
-
-            {updatesLeft !== null && updatesLeft <= 0 && (
-              <p className="mt-2 text-center text-xs text-red-500">
-                Training limit reached. Upgrade your plan to continue.
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={handleTrain}
+                disabled={trainingDisabled}
+                className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isPending ? "Training knowledge base..." : "Start training"}
+              </button>
+              <p className="text-sm text-slate-500">
+                Training usually takes 1 to 3 minutes depending on your website.
               </p>
-            )}
+            </div>
           </div>
 
-          {/* Training result */}
-          {trainResult && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-              <h2 className="text-sm font-semibold text-emerald-800">
-                Training Complete
-              </h2>
-              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatCard
-                  icon="P"
-                  label="Pages crawled"
-                  value={trainResult.pages_crawled}
-                />
-                <StatCard
-                  icon="S"
-                  label="Web results"
-                  value={trainResult.search_results}
-                />
-                <StatCard
-                  icon="F"
-                  label="Facts stored"
-                  value={trainResult.entries_stored}
-                />
-                <StatCard
-                  icon="Q"
-                  label="Quality score"
-                  value={trainResult.quality_score.toFixed(1)}
+          <div className="rounded-md border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 p-6 text-white shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200">
+              Before you start
+            </p>
+            <h3 className="mt-3 text-xl font-semibold">
+              Strong profile data improves chatbot answers
+            </h3>
+            <div className="mt-6 space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm font-medium text-white">Company name</p>
+                <p className="mt-1 text-sm text-slate-300">
+                  Helps the AI answer brand-specific questions more naturally.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm font-medium text-white">Website URL</p>
+                <p className="mt-1 text-sm text-slate-300">
+                  This is the source we crawl to build the knowledge base.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm font-medium text-white">Company type</p>
+                <p className="mt-1 text-sm text-slate-300">
+                  Gives the assistant better industry context during training.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isTrained ? (
+        <div className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              label="Facts stored"
+              value={status?.entries_stored ?? 0}
+              hint="Knowledge entries saved for the chatbot"
+            />
+            <StatCard
+              label="Pages crawled"
+              value={status?.pages_crawled ?? 0}
+              hint="Website pages successfully processed"
+            />
+            <StatCard
+              label="Runs left"
+              value={`${updatesLeft ?? 0} / ${status?.update_limit ?? 10}`}
+              hint="Available retraining runs in your plan"
+            />
+            <StatCard
+              label="Last updated"
+              value={
+                status?.last_updated
+                  ? new Date(status.last_updated).toLocaleDateString()
+                  : "Not available"
+              }
+              hint="Most recent successful training"
+            />
+          </div>
+
+          <div className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <SectionLabel
+                title="Knowledge base status"
+                description="Your AI is trained and ready. Use the progress data below to decide when to retrain."
+              />
+              <ScoreBadge score={status?.quality_score ?? 0} />
+            </div>
+
+            <div className="mt-6 rounded-md border border-slate-200 bg-slate-50 p-5">
+              <div className="flex items-center justify-between text-sm text-slate-500">
+                <span>Training usage</span>
+                <span className="font-semibold text-slate-700">
+                  {status?.update_count ?? 0} / {status?.update_limit ?? 10}
+                </span>
+              </div>
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-slate-900 transition-all"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      ((status?.update_count ?? 0) /
+                        (status?.update_limit ?? 10)) *
+                        100,
+                    )}%`,
+                  }}
                 />
               </div>
-              {trainResult.categories.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {trainResult.categories.map((cat) => (
+
+              {status?.categories?.length ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {status.categories.map((category) => (
                     <span
-                      key={cat}
-                      className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium capitalize text-emerald-700"
+                      key={category}
+                      className="rounded-full bg-white px-3 py-1 text-xs font-medium capitalize text-slate-600"
                     >
-                      {cat}
+                      {category}
                     </span>
                   ))}
                 </div>
-              )}
-              <p className="mt-3 text-xs text-emerald-600">
-                Pinecone index: <strong>{trainResult.vector_store_id}</strong> -
-                namespace: <strong>{trainResult.namespace}</strong>
-              </p>
+              ) : null}
             </div>
-          )}
 
-          {/* Knowledge base status */}
-          {status?.is_trained && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-base font-semibold text-gray-900">
-                  Current Knowledge Base
-                </h2>
-                <ScoreBadge score={status.quality_score ?? 0} />
+            {updatesLeft !== null && updatesLeft <= 0 ? (
+              <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                Training limit reached. Upgrade your plan to continue
+                retraining.
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatCard
-                  icon="F"
-                  label="Facts stored"
-                  value={status.entries_stored ?? 0}
-                />
-                <StatCard
-                  icon="P"
-                  label="Pages crawled"
-                  value={status.pages_crawled ?? 0}
-                />
-                <StatCard
-                  icon="R"
-                  label="Runs left"
-                  value={`${updatesLeft ?? 0}/${status.update_limit ?? 10}`}
-                />
-                <StatCard
-                  icon="L"
-                  label="Last trained"
-                  value={
-                    status.last_updated
-                      ? new Date(status.last_updated).toLocaleDateString()
-                      : "-"
-                  }
-                />
-              </div>
-              {status.categories?.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-xs font-medium text-gray-500">
-                    Extracted categories
-                  </p>
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {status.categories.map((cat) => (
-                      <span
-                        key={cat}
-                        className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs capitalize text-gray-600"
-                      >
-                        {cat}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3 text-xs text-gray-500 space-y-1">
-                <p>
-                  <span className="font-medium text-gray-700">
-                    Pinecone index:
-                  </span>{" "}
-                  {status.vector_store_id ?? "-"}
-                </p>
-                <p>
-                  <span className="font-medium text-gray-700">Namespace:</span>{" "}
-                  {status.namespace ?? "-"}
-                </p>
-                <p>
-                  <span className="font-medium text-gray-700">
-                    Last updated:
-                  </span>{" "}
-                  {status.last_updated
-                    ? new Date(status.last_updated).toLocaleString()
-                    : "-"}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Untrained placeholder */}
-          {status && !status.is_trained && !trainResult && (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500">
-              <p className="text-2xl">-</p>
-              <p className="mt-1 font-medium text-gray-700">
-                No knowledge base yet
-              </p>
-              <p className="mt-0.5 text-xs">
-                Enter your website URL above and click Train to get started.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ RIGHT: Chat Tester Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <div className="flex flex-col rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          {/* Chat header */}
-          <div className="flex items-center justify-between gap-2 border-b border-gray-100 bg-gray-50 px-5 py-4">
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">
-                Live Chat Test
-              </h2>
-              <p className="text-xs text-gray-400">
-                Test your chatbot with real questions right here.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {messages.length > 0 && (
-                <button
-                  onClick={handleCopyConversation}
-                  title="Copy conversation as JSON"
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                    copied
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  {copied ? <>Copied!</> : <>Copy JSON</>}
-                </button>
-              )}
-              {status?.is_trained ? (
-                <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                  KB Active
-                </span>
-              ) : (
-                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                  No KB yet
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Messages area */}
-          <div className="flex-1 min-h-[380px] max-h-[540px] overflow-y-auto px-4 py-4 space-y-3">
-            {messages.length === 0 && (
-              <div className="flex h-full items-center justify-center">
-                <div className="text-center text-sm text-gray-400">
-                  <p className="text-3xl mb-2">-</p>
-                  <p className="font-medium text-gray-500">
-                    Send a message to test your chatbot
-                  </p>
-                  {!status?.is_trained && (
-                    <p className="mt-1 text-xs text-amber-500">
-                      Tip: Train the knowledge base first for company-specific
-                      answers.
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {messages.map((msg, i) => {
-              const parsedAssistant =
-                msg.role === "assistant"
-                  ? parseAssistantContent(msg.content)
-                  : null;
-              const bubbleText =
-                msg.role === "assistant" && parsedAssistant
-                  ? parsedAssistant.text || msg.content
-                  : msg.content;
-
-              return (
-                <div
-                  key={i}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
-                      msg.role === "user"
-                        ? "bg-gray-900 text-white rounded-br-sm"
-                        : msg.error
-                          ? "bg-red-50 text-red-700 border border-red-200 rounded-bl-sm"
-                          : "bg-gray-100 text-gray-900 rounded-bl-sm"
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap">{bubbleText}</p>
-
-                    {msg.role === "assistant" &&
-                      parsedAssistant &&
-                      parsedAssistant.slots.length > 0 && (
-                        <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-3">
-                          <p className="text-xs font-semibold text-blue-700">
-                            Select an available time
-                          </p>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {parsedAssistant.slots.map((slot) => (
-                              <button
-                                key={`${i}-${slot}`}
-                                type="button"
-                                onClick={() =>
-                                  sendChatMessage(
-                                    `Please confirm this slot: ${slot}`,
-                                  )
-                                }
-                                disabled={isChatting}
-                                className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-medium text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                {slot}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                    {msg.role === "assistant" &&
-                      parsedAssistant &&
-                      parsedAssistant.calendlyUrl && (
-                        <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-                          <p className="text-xs font-semibold text-emerald-700">
-                            Confirm appointment
-                          </p>
-                          <a
-                            href={parsedAssistant.calendlyUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-2 inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
-                          >
-                            Open confirmation page
-                          </a>
-                        </div>
-                      )}
-
-                    {/* Tools used badge */}
-                    {msg.role === "assistant" &&
-                      msg.tools_used &&
-                      msg.tools_used.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {msg.tools_used.map((tool) => (
-                            <span
-                              key={tool}
-                              className="rounded-full bg-white border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500"
-                            >
-                              Tool: {tool}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Typing indicator */}
-            {isChatting && (
-              <div className="flex justify-start">
-                <div className="rounded-2xl rounded-bl-sm bg-gray-100 px-4 py-3">
-                  <div className="flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:0ms]" />
-                    <span className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:150ms]" />
-                    <span className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:300ms]" />
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={chatBottomRef} />
-          </div>
-
-          {/* Input bar */}
-          <div className="border-t border-gray-100 bg-gray-50 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && !e.shiftKey && handleChat()
-                }
-                placeholder="Ask something about your company..."
-                disabled={isChatting}
-                className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 disabled:opacity-50"
-              />
-              <button
-                type="button"
-                onClick={handleChat}
-                disabled={isChatting || !chatInput.trim()}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-900 text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label="Send"
-              >
-                {isChatting ? (
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="h-4 w-4"
-                  >
-                    <path d="M3.105 2.288a.75.75 0 0 0-.826.95l1.28 4.255A.75.75 0 0 0 4.272 8H10a.75.75 0 0 1 0 1.5H4.272a.75.75 0 0 0-.714.507l-1.279 4.255a.75.75 0 0 0 .826.95 28.896 28.896 0 0 0 15.293-7.154.75.75 0 0 0 0-1.115A28.897 28.897 0 0 0 3.105 2.288Z" />
-                  </svg>
-                )}
-              </button>
-            </div>
-            <p className="mt-1.5 text-center text-[10px] text-gray-400">
-              Session: <code className="font-mono">{sessionId}</code>
-            </p>
+            ) : null}
           </div>
         </div>
-      </div>
+      ) : null}
+
+      {trainResult ? (
+        <div className="rounded-md border border-emerald-200 bg-emerald-50/80 p-6 shadow-sm">
+          <SectionLabel
+            title="Training complete"
+            description="Your latest training run finished successfully. Here is the result from the most recent crawl."
+          />
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              label="Pages crawled"
+              value={trainResult.pages_crawled}
+              hint="Pages included in this run"
+            />
+            <StatCard
+              label="Search results"
+              value={trainResult.search_results}
+              hint="Relevant website results found"
+            />
+            <StatCard
+              label="Facts stored"
+              value={trainResult.entries_stored}
+              hint="Knowledge saved from this run"
+            />
+            <StatCard
+              label="Quality score"
+              value={trainResult.quality_score.toFixed(1)}
+              hint="Estimated quality of the trained data"
+            />
+          </div>
+
+          {trainResult.categories.length ? (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {trainResult.categories.map((category) => (
+                <span
+                  key={category}
+                  className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold capitalize text-emerald-700"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {missingInfo.length > 0 ? (
+        <MissingInfoPanel
+          companyId={companyId}
+          items={missingInfo}
+          onResolved={(remaining) => setMissingInfo(remaining)}
+        />
+      ) : null}
     </div>
   );
 }

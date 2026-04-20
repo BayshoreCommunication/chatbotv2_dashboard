@@ -4,7 +4,7 @@ import LandingPage from "@/components/landingPage/MainPage";
 const page = async () => {
   const session = await auth();
 
-  console.log("check session 250255", session);
+  // console.log("check session 250255", session);
 
   // Transform session to match LandingPage's expected type
   const transformedSession = session

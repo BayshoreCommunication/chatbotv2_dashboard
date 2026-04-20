@@ -33,6 +33,7 @@ export interface UserFull {
   is_active: boolean;
   is_verified: boolean;
   is_subscribed: boolean;
+  has_paid_subscription: boolean;
   subscription_type: string;
   subscription_start_date?: string | null;
   subscription_end_date?: string | null;
