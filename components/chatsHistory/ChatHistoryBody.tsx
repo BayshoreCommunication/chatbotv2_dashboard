@@ -13,7 +13,7 @@ interface ChatHistoryBodyProps {
   onSessionActivity?: (sessionId: string, role: string, content: string, timestamp: string | null) => void;
 }
 
-type LiveMessage = ConversationHistoryMessage & { source?: "human" | "ai" };
+type LiveMessage = ConversationHistoryMessage & { source?: string };
 
 function getSessionTitle(session: ConversationHistoryItem): string {
   if (session.lead_captured && session.lead_name?.trim()) return session.lead_name.trim();
