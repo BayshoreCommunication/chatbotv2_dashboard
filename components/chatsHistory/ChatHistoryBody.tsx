@@ -197,8 +197,7 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
   const allMessages: LiveMessage[] = useMemo(() => {
     const combined = [...(selectedSession?.messages ?? []), ...liveMessages];
     const seen = new Set<string>();
-    return combined.filter((msg) => {
-      // Normalize timestamp to the second to handle WS vs DB timestamp drift
+    const deduped = combined.filter((msg) => {
       let ts = "";
       if (msg.timestamp) {
         try { ts = new Date(msg.timestamp).toISOString().slice(0, 19); } catch { ts = msg.timestamp; }
@@ -207,6 +206,12 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
+    });
+    return deduped.sort((a, b) => {
+      if (!a.timestamp && !b.timestamp) return 0;
+      if (!a.timestamp) return -1;
+      if (!b.timestamp) return 1;
+      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
   }, [selectedSession?.messages, liveMessages]);
 
