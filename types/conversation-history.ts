@@ -2,6 +2,7 @@ export type ConversationHistoryMessage = {
   role: string;
   content: string;
   timestamp: string | null;
+  source?: string | null;
 };
 
 export type ConversationHistoryItem = {
