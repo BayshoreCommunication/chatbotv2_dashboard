@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BiCheck, BiCopy, BiDownArrowAlt, BiSend } from "react-icons/bi";
 import type { ConversationHistoryItem, ConversationHistoryMessage } from "@/types/conversation-history";
 
@@ -194,6 +194,22 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
     } catch {}
   };
 
+  const allMessages: LiveMessage[] = useMemo(() => {
+    const combined = [...(selectedSession?.messages ?? []), ...liveMessages];
+    const seen = new Set<string>();
+    return combined.filter((msg) => {
+      // Normalize timestamp to the second to handle WS vs DB timestamp drift
+      let ts = "";
+      if (msg.timestamp) {
+        try { ts = new Date(msg.timestamp).toISOString().slice(0, 19); } catch { ts = msg.timestamp; }
+      }
+      const key = `${msg.role}|${msg.content}|${ts}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [selectedSession?.messages, liveMessages]);
+
   if (!selectedSession) {
     return (
       <div className="flex flex-1 items-center justify-center bg-gray-50">
@@ -201,8 +217,6 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
       </div>
     );
   }
-
-  const allMessages: LiveMessage[] = [...selectedSession.messages, ...liveMessages];
 
   return (
     <div className="flex flex-1 flex-col bg-white border border-gray-200">
