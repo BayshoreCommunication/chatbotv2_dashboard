@@ -185,15 +185,6 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
     }
   };
 
-  const handleCopyJson = async () => {
-    if (!selectedSession) return;
-    try {
-      await copyToClipboard(JSON.stringify({ messages: selectedSession.messages }, null, 2));
-      setCopiedJson(true);
-      setTimeout(() => setCopiedJson(false), 2000);
-    } catch {}
-  };
-
   const allMessages: LiveMessage[] = useMemo(() => {
     const combined = [...(selectedSession?.messages ?? []), ...liveMessages];
     const seen = new Set<string>();
@@ -214,6 +205,15 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
   }, [selectedSession?.messages, liveMessages]);
+
+  const handleCopyJson = async () => {
+    if (!selectedSession) return;
+    try {
+      await copyToClipboard(JSON.stringify({ messages: allMessages }, null, 2));
+      setCopiedJson(true);
+      setTimeout(() => setCopiedJson(false), 2000);
+    } catch {}
+  };
 
   if (!selectedSession) {
     return (
