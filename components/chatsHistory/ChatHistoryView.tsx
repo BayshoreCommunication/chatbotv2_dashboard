@@ -45,9 +45,12 @@ const ChatHistoryView = ({ companyId, initialData, initialError, recentSessions 
         const existing = prev[sessionId];
         if (existing) {
           const msgs = existing.messages;
-          const lastMsg = msgs[msgs.length - 1];
-          const alreadyAdded =
-            lastMsg?.role === role && lastMsg?.content === content && lastMsg?.timestamp === timestamp;
+          const newTs = timestamp ? new Date(timestamp).getTime() : 0;
+          const alreadyAdded = msgs.some((m) => {
+            if (m.role !== role || m.content !== content) return false;
+            if (!m.timestamp) return false;
+            return Math.abs(new Date(m.timestamp).getTime() - newTs) < 30_000;
+          });
           return {
             ...prev,
             [sessionId]: {

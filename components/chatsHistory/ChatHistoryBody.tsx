@@ -91,9 +91,14 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
             onSessionActivity?.(data.session_id, "user", data.content, data.timestamp ?? null);
             if (isSelected) {
               setLiveMessages((prev) => {
-                const exists = prev.some(
-                  (m) => m.role === "user" && m.content === data.content && m.timestamp === (data.timestamp ?? null)
-                );
+                const newTs = data.timestamp ? new Date(data.timestamp).getTime() : 0;
+                // Dedup within 30 s — catches the same message re-broadcast when
+                // the widget re-sends a pending question after takeover is released
+                const exists = prev.some((m) => {
+                  if (m.role !== "user" || m.content !== data.content) return false;
+                  if (!m.timestamp) return false;
+                  return Math.abs(new Date(m.timestamp).getTime() - newTs) < 30_000;
+                });
                 if (exists) return prev;
                 return [...prev, { role: "user", content: data.content, timestamp: data.timestamp ?? null }];
               });
