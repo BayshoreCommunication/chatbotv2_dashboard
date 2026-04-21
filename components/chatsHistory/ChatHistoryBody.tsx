@@ -168,14 +168,15 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
     setIsSending(true);
 
     try {
-      await fetch(`${API_URL}/api/v1/chat/${companyId}/${selectedSession.session_id}/owner-reply`, {
+      const res = await fetch(`${API_URL}/api/v1/chat/${companyId}/${selectedSession.session_id}/owner-reply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
       });
+      const data = await res.json();
       setLiveMessages((prev) => [
         ...prev,
-        { role: "assistant", content, timestamp: new Date().toISOString(), source: "human" },
+        { role: "assistant", content, timestamp: data.timestamp ?? new Date().toISOString(), source: "human" },
       ]);
       endRef.current?.scrollIntoView({ behavior: "smooth" });
     } catch (err) {
