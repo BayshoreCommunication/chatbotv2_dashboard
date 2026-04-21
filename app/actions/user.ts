@@ -21,6 +21,10 @@ export interface TrainData {
   update_count: number;
   update_limit: number;
   is_trained: boolean;
+  entries_stored: number;
+  pages_crawled: number;
+  categories: string[];
+  namespace?: string | null;
 }
 
 export interface UserFull {

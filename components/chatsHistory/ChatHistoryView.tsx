@@ -1,11 +1,14 @@
 "use client";
 
+import type { RecentSession, VisitorStats } from "@/app/actions/dashboard";
+import type {
+  ConversationHistoryItem,
+  ConversationHistoryResponse,
+} from "@/types/conversation-history";
 import { useCallback, useMemo, useState } from "react";
 import ChatHistoryBody from "./ChatHistoryBody";
 import ChatHistoryList from "./ChatHistoryList";
 import RightNotification from "./RightNotification";
-import type { ConversationHistoryItem, ConversationHistoryResponse } from "@/types/conversation-history";
-import type { RecentSession, VisitorStats } from "@/app/actions/dashboard";
 
 type ChatHistoryViewProps = {
   companyId: string;
@@ -17,29 +20,44 @@ type ChatHistoryViewProps = {
 
 type LiveSessions = Record<string, ConversationHistoryItem>;
 
-const ChatHistoryView = ({ companyId, initialData, initialError, recentSessions = [], visitors = null }: ChatHistoryViewProps) => {
-  const initialSessions = useMemo(() => initialData?.sessions ?? [], [initialData]);
+const ChatHistoryView = ({
+  companyId,
+  initialData,
+  initialError,
+  recentSessions = [],
+  visitors = null,
+}: ChatHistoryViewProps) => {
+  const initialSessions = useMemo(
+    () => initialData?.sessions ?? [],
+    [initialData],
+  );
 
   const [liveSessions, setLiveSessions] = useState<LiveSessions>({});
 
   const sessions = useMemo(() => {
     const live = Object.values(liveSessions).filter(
-      (s) => !initialSessions.some((i) => i.session_id === s.session_id)
+      (s) => !initialSessions.some((i) => i.session_id === s.session_id),
     );
     return [...live, ...initialSessions];
   }, [initialSessions, liveSessions]);
 
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
-    initialSessions[0]?.session_id ?? null
+    initialSessions[0]?.session_id ?? null,
   );
 
   const selectedSession = useMemo(
-    () => sessions.find((item) => item.session_id === selectedSessionId) ?? null,
-    [selectedSessionId, sessions]
+    () =>
+      sessions.find((item) => item.session_id === selectedSessionId) ?? null,
+    [selectedSessionId, sessions],
   );
 
   const handleSessionActivity = useCallback(
-    (sessionId: string, role: string, content: string, timestamp: string | null) => {
+    (
+      sessionId: string,
+      role: string,
+      content: string,
+      timestamp: string | null,
+    ) => {
       const now = timestamp ?? new Date().toISOString();
       setLiveSessions((prev) => {
         const existing = prev[sessionId];
@@ -56,7 +74,9 @@ const ChatHistoryView = ({ companyId, initialData, initialError, recentSessions 
             [sessionId]: {
               ...existing,
               updated_at: now,
-              messages: alreadyAdded ? msgs : [...msgs, { role, content, timestamp }],
+              messages: alreadyAdded
+                ? msgs
+                : [...msgs, { role, content, timestamp }],
             },
           };
         }
@@ -77,11 +97,11 @@ const ChatHistoryView = ({ companyId, initialData, initialError, recentSessions 
         };
       });
     },
-    []
+    [],
   );
 
   return (
-    <div className="flex h-screen bg-gray-50 rounded">
+    <div className="flex h-[calc(100vh-115px)] bg-gray-50 rounded overflow-hidden ">
       {initialError && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded bg-red-100 px-4 py-2 text-sm text-red-700">
           {initialError}
@@ -101,7 +121,10 @@ const ChatHistoryView = ({ companyId, initialData, initialError, recentSessions 
       />
 
       <div className="flex items-start pl-4">
-        <RightNotification recentSessions={recentSessions} visitors={visitors} />
+        <RightNotification
+          recentSessions={recentSessions}
+          visitors={visitors}
+        />
       </div>
     </div>
   );

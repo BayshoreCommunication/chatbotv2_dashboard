@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BiCheck, BiCode, BiCopy, BiPlay, BiSend, BiUser, BiX } from "react-icons/bi";
+import { BiCheck, BiCode, BiCopy, BiImage, BiSend, BiX } from "react-icons/bi";
 import { WidgetSettingsForm } from "./WidgetSettingUpdate";
 
 interface ChatbotPreviewProps {
@@ -39,12 +39,16 @@ const ChatbotPreview = ({ data, companyId }: ChatbotPreviewProps) => {
             style={{ backgroundColor: primaryColor }}
           >
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-white p-1 overflow-hidden">
-                <img
-                  src={data.launcher.brand_image_url}
-                  alt="Logo"
-                  className="h-full w-full object-cover rounded-full"
-                />
+              <div className="h-9 w-9 rounded-full bg-white p-1 overflow-hidden flex items-center justify-center">
+                {data.launcher.brand_image_url ? (
+                  <img
+                    src={data.launcher.brand_image_url}
+                    alt="Logo"
+                    className="h-full w-full object-cover rounded-full"
+                  />
+                ) : (
+                  <BiImage size={18} className="text-gray-300" />
+                )}
               </div>
               <div>
                 <h3 className="font-semibold text-sm leading-tight">{data.bot_name}</h3>
@@ -72,9 +76,6 @@ const ChatbotPreview = ({ data, companyId }: ChatbotPreviewProps) => {
 
             {data.behavior.show_welcome_message && (
               <div className="flex gap-2">
-                <div className="h-7 w-7 shrink-0 rounded-full bg-gray-200 overflow-hidden mt-1 p-0.5 border border-gray-100">
-                  <img src={data.launcher.brand_image_url} alt="Bot" className="h-full w-full object-cover rounded-full" />
-                </div>
                 <div className="rounded-2xl rounded-tl-sm bg-white p-3 text-sm text-gray-800 shadow-sm border border-gray-100 max-w-[85%] leading-relaxed">
                   {data.content.welcome_message}
                 </div>
@@ -82,9 +83,6 @@ const ChatbotPreview = ({ data, companyId }: ChatbotPreviewProps) => {
             )}
 
             <div className="flex gap-2 flex-row-reverse mt-6">
-              <div className="h-7 w-7 shrink-0 rounded-full bg-blue-100 flex items-center justify-center mt-1">
-                <BiUser size={14} className="text-blue-600" />
-              </div>
               <div
                 className="rounded-2xl rounded-tr-sm p-3 text-sm text-white shadow-sm max-w-[80%] leading-relaxed"
                 style={{ backgroundColor: primaryColor }}

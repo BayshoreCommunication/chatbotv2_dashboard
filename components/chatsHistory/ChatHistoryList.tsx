@@ -89,41 +89,42 @@ const ChatHistoryList = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
         {filteredChats.map((chat) => {
           const title = formatTitle(chat);
           const live = liveActivity[chat.session_id];
           const lastMessage = live?.lastMessage ?? chat.messages[chat.messages.length - 1]?.content ?? "";
           const updatedAt = live?.updatedAt ?? chat.updated_at;
           return (
-          <div
-            key={chat.session_id}
-            onClick={() => onChatSelect(chat.session_id)}
-            className={`flex items-start gap-3 p-4 cursor-pointer transition-colors border-b border-gray-100 ${
-              selectedSessionId === chat.session_id ? "bg-gray-100" : "hover:bg-gray-50"
-            }`}
-          >
-            <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-700">
-                {getInitials(title)}
+            <div
+              key={chat.session_id}
+              onClick={() => onChatSelect(chat.session_id)}
+              className={`flex items-start gap-3 p-4 cursor-pointer transition-colors border-b border-gray-100 ${
+                selectedSessionId === chat.session_id ? "bg-gray-100" : "hover:bg-gray-50"
+              }`}
+            >
+              <div className="relative shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-700">
+                  {getInitials(title)}
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between mb-1">
+                  <h3 className="text-sm font-semibold text-gray-900 truncate">{title}</h3>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <p className="truncate flex-1">{lastMessage}</p>
+                  <span className="whitespace-nowrap">{formatTime(updatedAt)}</span>
+                </div>
               </div>
             </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between mb-1">
-                <h3 className="text-sm font-semibold text-gray-900 truncate">
-                  {title}
-                </h3>
-              </div>
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <p className="truncate flex-1">{lastMessage}</p>
-                <span>{formatTime(updatedAt)}</span>
-              </div>
-            </div>
-          </div>
-        )})}
+          );
+        })}
         {filteredChats.length === 0 && (
-          <p className="p-4 text-sm text-gray-500">No conversations found.</p>
+          <div className="flex flex-col items-center justify-center h-40 gap-2 text-gray-400">
+            <BiSearch size={28} />
+            <p className="text-sm">{sessions.length === 0 ? "No conversations yet" : "No results found"}</p>
+          </div>
         )}
       </div>
     </div>

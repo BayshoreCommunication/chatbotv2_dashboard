@@ -61,7 +61,7 @@ export const defaultSettings: WidgetSettingsForm = {
     position: "bottom-right",
     icon_style: "default",
     show_bubbles: true,
-    brand_image_url: "https://i.ibb.co.com/pvcGHgy9/ocrun0jnwtssa3pbky9y.webp",
+    brand_image_url: "",
   },
 };
 
@@ -252,10 +252,17 @@ const WidgetSettingUpdate = ({ form, setForm, settings, editing }: WidgetSetting
                       </div>
                     )}
                   </>
-                ) : (
+                ) : settings.launcher.brand_image_url ? (
                   <div className="flex flex-col items-center gap-3">
                     <img src={settings.launcher.brand_image_url} alt="Active Brand Logo" className="h-24 w-24 rounded object-cover shadow-md ring-4 ring-white" />
                     <p className="text-xs font-medium text-gray-400">Current Logo</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-gray-400">
+                    <div className="flex h-24 w-24 items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50">
+                      <BiImageAdd size={32} className="text-gray-300" />
+                    </div>
+                    <p className="text-xs font-medium">No logo uploaded</p>
                   </div>
                 )}
               </div>
