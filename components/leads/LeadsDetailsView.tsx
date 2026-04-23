@@ -209,9 +209,9 @@ const LeadsDetailsView = () => {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Phone
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                {/* <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Inquiry
-                </th>
+                </th> */}
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Date
                 </th>
@@ -257,11 +257,11 @@ const LeadsDetailsView = () => {
                         {lead.phone || "N/A"}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    {/* <td className="px-6 py-4">
                       <div className="text-sm text-gray-700 max-w-xs truncate" title={lead.message || ""}>
                         {lead.message || "N/A"}
                       </div>
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
                         {new Date(lead.created_at).toLocaleDateString()}
