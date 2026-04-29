@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BiCheck, BiCode, BiCopy, BiImage, BiSend, BiX } from "react-icons/bi";
 import { WidgetSettingsForm } from "./WidgetSettingUpdate";
 
@@ -13,6 +13,18 @@ const ChatbotPreview = ({ data, companyId }: ChatbotPreviewProps) => {
   const primaryColor = data.theme.primary_color || "#2563eb";
   const fontFamily = data.theme.font_family || "Inter";
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!fontFamily || fontFamily === "Inter") return;
+    const id = `gfont-preview-${fontFamily.replace(/ /g, "-")}`;
+    if (!document.getElementById(id)) {
+      const link = document.createElement("link");
+      link.id = id;
+      link.rel = "stylesheet";
+      link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/ /g, "+")}:wght@400;500;600;700&display=swap`;
+      document.head.appendChild(link);
+    }
+  }, [fontFamily]);
 
   const widgetUrl = process.env.NEXT_PUBLIC_WIDGET_URL || "https://chat.your-domain.com";
   const apiKey = companyId ? `org-${companyId}` : "YOUR_API_KEY_HERE";
