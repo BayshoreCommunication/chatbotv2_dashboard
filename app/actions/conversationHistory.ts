@@ -85,3 +85,101 @@ export async function getConversationHistoryAction(
     };
   }
 }
+
+export type SimpleActionResult = {
+  ok: boolean;
+  error?: string;
+  statusCode?: number;
+  timestamp?: string;
+};
+
+export async function toggleTakeoverAction(
+  companyId: string,
+  sessionId: string,
+  active: boolean
+): Promise<SimpleActionResult> {
+  const session = (await auth()) as SessionWithToken | null;
+  const token = session?.user?.accessToken;
+
+  try {
+    const response = await fetch(
+      `${API_URL}/api/v1/chat/${companyId.trim()}/${sessionId}/takeover`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ active }),
+        cache: "no-store",
+      }
+    );
+
+    const raw = await response.text();
+    const payload = parsePayload(raw);
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        statusCode: response.status,
+        error: parseError(payload, "Failed to toggle takeover."),
+      };
+    }
+
+    return { ok: true, statusCode: response.status };
+  } catch (error: unknown) {
+    return {
+      ok: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unexpected error while toggling takeover.",
+    };
+  }
+}
+
+export async function sendOwnerReplyAction(
+  companyId: string,
+  sessionId: string,
+  content: string
+): Promise<SimpleActionResult> {
+  const session = (await auth()) as SessionWithToken | null;
+  const token = session?.user?.accessToken;
+
+  try {
+    const response = await fetch(
+      `${API_URL}/api/v1/chat/${companyId.trim()}/${sessionId}/owner-reply`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ content }),
+        cache: "no-store",
+      }
+    );
+
+    const raw = await response.text();
+    const payload = parsePayload(raw);
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        statusCode: response.status,
+        error: parseError(payload, "Failed to send reply."),
+      };
+    }
+
+    const data = payload as { timestamp?: string };
+    return { ok: true, statusCode: response.status, timestamp: data.timestamp };
+  } catch (error: unknown) {
+    return {
+      ok: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unexpected error while sending reply.",
+    };
+  }
+}

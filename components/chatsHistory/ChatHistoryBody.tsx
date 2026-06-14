@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BiCheck, BiCopy, BiDownArrowAlt, BiSend } from "react-icons/bi";
+import { sendOwnerReplyAction, toggleTakeoverAction } from "@/app/actions/conversationHistory";
 import type { ConversationHistoryItem, ConversationHistoryMessage } from "@/types/conversation-history";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
@@ -155,11 +156,11 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
     if (!selectedSession) return;
     const next = !isTakeover;
     try {
-      await fetch(`${API_URL}/api/v1/chat/${companyId}/${selectedSession.session_id}/takeover`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ active: next }),
-      });
+      const result = await toggleTakeoverAction(companyId, selectedSession.session_id, next);
+      if (!result.ok) {
+        console.error("Takeover toggle failed", result.error);
+        return;
+      }
       setIsTakeover(next);
     } catch (err) {
       console.error("Takeover toggle failed", err);
@@ -173,15 +174,14 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
     setIsSending(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/v1/chat/${companyId}/${selectedSession.session_id}/owner-reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      });
-      const data = await res.json();
+      const result = await sendOwnerReplyAction(companyId, selectedSession.session_id, content);
+      if (!result.ok) {
+        console.error("Owner reply failed", result.error);
+        return;
+      }
       setLiveMessages((prev) => [
         ...prev,
-        { role: "assistant", content, timestamp: data.timestamp ?? new Date().toISOString(), source: "human" },
+        { role: "assistant", content, timestamp: result.timestamp ?? new Date().toISOString(), source: "human" },
       ]);
       endRef.current?.scrollIntoView({ behavior: "smooth" });
     } catch (err) {
