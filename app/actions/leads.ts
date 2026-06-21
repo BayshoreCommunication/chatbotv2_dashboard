@@ -53,6 +53,36 @@ export async function getLeadsAction(): Promise<LeadsResponse> {
   }
 }
 
+export async function setLeadContactedAction(
+  leadId: string,
+  isContacted: boolean,
+): Promise<{ ok: boolean; data?: Lead; error?: string }> {
+  const token = await getAuthToken();
+  if (!token) return { ok: false, error: "Not authenticated" };
+
+  try {
+    const response = await fetch(`${API_URL}/api/v1/leads/${leadId}/contacted`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ is_contacted: isContacted }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { ok: false, error: errorData.detail || "Failed to update lead" };
+    }
+
+    const data = await response.json();
+    return { ok: true, data };
+  } catch (error) {
+    console.error("Error in setLeadContactedAction:", error);
+    return { ok: false, error: "Network error" };
+  }
+}
+
 export async function deleteLeadAction(leadId: string): Promise<{ ok: boolean; error?: string }> {
   const token = await getAuthToken();
   if (!token) return { ok: false, error: "Not authenticated" };

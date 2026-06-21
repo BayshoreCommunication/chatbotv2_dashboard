@@ -55,58 +55,73 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const session = await auth();
+  try {
+    const session = await auth();
 
-  // --- AUTH PAGE REDIRECT (UX Improvement) ---
-  // If user is already logged in, don't let them see Sign-In/Up pages
-  if (session?.user && (pathname === "/sign-in" || pathname === "/sign-up")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
+    // --- AUTH PAGE REDIRECT (UX Improvement) ---
+    // If user is already logged in, don't let them see Sign-In/Up pages
+    if (session?.user && (pathname === "/sign-in" || pathname === "/sign-up")) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
 
-  // Allow other public paths
-  if (
-    publicPaths.some(
-      (path) => pathname === path || pathname.startsWith(path + "/"),
-    )
-  ) {
+    // Allow other public paths
+    if (
+      publicPaths.some(
+        (path) => pathname === path || pathname.startsWith(path + "/"),
+      )
+    ) {
+      return NextResponse.next();
+    }
+
+    // --- PROTECTED ROUTES ---
+
+    // 1. Require Authentication
+    if (!session || !session.user) {
+      const url = new URL("/sign-in", request.url);
+      url.searchParams.set("callbackUrl", pathname + request.nextUrl.search);
+      return NextResponse.redirect(url);
+    }
+
+    // 2. Subscription Check logic
+    // These paths require auth but are allowed WITHOUT an active subscription
+    const subscriptionExemptPaths = [
+      "/start-free-trial",
+      "/confirm-subscription",
+      "/paymenttest",
+      "/checkout",
+    ];
+
+    if (subscriptionExemptPaths.some((path) => pathname.startsWith(path))) {
+      return NextResponse.next();
+    }
+
+    // For all other protected paths, require active subscription (checked fresh from API)
+    const token = (session.user as { accessToken?: string }).accessToken;
+
+    if (!token) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
+
+    const user = await fetchUserProfile(token);
+
+    if (!user?.is_subscribed) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
     return NextResponse.next();
-  }
-
-  // --- PROTECTED ROUTES ---
-
-  // 1. Require Authentication
-  if (!session || !session.user) {
+  } catch (error) {
+    // A thrown error here (e.g. a corrupted/expired session cookie) would
+    // otherwise crash every single page request with "Internal Server
+    // Error" — fall back to treating the visitor as unauthenticated
+    // instead of taking the whole site down.
+    console.error("💥 [Middleware] Unexpected error:", error);
+    if (publicPaths.some((path) => pathname === path || pathname.startsWith(path + "/"))) {
+      return NextResponse.next();
+    }
     const url = new URL("/sign-in", request.url);
     url.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(url);
   }
-
-  // 2. Subscription Check logic
-  // These paths require auth but are allowed WITHOUT an active subscription
-  const subscriptionExemptPaths = [
-    "/start-free-trial",
-    "/confirm-subscription",
-    "/paymenttest",
-  ];
-
-  if (subscriptionExemptPaths.some((path) => pathname.startsWith(path))) {
-    return NextResponse.next();
-  }
-
-  // For all other protected paths, require active subscription (checked fresh from API)
-  const token = (session.user as { accessToken?: string }).accessToken;
-
-  if (!token) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
-  }
-
-  const user = await fetchUserProfile(token);
-
-  if (!user?.is_subscribed) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  return NextResponse.next();
 }
 
 export const config = {

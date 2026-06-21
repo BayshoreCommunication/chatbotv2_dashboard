@@ -7,7 +7,7 @@ const API_URL =
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type SubscriptionTier = "starter" | "professional" | "enterprise";
+type SubscriptionTier = "free" | "professional" | "advanced" | "enterprise";
 type SubscriptionStatus =
   | "active"
   | "trialing"
@@ -113,6 +113,73 @@ export async function createCheckoutSessionAction(
         success_url: successUrl,
         cancel_url: cancelUrl,
       }),
+    }
+  );
+}
+
+/**
+ * POST /api/v1/subscription/create/{companyId}
+ * Fully custom signup — creates the Stripe customer/subscription and
+ * returns a PaymentIntent client_secret for Stripe Elements to confirm
+ * directly in our UI. No redirect to Stripe Checkout. Use this instead of
+ * createCheckoutSessionAction for the custom signup flow.
+ */
+export async function createSubscriptionIntentAction(
+  tier: SubscriptionTier,
+  billingCycle: BillingCycle
+): Promise<
+  ActionResponse<{
+    subscription_id: string;
+    client_secret: string | null;
+    requires_payment: boolean;
+  }>
+> {
+  const { token, companyId } = await getSession();
+  if (!token || !companyId)
+    return { ok: false, error: "You must be logged in to subscribe." };
+
+  return apiFetch(`/api/v1/subscription/create/${companyId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ tier, billing_cycle: billingCycle }),
+  });
+}
+
+/**
+ * POST /api/v1/subscription/change-plan/{companyId}
+ * Switches plan on an existing Stripe subscription (including a free-tier
+ * one) — no Checkout redirect. If a usable card is already on file, Stripe
+ * charges it immediately and requires_payment comes back false. If not
+ * (e.g. upgrading straight from a card-less free trial), requires_payment
+ * comes back true with a client_secret — show the same Stripe Elements
+ * form used for brand-new signups to collect/confirm payment.
+ */
+export async function changeSubscriptionPlanAction(
+  tier: SubscriptionTier,
+  billingCycle: BillingCycle
+): Promise<
+  ActionResponse<{
+    ok: boolean;
+    requires_payment: boolean;
+    client_secret: string | null;
+  }>
+> {
+  const { token, companyId } = await getSession();
+  if (!token || !companyId)
+    return { ok: false, error: "You must be logged in." };
+
+  return apiFetch(
+    `/api/v1/subscription/change-plan/${companyId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ tier, billing_cycle: billingCycle }),
     }
   );
 }

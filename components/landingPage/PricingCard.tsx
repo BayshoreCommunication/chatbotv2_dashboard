@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/shared/ui/badge";
-import { Button } from "@/components/shared/ui/button";
+import { Button, buttonVariants } from "@/components/shared/ui/button";
 import {
   Card,
   CardContent,
@@ -11,25 +11,34 @@ import {
 } from "@/components/shared/ui/card";
 import { PricingPlan } from "@/config/pricing";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { memo } from "react";
 import { BiCheckCircle } from "react-icons/bi";
 import { BsArrowRight } from "react-icons/bs";
-
-interface User {
-  name?: string | null;
-  email?: string | null;
-  has_paid_subscription?: boolean | null;
-  id?: string | null;
-}
 
 interface PricingCardProps {
   plan: PricingPlan;
   loading: string | null;
   handleSubscribe: (plan: PricingPlan, billingCycle: "monthly" | "yearly") => void;
   isAuthenticated: boolean;
-  user: User | null;
   isYearly: boolean;
+  /** Real subscription state from the backend — has_paid_subscription on the session is never populated, don't rely on it. */
+  hasActiveSubscription?: boolean;
+  currentTier?: string | null;
 }
+
+const CONTACT_SALES_HREF =
+  "mailto:sales@bayshorecommunication.com?subject=Enterprise%20Plan%20Inquiry";
+
+// "trial" (this plan's id) and "free" (the backend tier name for it) refer
+// to the same plan — normalize before ranking.
+const TIER_RANK: Record<string, number> = {
+  trial: 0,
+  free: 0,
+  professional: 1,
+  advanced: 2,
+  enterprise: 3,
+};
 
 export const PricingCard = memo(
   ({
@@ -37,11 +46,23 @@ export const PricingCard = memo(
     loading,
     handleSubscribe,
     isAuthenticated,
-    user,
     isYearly,
+    hasActiveSubscription = false,
+    currentTier = null,
   }: PricingCardProps) => {
+    const router = useRouter();
     const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
     const displayPrice = isYearly && plan.id !== "trial" ? price / 12 : price;
+
+    const isCurrentPlan =
+      hasActiveSubscription &&
+      !!currentTier &&
+      TIER_RANK[plan.id] === TIER_RANK[currentTier];
+    const isUpgrade =
+      hasActiveSubscription &&
+      !!currentTier &&
+      !isCurrentPlan &&
+      TIER_RANK[plan.id] > TIER_RANK[currentTier];
 
     return (
       <motion.div
@@ -80,18 +101,28 @@ export const PricingCard = memo(
             <CardDescription className="mb-6 text-gray-600 dark:text-gray-400">
               {plan.description}
             </CardDescription>
-            <div className="mb-6 flex items-baseline justify-center">
-              <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-5xl font-bold text-transparent dark:from-white dark:to-gray-300">
-                ${displayPrice.toFixed(0)}
-              </span>
-              <span className="ml-2 text-lg text-gray-600 dark:text-gray-400">
-                /month
-              </span>
-            </div>
-            {isYearly && plan.id !== "trial" && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Billed ${price} annually
-              </p>
+            {plan.isCustomPricing ? (
+              <div className="mb-6 flex items-baseline justify-center">
+                <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-5xl font-bold text-transparent dark:from-white dark:to-gray-300">
+                  Custom
+                </span>
+              </div>
+            ) : (
+              <>
+                <div className="mb-6 flex items-baseline justify-center">
+                  <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-5xl font-bold text-transparent dark:from-white dark:to-gray-300">
+                    ${displayPrice.toFixed(0)}
+                  </span>
+                  <span className="ml-2 text-lg text-gray-600 dark:text-gray-400">
+                    /month
+                  </span>
+                </div>
+                {isYearly && plan.id !== "trial" && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Billed ${price} annually
+                  </p>
+                )}
+              </>
             )}
           </CardHeader>
 
@@ -113,28 +144,46 @@ export const PricingCard = memo(
             </ul>
 
             <div className="mt-auto">
-              <Button
-                variant={plan.recommended ? "gradient" : "outline"}
-                size="xl"
-                className="w-full"
-                onClick={() =>
-                  handleSubscribe(plan, isYearly ? "yearly" : "monthly")
-                }
-                disabled={loading === plan.id}
-              >
-                {loading === plan.id ? (
-                  <span className="flex items-center">Processing...</span>
-                ) : (
+              {plan.isCustomPricing ? (
+                <a
+                  href={CONTACT_SALES_HREF}
+                  className={buttonVariants({ variant: "outline", size: "xl", className: "w-full" })}
+                >
                   <span className="flex items-center justify-center gap-2">
-                    {isAuthenticated
-                      ? user?.has_paid_subscription
-                        ? "Access Dashboard"
-                        : "Get Started"
-                      : "Sign In"}
+                    Contact Sales
                     <BsArrowRight className="h-5 w-5" />
                   </span>
-                )}
-              </Button>
+                </a>
+              ) : (
+                <Button
+                  variant={plan.recommended ? "gradient" : "outline"}
+                  size="xl"
+                  className="w-full"
+                  onClick={() =>
+                    isCurrentPlan
+                      ? router.push("/dashboard")
+                      : handleSubscribe(plan, isYearly ? "yearly" : "monthly")
+                  }
+                  disabled={loading === plan.id}
+                >
+                  {loading === plan.id ? (
+                    <span className="flex items-center">Processing...</span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      {!isAuthenticated
+                        ? "Sign In"
+                        : isCurrentPlan
+                          ? "Go to Dashboard"
+                          : hasActiveSubscription
+                            ? isUpgrade
+                              ? `Upgrade to ${plan.name}`
+                              : `Downgrade to ${plan.name}`
+                            : "Get Started"}
+                      <BsArrowRight className="h-5 w-5" />
+                    </span>
+                  )}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

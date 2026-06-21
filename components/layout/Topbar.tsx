@@ -9,10 +9,10 @@ import { useEffect, useRef, useState } from "react";
 import {
   BiBell,
   BiChevronDown,
-  BiCog,
   BiLogOut,
   BiSearch,
   BiUser,
+  BiWallet,
 } from "react-icons/bi";
 
 interface User {
@@ -117,6 +117,7 @@ const Topbar = () => {
   }, []);
 
   const handleSignOut = async () => {
+    setIsDropdownOpen(false);
     await signoutAction();
   };
 
@@ -191,17 +192,19 @@ const Topbar = () => {
               </div>
               <Link
                 href="/user-settings"
+                onClick={() => setIsDropdownOpen(false)}
                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <BiUser className="mr-3 h-5 w-5 text-gray-400" />
                 Profile
               </Link>
               <Link
-                href="/settings"
+                href="/billing"
+                onClick={() => setIsDropdownOpen(false)}
                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
-                <BiCog className="mr-3 h-5 w-5 text-gray-400" />
-                Settings
+                <BiWallet className="mr-3 h-5 w-5 text-gray-400" />
+                Billing
               </Link>
               <button
                 onClick={handleSignOut}

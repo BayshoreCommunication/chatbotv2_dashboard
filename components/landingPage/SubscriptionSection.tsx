@@ -1,10 +1,12 @@
 "use client";
 
-import { createCheckoutSessionAction } from "@/app/actions/subscriptions";
+import { getSubscriptionAction } from "@/app/actions/subscriptions";
 import { PricingPlan, pricingPlans } from "@/config/pricing";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BiCheckCircle } from "react-icons/bi";
+import { BsArrowRight } from "react-icons/bs";
 import { IoSparkles } from "react-icons/io5";
 import { LuSparkles } from "react-icons/lu";
 import { PricingCard } from "./PricingCard";
@@ -12,7 +14,6 @@ import { PricingCard } from "./PricingCard";
 interface User {
   name?: string | null;
   email?: string | null;
-  has_paid_subscription?: boolean | null;
   id?: string | null;
 }
 
@@ -27,46 +28,43 @@ const SubscriptionSection = ({
 }: SubscriptionSectionProps) => {
   const [isYearly, setIsYearly] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
+  const [currentTier, setCurrentTier] = useState<string | null>(null);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const router = useRouter();
 
-  const handleSubscribe = async (
+  // The session never carries real subscription state (no has_paid_subscription
+  // field is populated upstream) — check the real subscription from the backend
+  // instead. Also gives us the current tier, needed for Upgrade/Downgrade labels.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    getSubscriptionAction().then((res) => {
+      if (cancelled) return;
+      if (res.ok && res.data) {
+        setCurrentTier(res.data.subscription_tier);
+        setHasActiveSubscription(res.data.is_active);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
+
+  const handleSubscribe = (
     plan: PricingPlan,
     billingCycle: "monthly" | "yearly"
   ) => {
     if (!isAuthenticated) {
-      router.push(
-        `/sign-in?redirect=landing&plan=${plan.id}&billing=${billingCycle}`
-      );
-      return;
-    }
-
-    if (user?.has_paid_subscription) {
-      router.push("/dashboard");
+      const checkoutUrl = `/checkout?plan=${plan.id}&billing=${billingCycle}`;
+      router.push(`/sign-in?callbackUrl=${encodeURIComponent(checkoutUrl)}`);
       return;
     }
 
     setLoading(plan.id);
-
-    try {
-      const tier = plan.id === "trial" ? "starter" : (plan.id as "starter" | "professional" | "enterprise");
-      const result = await createCheckoutSessionAction(
-        tier,
-        billingCycle === "yearly" ? "annual" : "monthly",
-        `${window.location.origin}/dashboard?subscription=success`,
-        `${window.location.origin}/#pricing`,
-      );
-
-      if (result.ok && result.data?.checkout_url) {
-        window.location.href = result.data.checkout_url;
-      } else {
-        alert(result.error || "Failed to start subscription.");
-      }
-    } catch (error) {
-      console.error("Subscription error:", error);
-      alert("An unexpected error occurred.");
-    } finally {
-      setLoading(null);
-    }
+    // Custom checkout page handles the rest: auto-detecting an existing
+    // subscription vs. brand-new signup, and showing the Stripe Elements
+    // card form only if actually needed.
+    router.push(`/checkout?plan=${plan.id}&billing=${billingCycle}`);
   };
 
   return (
@@ -218,18 +216,57 @@ const SubscriptionSection = ({
           {/* Simple glow effect */}
           <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/20 opacity-20 blur-[120px]" />
 
-          {pricingPlans.map((plan) => (
-            <PricingCard
-              key={plan.id}
-              plan={plan}
-              loading={loading}
-              handleSubscribe={handleSubscribe}
-              isAuthenticated={isAuthenticated}
-              user={user}
-              isYearly={isYearly}
-            />
-          ))}
+          {pricingPlans
+            .filter((plan) => !plan.isCustomPricing)
+            .map((plan) => (
+              <PricingCard
+                key={plan.id}
+                plan={plan}
+                loading={loading}
+                handleSubscribe={handleSubscribe}
+                isAuthenticated={isAuthenticated}
+                isYearly={isYearly}
+                hasActiveSubscription={hasActiveSubscription}
+                currentTier={currentTier}
+              />
+            ))}
         </motion.div>
+
+        {/* Enterprise — custom pricing, shown as a distinct full-width banner */}
+        {pricingPlans
+          .filter((plan) => plan.isCustomPricing)
+          .map((plan) => (
+            <motion.div
+              key={plan.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="relative mx-auto mt-20 max-w-6xl overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-900 to-black p-8 dark:border-gray-800 sm:p-10"
+            >
+              <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+                <div>
+                  <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
+                  <p className="mt-2 max-w-xl text-gray-400">{plan.description}</p>
+                  <ul className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-300 sm:justify-start">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2">
+                        <BiCheckCircle className="h-4 w-4 text-blue-400" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <a
+                  href="mailto:sales@bayshorecommunication.com?subject=Enterprise%20Plan%20Inquiry"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-lg transition-transform hover:scale-105"
+                >
+                  Contact Sales
+                  <BsArrowRight className="h-5 w-5" />
+                </a>
+              </div>
+            </motion.div>
+          ))}
       </div>
     </section>
   );

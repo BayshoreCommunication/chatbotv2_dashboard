@@ -8,6 +8,8 @@ export interface PricingPlan {
   recommended?: boolean;
   stripePriceIdMonthly: string;
   stripePriceIdYearly: string;
+  /** True for custom-priced plans with no fixed Stripe price — contact sales instead of checkout. */
+  isCustomPricing?: boolean;
 }
 
 export const pricingPlans: PricingPlan[] = [
@@ -47,8 +49,8 @@ export const pricingPlans: PricingPlan[] = [
     stripePriceIdYearly: "price_1SRPfGFS3P7wS29b1LEGA6HR",
   },
   {
-    id: "enterprise",
-    name: "Enterprise",
+    id: "advanced",
+    name: "Advanced",
     monthlyPrice: 99,
     yearlyPrice: 999,
     description: "Maximum value for committed teams",
@@ -62,5 +64,23 @@ export const pricingPlans: PricingPlan[] = [
     ],
     stripePriceIdMonthly: "price_1RyxUsFS3P7wS29bjiaTZag4",
     stripePriceIdYearly: "price_1SRPh0FS3P7wS29bfAjG9QGZ",
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    description: "Custom solutions for large organizations",
+    features: [
+      "Everything in Advanced plan",
+      "Unlimited conversations — no cap",
+      "Dedicated account manager",
+      "Custom AI model training",
+      "Premium API access & webhooks",
+      "Custom SLA & onboarding",
+    ],
+    stripePriceIdMonthly: "",
+    stripePriceIdYearly: "",
+    isCustomPricing: true,
   },
 ];
