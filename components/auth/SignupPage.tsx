@@ -441,27 +441,28 @@ const SignupPage = () => {
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
               <div
-                className="relative w-full max-w-md rounded-2xl border border-white/20 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-gray-900"
+                className="relative w-full max-w-md rounded-2xl border border-white/20 bg-white p-8 shadow-2xl"
+                style={{ colorScheme: "light" }}
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Close Button */}
                 <button
                   onClick={() => !loading && setShowOTPModal(false)}
                   disabled={loading}
-                  className="absolute right-4 top-4 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300 disabled:opacity-50"
+                  className="absolute right-4 top-4 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
                 >
                   <BiX className="h-5 w-5" />
                 </button>
 
                 {/* Modal Header */}
                 <div className="mb-6 text-center">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-                    <BiShield className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                    <BiShield className="h-8 w-8 text-blue-600" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     Verify Your Email
                   </h2>
-                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="mt-2 text-sm text-gray-500">
                     We&apos;ve sent a 6-digit code to{" "}
                     <strong>{formData.email}</strong>
                   </p>
@@ -480,17 +481,18 @@ const SignupPage = () => {
                       }
                       maxLength={6}
                       required
-                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-3xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
+                      style={{ colorScheme: "light" }}
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-3xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
                     />
 
                     {/* Timer and Resend */}
                     <div className="flex items-center justify-between text-sm">
                       {otpTimer > 0 ? (
-                        <p className="font-mono text-blue-600 dark:text-blue-400">
+                        <p className="font-mono text-blue-600">
                           Code expires in {formatTime(otpTimer)}
                         </p>
                       ) : (
-                        <p className="text-red-600 dark:text-red-400">
+                        <p className="text-red-600">
                           Code expired
                         </p>
                       )}
@@ -498,7 +500,7 @@ const SignupPage = () => {
                         type="button"
                         onClick={handleResendOTP}
                         disabled={loading || otpTimer > 0}
-                        className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="font-semibold text-blue-600 hover:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Resend Code
                       </button>
@@ -512,8 +514,8 @@ const SignupPage = () => {
                       animate={{ height: "auto", opacity: 1 }}
                       className={`rounded-lg px-4 py-3 text-sm font-medium ${
                         error
-                          ? "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400"
-                          : "bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400"
+                          ? "bg-red-50 text-red-600"
+                          : "bg-green-50 text-green-600"
                       }`}
                     >
                       {error || success}

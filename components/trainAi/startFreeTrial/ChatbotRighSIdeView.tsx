@@ -389,7 +389,8 @@ const ChatbotRightSideView = ({
                 onKeyPress={handleKeyPress}
                 disabled={isLoading}
                 placeholder={inputPlaceholder}
-                className="w-full bg-transparent text-sm outline-none placeholder-gray-400"
+                style={{ colorScheme: "light" }}
+                className="w-full bg-transparent text-sm text-gray-900 outline-none placeholder-gray-400"
               />
               <button
                 onClick={handleSendMessage}

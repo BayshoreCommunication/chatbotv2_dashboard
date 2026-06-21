@@ -111,7 +111,7 @@ const ChatbotPreview = ({ data, companyId }: ChatbotPreviewProps) => {
                 type="text"
                 readOnly
                 placeholder={data.content.input_placeholder || "Type your question here..."}
-                className="w-full bg-transparent text-sm outline-none placeholder-gray-400"
+                className="w-full bg-transparent text-sm text-gray-900 outline-none placeholder-gray-400"
               />
               <div
                 className="flex h-8 w-8 shrink-0 cursor-not-allowed items-center justify-center rounded-full text-white shadow-sm"

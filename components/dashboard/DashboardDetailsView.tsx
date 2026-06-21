@@ -8,7 +8,9 @@ import type {
   VisitorStats,
 } from "@/app/actions/dashboard";
 import type { SubscriptionData } from "@/app/actions/subscriptions";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import {
   BiCheck,
   BiClipboard,
@@ -36,11 +38,27 @@ interface DashboardDetailsViewProps {
   recentSessions: RecentSession[];
   subscription: SubscriptionData | null;
   leadCategories: LeadCategory[];
+  companyType: string | null;
 }
 
 // Estimated time a staff member would spend handling one inquiry manually
 // (phone/email back-and-forth) if the chatbot hadn't answered it instead.
 const AVG_HANDLE_TIME_MINUTES = 8;
+
+// Estimated fully-loaded hourly staff cost by industry — used to translate
+// "hours saved" into a dollar figure on the Cost vs. Value banner. These are
+// rough US averages for the role that would otherwise field these inquiries
+// (intake/front-desk/support), not the company's own billing rate.
+const HOURLY_RATE_BY_COMPANY_TYPE: Record<string, number> = {
+  "law-firm": 65,
+  "healthcare-company": 45,
+  "realestate-company": 40,
+  "consultancy-company": 55,
+  "agency-company": 40,
+  "tech-company": 45,
+  other: 35,
+};
+const DEFAULT_HOURLY_RATE = 35;
 
 function fmt(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -62,7 +80,20 @@ const DashboardDetailsView = ({
   recentSessions,
   subscription,
   leadCategories,
+  companyType,
 }: DashboardDetailsViewProps) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Land here after a successful checkout (see app/checkout/page.tsx) — show
+  // a one-time confirmation, then strip the query param so it doesn't fire
+  // again on refresh/back-navigation.
+  useEffect(() => {
+    if (searchParams.get("subscription") !== "success") return;
+    toast.success("Subscription confirmed — welcome aboard!");
+    router.replace("/dashboard");
+  }, [searchParams, router]);
+
   const [selectedPeriod, setSelectedPeriod] = useState<"year" | "last-year">(
     "year",
   );
@@ -81,6 +112,11 @@ const DashboardDetailsView = ({
   const hoursSaved = summary
     ? Math.round((summary.total_sessions * AVG_HANDLE_TIME_MINUTES) / 60)
     : 0;
+
+  const hourlyRate = companyType
+    ? HOURLY_RATE_BY_COMPANY_TYPE[companyType] ?? DEFAULT_HOURLY_RATE
+    : DEFAULT_HOURLY_RATE;
+  const dollarsSaved = hoursSaved * hourlyRate;
 
   const stats = [
     {
@@ -245,8 +281,9 @@ const DashboardDetailsView = ({
               ) : null}
               Your AI handled{" "}
               <span className="font-semibold">{fmt(summary!.total_sessions)} conversations</span> and
-              captured <span className="font-semibold">{fmt(summary!.total_leads)} leads</span> — an
-              estimated <span className="font-semibold">{fmt(hoursSaved)} hours</span> of staff time saved.
+              captured <span className="font-semibold">{fmt(summary!.total_leads)} leads</span> — that&apos;s an
+              estimated <span className="font-semibold text-green-700">${fmt(dollarsSaved)} saved</span> in
+              staff time (~{fmt(hoursSaved)} hours).
             </p>
           </div>
         )}

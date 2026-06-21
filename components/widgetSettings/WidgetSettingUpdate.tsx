@@ -158,7 +158,7 @@ const WidgetSettingUpdate = ({ form, setForm, settings, editing }: WidgetSetting
                 {editing ? (
                   <input
                     type="text"
-                    className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all"
+                    className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all"
                     value={form.bot_name}
                     onChange={(e) => setForm({ ...form, bot_name: e.target.value })}
                   />
@@ -173,8 +173,8 @@ const WidgetSettingUpdate = ({ form, setForm, settings, editing }: WidgetSetting
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Primary Color</label>
                   {editing ? (
                     <div className="flex h-[46px] items-center gap-2 rounded-xl border border-gray-300 bg-gray-50 px-3 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100 transition-all">
-                      <input type="color" className="h-6 w-6 cursor-pointer rounded border-0 bg-transparent p-0" value={form.theme.primary_color} onChange={(e) => setForm({ ...form, theme: { ...form.theme, primary_color: e.target.value } })} />
-                      <input type="text" className="w-full bg-transparent text-sm font-medium uppercase outline-none" value={form.theme.primary_color} onChange={(e) => setForm({ ...form, theme: { ...form.theme, primary_color: e.target.value } })} />
+                      <input type="color" className="text-gray-900 h-6 w-6 cursor-pointer rounded border-0 bg-transparent p-0" value={form.theme.primary_color} onChange={(e) => setForm({ ...form, theme: { ...form.theme, primary_color: e.target.value } })} />
+                      <input type="text" className="text-gray-900 w-full bg-transparent text-sm font-medium uppercase outline-none" value={form.theme.primary_color} onChange={(e) => setForm({ ...form, theme: { ...form.theme, primary_color: e.target.value } })} />
                     </div>
                   ) : (
                     <div className="flex h-[46px] items-center gap-3 rounded-xl bg-gray-50 px-4">
@@ -186,7 +186,7 @@ const WidgetSettingUpdate = ({ form, setForm, settings, editing }: WidgetSetting
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Font Family</label>
                   {editing ? (
-                    <select className="w-full h-[46px] rounded-xl border border-gray-300 bg-gray-50 px-4 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.theme.font_family} onChange={(e) => setForm({ ...form, theme: { ...form.theme, font_family: e.target.value } })}>
+                    <select className="text-gray-900 w-full h-[46px] rounded-xl border border-gray-300 bg-gray-50 px-4 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.theme.font_family} onChange={(e) => setForm({ ...form, theme: { ...form.theme, font_family: e.target.value } })}>
                       {FONTS.map((f) => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
                     </select>
                   ) : (
@@ -200,7 +200,7 @@ const WidgetSettingUpdate = ({ form, setForm, settings, editing }: WidgetSetting
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Position</label>
                   {editing ? (
-                    <select className="w-full h-[46px] rounded-xl border border-gray-300 bg-gray-50 px-4 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.launcher.position} onChange={(e) => setForm({ ...form, launcher: { ...form.launcher, position: e.target.value } })}>
+                    <select className="text-gray-900 w-full h-[46px] rounded-xl border border-gray-300 bg-gray-50 px-4 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.launcher.position} onChange={(e) => setForm({ ...form, launcher: { ...form.launcher, position: e.target.value } })}>
                       <option value="bottom-right">Bottom Right</option>
                       <option value="bottom-left">Bottom Left</option>
                     </select>
@@ -211,7 +211,7 @@ const WidgetSettingUpdate = ({ form, setForm, settings, editing }: WidgetSetting
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Icon Style</label>
                   {editing ? (
-                    <select className="w-full h-[46px] rounded-xl border border-gray-300 bg-gray-50 px-4 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.launcher.icon_style} onChange={(e) => setForm({ ...form, launcher: { ...form.launcher, icon_style: e.target.value } })}>
+                    <select className="text-gray-900 w-full h-[46px] rounded-xl border border-gray-300 bg-gray-50 px-4 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.launcher.icon_style} onChange={(e) => setForm({ ...form, launcher: { ...form.launcher, icon_style: e.target.value } })}>
                       <option value="default">Default</option>
                       <option value="minimal">Minimal</option>
                       <option value="solid">Solid</option>
@@ -317,7 +317,7 @@ const WidgetSettingUpdate = ({ form, setForm, settings, editing }: WidgetSetting
             <div className="flex flex-col justify-center">
               <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Open Delay (ms)</label>
               {editing ? (
-                <input type="number" className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.behavior.open_delay} onChange={(e) => setForm({ ...form, behavior: { ...form.behavior, open_delay: parseInt(e.target.value) || 0 } })} />
+                <input type="number" className="text-gray-900 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.behavior.open_delay} onChange={(e) => setForm({ ...form, behavior: { ...form.behavior, open_delay: parseInt(e.target.value) || 0 } })} />
               ) : (
                 <div className="w-full rounded-xl bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900">{settings.behavior.open_delay} ms</div>
               )}
@@ -356,7 +356,7 @@ const WidgetSettingUpdate = ({ form, setForm, settings, editing }: WidgetSetting
               <div>
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Welcome Message Text</label>
                 {editing ? (
-                  <textarea rows={4} className="w-full resize-none rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.content.welcome_message} onChange={(e) => setForm({ ...form, content: { ...form.content, welcome_message: e.target.value } })} />
+                  <textarea rows={4} className="text-gray-900 w-full resize-none rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.content.welcome_message} onChange={(e) => setForm({ ...form, content: { ...form.content, welcome_message: e.target.value } })} />
                 ) : (
                   <div className="min-h-[100px] rounded-xl bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 leading-relaxed">{settings.content.welcome_message}</div>
                 )}
@@ -366,7 +366,7 @@ const WidgetSettingUpdate = ({ form, setForm, settings, editing }: WidgetSetting
               <div>
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-500">Input Placeholder Text</label>
                 {editing ? (
-                  <input type="text" className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.content.input_placeholder} onChange={(e) => setForm({ ...form, content: { ...form.content, input_placeholder: e.target.value } })} />
+                  <input type="text" className="text-gray-900 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" value={form.content.input_placeholder} onChange={(e) => setForm({ ...form, content: { ...form.content, input_placeholder: e.target.value } })} />
                 ) : (
                   <div className="w-full rounded-xl bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900">{settings.content.input_placeholder}</div>
                 )}
