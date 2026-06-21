@@ -32,7 +32,7 @@ const page = async () => {
         chartLastYear={chartLastRes.ok ? chartLastRes.data : []}
         visitors={visitorsRes.ok ? visitorsRes.data : null}
         recentSessions={recentRes.ok ? recentRes.data : []}
-        subscription={subscriptionRes.ok ? subscriptionRes.data : null}
+        subscription={subscriptionRes.ok ? subscriptionRes.data ?? null : null}
         leadCategories={leadCategoriesRes.ok ? leadCategoriesRes.data : []}
       />
     </div>

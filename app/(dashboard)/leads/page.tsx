@@ -1,9 +1,12 @@
+import { Suspense } from "react";
 import LeadsDetailsView from "@/components/leads/LeadsDetailsView";
 
 const page = () => {
   return (
     <div>
-      <LeadsDetailsView />
+      <Suspense fallback={null}>
+        <LeadsDetailsView />
+      </Suspense>
     </div>
   );
 };
