@@ -6,6 +6,7 @@ import {
   setLeadContactedAction,
   Lead,
 } from "@/app/actions/leads";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "react-hot-toast";
@@ -72,9 +73,19 @@ function MessageCell({ message }: { message: string }) {
 }
 
 const LeadsDetailsView = () => {
+  const searchParams = useSearchParams();
+  const highlightedLeadId = searchParams.get("leadId");
+
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Scroll to and briefly highlight a lead opened from the topbar search
+  useEffect(() => {
+    if (!highlightedLeadId || leads.length === 0) return;
+    const row = document.getElementById(`lead-row-${highlightedLeadId}`);
+    row?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [highlightedLeadId, leads]);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -357,7 +368,12 @@ const LeadsDetailsView = () => {
                   ? leads.map((lead) => (
                       <tr
                         key={lead.id}
-                        className="hover:bg-gray-50 transition-colors"
+                        id={`lead-row-${lead.id}`}
+                        className={`transition-colors ${
+                          lead.id === highlightedLeadId
+                            ? "bg-blue-50 hover:bg-blue-50"
+                            : "hover:bg-gray-50"
+                        }`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">

@@ -3,17 +3,18 @@
 import type {
   ChartBucket,
   DashboardSummary,
+  LeadCategory,
   RecentSession,
   VisitorStats,
 } from "@/app/actions/dashboard";
+import type { SubscriptionData } from "@/app/actions/subscriptions";
 import { useState } from "react";
 import {
   BiCheck,
-  BiData,
+  BiClipboard,
   BiDollar,
-  BiFile,
   BiMessageDetail,
-  BiPhone,
+  BiTime,
   BiTrendingUp,
   BiUser,
 } from "react-icons/bi";
@@ -33,7 +34,13 @@ interface DashboardDetailsViewProps {
   chartLastYear: ChartBucket[];
   visitors: VisitorStats | null;
   recentSessions: RecentSession[];
+  subscription: SubscriptionData | null;
+  leadCategories: LeadCategory[];
 }
+
+// Estimated time a staff member would spend handling one inquiry manually
+// (phone/email back-and-forth) if the chatbot hadn't answered it instead.
+const AVG_HANDLE_TIME_MINUTES = 8;
 
 function fmt(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -53,6 +60,8 @@ const DashboardDetailsView = ({
   chartLastYear,
   visitors,
   recentSessions,
+  subscription,
+  leadCategories,
 }: DashboardDetailsViewProps) => {
   const [selectedPeriod, setSelectedPeriod] = useState<"year" | "last-year">(
     "year",
@@ -69,44 +78,53 @@ const DashboardDetailsView = ({
     visitors: b.visitors,
   }));
 
+  const hoursSaved = summary
+    ? Math.round((summary.total_sessions * AVG_HANDLE_TIME_MINUTES) / 60)
+    : 0;
+
   const stats = [
     {
-      title: "Total Users",
+      title: "Website Visitors",
       value: fmt(visitors?.total_visitors ?? 0),
       subtitle: visitors
         ? `${fmt(visitors.new_visitors_30d)} new this month`
-        : "Unique visitors",
+        : "People who visited your site",
       icon: <BiUser size={24} />,
       color: "bg-blue-50",
       iconColor: "text-blue-600",
     },
     {
-      title: "API Calls",
+      title: "Conversations Handled",
       value: fmt(summary?.total_sessions ?? 0),
       subtitle: summary
         ? deltaLabel(summary.deltas.sessions_pct)
-        : "Total conversations",
-      icon: <BiPhone size={24} />,
+        : "Chats your AI has handled",
+      icon: <BiMessageDetail size={24} />,
       color: "bg-purple-50",
       iconColor: "text-purple-600",
     },
     {
-      title: "Storage Used",
-      value: fmt(summary?.entries_stored ?? 0),
-      subtitle: "Vector embeddings",
-      icon: <BiData size={24} />,
+      title: "Leads Captured",
+      value: fmt(summary?.total_leads ?? 0),
+      subtitle: summary
+        ? deltaLabel(summary.deltas.leads_pct)
+        : "Visitors who left contact info",
+      icon: <BiTrendingUp size={24} />,
       color: "bg-green-50",
       iconColor: "text-green-600",
     },
     {
-      title: "Documents",
-      value: fmt(summary?.pages_crawled ?? 0),
-      subtitle: "Pages crawled",
-      icon: <BiFile size={24} />,
+      title: "Est. Hours Saved",
+      value: `${fmt(hoursSaved)} hrs`,
+      subtitle: `~${AVG_HANDLE_TIME_MINUTES} min saved per conversation`,
+      icon: <BiTime size={24} />,
       color: "bg-orange-50",
       iconColor: "text-orange-600",
     },
   ];
+
+  const monthlyPrice = subscription?.payment_amount ?? 0;
+  const showValueBanner = !!summary && summary.total_sessions > 0;
 
   // Right sidebar: recent sessions as notifications
   const notifications =
@@ -156,38 +174,32 @@ const DashboardDetailsView = ({
           },
         ];
 
-  // Right sidebar: leads with contact info as "active users"
+  // Right sidebar: plain-language bot health, instead of raw technical metrics
   const activeUsers = summary
     ? [
         {
           id: 1,
-          initials: fmt(summary.total_leads),
-          name: "Leads captured",
-          active: true,
+          initials: `${summary.kb_score.toFixed(0)}%`,
+          name: "Knowledge base ready",
+          active: summary.kb_score > 50,
         },
         {
           id: 2,
-          initials: fmt(summary.total_messages),
-          name: "Total messages",
+          initials: fmt(visitors?.returning_visitors ?? 0),
+          name: "Returning visitors",
           active: true,
         },
         {
           id: 3,
-          initials: `${summary.kb_score.toFixed(0)}%`,
-          name: "KB quality score",
-          active: summary.kb_score > 50,
+          initials: fmt(summary.total_messages),
+          name: "Messages exchanged",
+          active: true,
         },
         {
           id: 4,
           initials: String(summary.total_train_runs),
-          name: "Training runs",
+          name: "Times you've trained your bot",
           active: summary.total_train_runs > 0,
-        },
-        {
-          id: 5,
-          initials: fmt(visitors?.returning_visitors ?? 0),
-          name: "Returning visitors",
-          active: true,
         },
       ]
     : [
@@ -222,6 +234,23 @@ const DashboardDetailsView = ({
           </button>
         </div>
 
+        {/* Cost vs. Value Banner */}
+        {showValueBanner && (
+          <div className="mb-6 rounded border border-blue-100 bg-blue-50 p-5">
+            <p className="text-sm text-gray-800">
+              {monthlyPrice > 0 ? (
+                <>
+                  You paid <span className="font-semibold">${monthlyPrice.toFixed(0)}</span> this month.{" "}
+                </>
+              ) : null}
+              Your AI handled{" "}
+              <span className="font-semibold">{fmt(summary!.total_sessions)} conversations</span> and
+              captured <span className="font-semibold">{fmt(summary!.total_leads)} leads</span> — an
+              estimated <span className="font-semibold">{fmt(hoursSaved)} hours</span> of staff time saved.
+            </p>
+          </div>
+        )}
+
         {/* Statistics Cards */}
         <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
@@ -239,6 +268,40 @@ const DashboardDetailsView = ({
             </div>
           ))}
         </div>
+
+        {/* What People Are Asking About */}
+        {leadCategories.length > 0 && (
+          <div className="mb-6 rounded border border-gray-200 bg-white p-6">
+            <div className="mb-4 flex items-center gap-2">
+              <BiClipboard size={18} className="text-gray-500" />
+              <h2 className="text-base font-bold text-gray-900">
+                What People Are Asking About
+              </h2>
+            </div>
+            <div className="space-y-3">
+              {leadCategories.map((cat) => {
+                const maxCount = leadCategories[0]?.count || 1;
+                const widthPct = Math.max(8, Math.round((cat.count / maxCount) * 100));
+                return (
+                  <div key={cat.category} className="flex items-center gap-3">
+                    <span className="w-36 flex-shrink-0 truncate text-sm text-gray-700">
+                      {cat.category}
+                    </span>
+                    <div className="h-6 flex-1 overflow-hidden rounded bg-gray-100">
+                      <div
+                        className="h-full rounded bg-blue-500"
+                        style={{ width: `${widthPct}%` }}
+                      />
+                    </div>
+                    <span className="w-8 flex-shrink-0 text-right text-sm font-semibold text-gray-900">
+                      {cat.count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Chart Section */}
         <div className="rounded border border-gray-200 bg-white p-6">
@@ -401,10 +464,10 @@ const DashboardDetailsView = ({
           </div>
         </div>
 
-        {/* Active / Stats */}
+        {/* Bot Performance */}
         <div className="rounded border border-gray-200 bg-white overflow-y-auto flex flex-col">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-base font-bold text-gray-900">Active</h2>
+            <h2 className="text-base font-bold text-gray-900">Bot Performance</h2>
           </div>
           <div className="overflow-y-auto p-4 max-h-[305px]">
             <div className="space-y-1">

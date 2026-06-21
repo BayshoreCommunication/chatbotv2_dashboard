@@ -44,6 +44,11 @@ export type RecentSession = {
   updated_at: string | null;
 };
 
+export type LeadCategory = {
+  category: string;
+  count: number;
+};
+
 type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string; statusCode?: number };
@@ -128,4 +133,11 @@ export async function getDashboardRecentSessionsAction(
   limit = 5,
 ): Promise<ActionResult<RecentSession[]>> {
   return apiFetch(`/api/v1/dashboard/${companyId}/recent-sessions`, { limit });
+}
+
+export async function getDashboardLeadCategoriesAction(
+  companyId: string,
+  limit = 8,
+): Promise<ActionResult<LeadCategory[]>> {
+  return apiFetch(`/api/v1/dashboard/${companyId}/lead-categories`, { limit });
 }

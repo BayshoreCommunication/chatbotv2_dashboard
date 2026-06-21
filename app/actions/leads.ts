@@ -53,6 +53,34 @@ export async function getLeadsAction(): Promise<LeadsResponse> {
   }
 }
 
+export async function searchLeadsAction(query: string): Promise<LeadsResponse> {
+  const token = await getAuthToken();
+  if (!token) return { ok: false, error: "Not authenticated" };
+  if (!query.trim()) return { ok: true, data: [] };
+
+  try {
+    const response = await fetch(
+      `${API_URL}/api/v1/leads/search?q=${encodeURIComponent(query)}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { ok: false, error: errorData.detail || "Search failed" };
+    }
+
+    const data = await response.json();
+    return { ok: true, data };
+  } catch (error) {
+    console.error("Error in searchLeadsAction:", error);
+    return { ok: false, error: "Network error" };
+  }
+}
+
 export async function setLeadContactedAction(
   leadId: string,
   isContacted: boolean,
