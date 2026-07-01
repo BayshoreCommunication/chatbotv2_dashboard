@@ -1,6 +1,12 @@
 "use client";
 
 import {
+  getInvitesAction,
+  revokeInviteAction,
+  sendInviteAction,
+  type Invite,
+} from "@/app/actions/invites";
+import {
   getCurrentUserDetails,
   getUserData,
   updateUserData,
@@ -23,6 +29,7 @@ import {
   BiRefresh,
   BiSave,
   BiShield,
+  BiUserPlus,
   BiX,
 } from "react-icons/bi";
 
@@ -65,6 +72,13 @@ type ProfileForm = {
   companyType: string;
   website: string;
 };
+
+type InviteForm = {
+  name: string;
+  email: string;
+};
+
+const MAX_MEMBERS = 5;
 
 function formatDate(value?: string | null): string {
   if (!value) return "—";
@@ -154,6 +168,29 @@ function SkeletonView() {
   );
 }
 
+function statusBadge(status: Invite["status"]) {
+  if (status === "active")
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+        Active
+      </span>
+    );
+  if (status === "pending")
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-700">
+        <span className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
+        Pending
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-500">
+      <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+      Revoked
+    </span>
+  );
+}
+
 const UserDetails = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -169,6 +206,14 @@ const UserDetails = () => {
     companyType: "",
     website: "",
   });
+
+  // Team access state
+  const [invites, setInvites] = useState<Invite[]>([]);
+  const [inviteForm, setInviteForm] = useState<InviteForm>({ name: "", email: "" });
+  const [inviting, setInviting] = useState(false);
+  const [revoking, setRevoking] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
   const loadUser = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
@@ -195,9 +240,15 @@ const UserDetails = () => {
     }
   }, []);
 
+  const loadInvites = useCallback(async () => {
+    const res = await getInvitesAction();
+    if (res.ok && res.data) setInvites(res.data);
+  }, []);
+
   useEffect(() => {
     void loadUser(false);
-  }, [loadUser]);
+    void loadInvites();
+  }, [loadUser, loadInvites]);
 
   const vm = useMemo<UserViewModel>(
     () => ({
@@ -337,6 +388,55 @@ const UserDetails = () => {
       companyType: vm.companyType || "",
       website: vm.website || "",
     });
+  };
+
+  const activeCount = invites.filter((i) => i.status !== "revoked").length;
+
+  const handleSendInvite = async () => {
+    setInviteError(null);
+    setInviteSuccess(null);
+    const name = inviteForm.name.trim();
+    const email = inviteForm.email.trim();
+    if (!name || !email) {
+      setInviteError("Name and email are required.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setInviteError("Enter a valid email address.");
+      return;
+    }
+    if (activeCount >= MAX_MEMBERS) {
+      setInviteError(`You have reached the maximum of ${MAX_MEMBERS} team members.`);
+      return;
+    }
+    setInviting(true);
+    try {
+      const res = await sendInviteAction(name, email);
+      if (!res.ok) {
+        setInviteError(res.error || "Failed to send invite.");
+        return;
+      }
+      if (res.data) setInvites((prev) => [res.data!, ...prev]);
+      setInviteForm({ name: "", email: "" });
+      setInviteSuccess(`Invite sent to ${email}.`);
+    } catch {
+      setInviteError("An unexpected error occurred.");
+    } finally {
+      setInviting(false);
+    }
+  };
+
+  const handleRevoke = async (id: string) => {
+    setRevoking(id);
+    try {
+      const res = await revokeInviteAction(id);
+      if (!res.ok) return;
+      setInvites((prev) =>
+        prev.map((inv) => (inv.id === id ? { ...inv, status: "revoked" } : inv)),
+      );
+    } finally {
+      setRevoking(null);
+    }
   };
 
   if (loading) return <SkeletonView />;
@@ -549,6 +649,114 @@ const UserDetails = () => {
               }
             />
           </div>
+        </div>
+      </div>
+
+      {/* Team Access */}
+      <div className="rounded border border-gray-200 bg-white overflow-hidden">
+        <div className="border-b border-gray-200 bg-gray-50 px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BiUserPlus size={16} className="text-gray-500" />
+            <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wider">
+              Team Access
+            </h2>
+          </div>
+          <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">
+            {activeCount} / {MAX_MEMBERS} members
+          </span>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Invite form */}
+          <div className="rounded-lg border border-gray-100 bg-gray-50 p-4 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Invite a team member
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]">
+              <input
+                type="text"
+                value={inviteForm.name}
+                onChange={(e) =>
+                  setInviteForm((p) => ({ ...p, name: e.target.value }))
+                }
+                placeholder="Full name"
+                disabled={inviting || activeCount >= MAX_MEMBERS}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50"
+              />
+              <input
+                type="email"
+                value={inviteForm.email}
+                onChange={(e) =>
+                  setInviteForm((p) => ({ ...p, email: e.target.value }))
+                }
+                placeholder="Email address"
+                disabled={inviting || activeCount >= MAX_MEMBERS}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50"
+              />
+              <button
+                type="button"
+                onClick={() => void handleSendInvite()}
+                disabled={inviting || activeCount >= MAX_MEMBERS}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 whitespace-nowrap"
+              >
+                <BiUserPlus size={16} />
+                {inviting ? "Sending…" : "Send Invite"}
+              </button>
+            </div>
+            {activeCount >= MAX_MEMBERS && (
+              <p className="text-xs text-amber-600">
+                Member limit reached. Revoke an existing member to invite someone new.
+              </p>
+            )}
+            {inviteError && (
+              <p className="text-xs text-red-600">{inviteError}</p>
+            )}
+            {inviteSuccess && (
+              <p className="text-xs text-green-600">{inviteSuccess}</p>
+            )}
+          </div>
+
+          {/* Members list */}
+          {invites.length === 0 ? (
+            <p className="text-center py-6 text-sm text-gray-400">
+              No team members invited yet.
+            </p>
+          ) : (
+            <div className="divide-y divide-gray-100 rounded-lg border border-gray-100 overflow-hidden">
+              {invites.map((invite) => (
+                <div
+                  key={invite.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white hover:bg-gray-50 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-gray-900">
+                      {invite.invitee_name}
+                    </p>
+                    <p className="truncate text-xs text-gray-500">
+                      {invite.invitee_email}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    {statusBadge(invite.status)}
+                    <span className="hidden text-xs text-gray-400 sm:block">
+                      {new Date(invite.created_at).toLocaleDateString()}
+                    </span>
+                    {invite.status !== "revoked" && (
+                      <button
+                        type="button"
+                        onClick={() => void handleRevoke(invite.id)}
+                        disabled={revoking === invite.id}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        <BiX size={14} />
+                        {revoking === invite.id ? "Revoking…" : "Revoke"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

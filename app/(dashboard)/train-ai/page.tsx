@@ -10,7 +10,7 @@ const Page = async () => {
   const user = userRes.ok ? userRes.data : null;
 
   return (
-    <div className="p-2 md:p-4">
+    <div className="p-2 md:p-6">
       <TrainKnowledgeBase
         companyId={companyId}
         companyName={user?.company_name ?? ""}

@@ -51,6 +51,22 @@ export type TrainResult = {
   missing_info: MissingInfoItem[];
 };
 
+export type FoundItem = {
+  category: string;
+  label: string;
+  source_url: string;
+};
+
+export type TrainProgress = {
+  status: "idle" | "running" | "done" | "error";
+  percent: number;
+  stage: string | null;
+  message: string | null;
+  found: FoundItem[];
+  started_at: string | null;
+  updated_at: string | null;
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function parseErrorMessage(payload: unknown, fallback: string): string {
@@ -217,6 +233,27 @@ export async function getKnowledgeStatusAction(
 
   return apiCall<TrainStatus>(
     `${API_URL}/api/v1/knowledge/status/${companyId}`,
+    {
+      method: "GET",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }
+  );
+}
+
+/**
+ * GET /api/v1/knowledge/progress/{companyId}
+ * Live progress written by the backend WHILE a POST /train call is in
+ * flight on a separate connection — meant to be polled every 1-2s.
+ */
+export async function getTrainingProgressAction(
+  companyId: string
+): Promise<ActionResponse<TrainProgress>> {
+  if (!companyId) return { ok: false, error: "Missing company ID." };
+
+  const token = await getToken();
+
+  return apiCall<TrainProgress>(
+    `${API_URL}/api/v1/knowledge/progress/${companyId}`,
     {
       method: "GET",
       headers: token ? { Authorization: `Bearer ${token}` } : {},

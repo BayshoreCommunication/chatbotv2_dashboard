@@ -20,12 +20,20 @@ export type Invoice = {
   id: string;
   created: number;
   amount_due: number;
+  amount_paid: number;
   currency: string;
   status: "paid" | "due";
   invoice_pdf: string | null;
   hosted_invoice_url: string | null;
   /** Plan tier that was actually billed on this invoice (e.g. "professional", "advanced") — not the company's current tier. */
   tier: string | null;
+  /** Stripe billing_reason: "subscription_create" | "subscription_cycle" | "subscription_update" | "manual" */
+  billing_reason: string | null;
+  /** Unix timestamps for the billing period this invoice covers. */
+  period_start: number | null;
+  period_end: number | null;
+  /** True for the $0 trial-start invoice (card saved, nothing charged). */
+  is_trial: boolean;
 };
 
 type ActionResponse<T = unknown> = {

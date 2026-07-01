@@ -8,9 +8,14 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
+      // NextAuth's own catch-all route (/api/auth/*) is dynamic, so without
+      // this exclusion the blanket proxy below wins over it — Next.js
+      // resolves "afterFiles" rewrites before dynamic routes — silently
+      // sending session/csrf/callback requests to the backend instead of
+      // NextAuth and breaking them.
       {
-        source: "/api/:path*",
-        destination: "http://localhost:8000/api/:path*", // Proxy to Backend
+        source: "/api/:path((?!auth/).*)",
+        destination: "http://localhost:8000/api/:path", // Proxy to Backend
       },
     ];
   },

@@ -17,14 +17,20 @@ export async function middleware(request: NextRequest) {
     "/google",
     "/create-assistent",
     "/chatbot",
+    "/pricing",
+    "/accept-invite",
   ];
 
-  // 2. STATIC ASSETS: Always allow
+  // 2. STATIC ASSETS + NEXTAUTH INTERNALS: Always allow.
+  // /api/auth/* is NextAuth's own session/csrf/callback plumbing — it must
+  // never be gated behind "is logged in", or sign-in itself breaks (the
+  // credentials callback fires *before* a session exists).
   const excludedPaths = [
     "/_next/",
     "/favicon.ico",
     "/opengraph-image.png",
     "/assets/",
+    "/api/auth/",
   ];
 
   // Check for static assets
@@ -115,7 +121,11 @@ export async function middleware(request: NextRequest) {
     // Error" — fall back to treating the visitor as unauthenticated
     // instead of taking the whole site down.
     console.error("💥 [Middleware] Unexpected error:", error);
-    if (publicPaths.some((path) => pathname === path || pathname.startsWith(path + "/"))) {
+    if (
+      publicPaths.some(
+        (path) => pathname === path || pathname.startsWith(path + "/"),
+      )
+    ) {
       return NextResponse.next();
     }
     const url = new URL("/sign-in", request.url);

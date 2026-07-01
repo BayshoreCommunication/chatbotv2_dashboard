@@ -1,7 +1,12 @@
+import { Suspense } from "react";
 import WidgetSettingView from "@/components/widgetSettings/WidgetSettingView";
 
-const page = () => {
-  return <div><WidgetSettingView/></div>;
+const WidgetSettingsPage = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <WidgetSettingView />
+    </Suspense>
+  );
 };
 
-export default page;
+export default WidgetSettingsPage;

@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { getCurrentUserDetails } from "@/app/actions/user";
 import Footer from "@/components/landingPage/Footer";
 import Navbar from "@/components/landingPage/Navbar";
 import type { Metadata } from "next";
@@ -27,12 +28,20 @@ export default async function LandingPageLayout({
 }>) {
   const session = await auth();
 
-  // Transform user to match Navbar's expected type
+  // Fetch fresh company/profile data from the backend so the navbar never shows
+  // stale info baked into the long-lived (30-day) NextAuth session JWT.
+  const userDetails = session?.user
+    ? await getCurrentUserDetails()
+    : null;
+  const freshUser = userDetails?.ok ? userDetails.data : null;
+
+  // Transform user to match Navbar's expected type — prefer fresh backend data,
+  // falling back to the session JWT if the backend call fails.
   const safeUser = session?.user
     ? {
-        email: session.user.email || undefined,
+        email: freshUser?.email || session.user.email || undefined,
         name: session.user.name === null ? undefined : session.user.name,
-        companyName: session.user.companyName,
+        companyName: freshUser?.company_name || session.user.companyName,
         avatar: session.user.avatar,
       }
     : null;

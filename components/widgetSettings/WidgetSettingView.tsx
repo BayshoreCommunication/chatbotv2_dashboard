@@ -5,9 +5,16 @@ import {
   updateWidgetSettingsAction,
   type WidgetSettingsResponse,
 } from "@/app/actions/widgetSettings";
-import { useEffect, useState } from "react";
+import {
+  getSubscriptionAction,
+  type SubscriptionData,
+} from "@/app/actions/subscriptions";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { BiPencil, BiRefresh, BiSave, BiX } from "react-icons/bi";
+import { BsArrowRight, BsExclamationTriangle } from "react-icons/bs";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import ChatbotPreview from "./ChatbotPreview";
 import WidgetSettingUpdate, {
   defaultSettings,
@@ -25,33 +32,105 @@ function toFormData(data: WidgetSettingsResponse): WidgetSettingsForm {
   };
 }
 
-type ViewState = "loading" | "setup" | "editor";
+function trialDaysLeft(trialEnd: string | null): number {
+  if (!trialEnd) return 0;
+  const ms = new Date(trialEnd).getTime() - Date.now();
+  return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+}
+
+type ViewState = "loading" | "activating" | "paywall" | "setup" | "editor";
 
 const WidgetSettingView = () => {
+  const searchParams = useSearchParams();
+  const successToastFired = useRef(false);
+  const initRan = useRef(false);
+
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [companyId, setCompanyId] = useState<string>("");
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [settings, setSettings] = useState<WidgetSettingsForm>(defaultSettings);
   const [form, setForm] = useState<WidgetSettingsForm>(defaultSettings);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const hasChanges = JSON.stringify(form) !== JSON.stringify(settings);
 
-  // Fetch saved settings on mount
+  // Fetch subscription + widget settings on mount.
+  // When arriving from checkout (?subscription=success), Stripe's webhook may
+  // not have written to MongoDB yet — poll up to 5 times (2 s apart) so
+  // trial users aren't incorrectly shown the paywall.
   useEffect(() => {
-    const fetchSettings = async () => {
-      const res = await getWidgetSettingsAction();
-      if (res.ok && res.data) {
-        const formData = toFormData(res.data);
+    if (initRan.current) return;
+    initRan.current = true;
+
+    const justSubscribed =
+      searchParams.get("subscription") === "success";
+
+    const init = async () => {
+      const [subRes, widgetRes] = await Promise.all([
+        getSubscriptionAction(),
+        getWidgetSettingsAction(),
+      ]);
+
+      let sub = subRes.ok && subRes.data ? subRes.data : null;
+
+      // If arriving from checkout and the subscription isn't active yet
+      // (Stripe webhook may still be in flight), poll briefly before giving up.
+      if (justSubscribed && (!sub || !sub.is_active)) {
+        setViewState("activating");
+        for (let i = 0; i < 5; i++) {
+          await new Promise((r) => setTimeout(r, 2000));
+          const retry = await getSubscriptionAction();
+          if (retry.ok && retry.data?.is_active) {
+            sub = retry.data;
+            break;
+          }
+        }
+      }
+
+      setSubscription(sub);
+
+      // Only hard-block on statuses that are definitively inactive.
+      // A missing subscription doc (null) means the user is new or the webhook
+      // hasn't synced yet — do NOT block them, just proceed.
+      // "trialing" and "active" pass through automatically.
+      const BLOCKED: string[] = [
+        "canceled",
+        "unpaid",
+        "incomplete_expired",
+        "paused",
+      ];
+      const isBlocked =
+        sub !== null && BLOCKED.includes(sub.subscription_status);
+
+      if (isBlocked) {
+        setViewState("paywall");
+        return;
+      }
+
+      if (widgetRes.ok && widgetRes.data) {
+        const formData = toFormData(widgetRes.data);
         setSettings(formData);
         setForm(formData);
-        setCompanyId(res.data.company_id);
+        setCompanyId(widgetRes.data.company_id);
         setViewState("editor");
       } else {
         setViewState("setup");
       }
     };
-    fetchSettings();
-  }, []);
+
+    init();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Show success toast once after checkout redirect
+  useEffect(() => {
+    if (successToastFired.current) return;
+    if (searchParams.get("subscription") === "success") {
+      successToastFired.current = true;
+      toast.success("You're all set! Your subscription is now active.", {
+        duration: 5000,
+      });
+    }
+  }, [searchParams]);
 
   const handleSetupComplete = async () => {
     // Re-fetch after setup so state matches DB
@@ -208,14 +287,78 @@ const WidgetSettingView = () => {
     );
   }
 
+  // ── Activating (webhook not synced yet right after checkout) ─────────────
+  if (viewState === "activating") {
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4 text-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+        <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+          Setting up your subscription…
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">
+          This usually takes just a few seconds.
+        </p>
+      </div>
+    );
+  }
+
+  // ── Paywall ────────────────────────────────────────────────────────────────
+  if (viewState === "paywall") {
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 px-4 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
+          <BsExclamationTriangle className="h-7 w-7 text-gray-500" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Subscription required
+          </h2>
+          <p className="max-w-md text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+            Widget settings are available on the Professional and Advanced plans.
+            Start your 14-day free trial — your card won&apos;t be charged until the trial ends.
+          </p>
+        </div>
+        <Link
+          href="/pricing"
+          className="group inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+        >
+          View plans
+          <BsArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
+    );
+  }
+
   // ── Setup ──────────────────────────────────────────────────────────────────
   if (viewState === "setup") {
     return <WidgetSetup onSetupComplete={handleSetupComplete} />;
   }
 
+  // Trial banner (shown above the editor when user is in the free trial)
+  const daysLeft = trialDaysLeft(subscription?.trial_end ?? null);
+  const trialBanner = subscription?.is_in_trial ? (
+    <div className="mb-5 flex flex-col gap-1 rounded-xl border border-blue-200 bg-blue-50 px-5 py-3.5 dark:border-blue-900 dark:bg-blue-950 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">
+          Free trial — {daysLeft} day{daysLeft !== 1 ? "s" : ""} remaining
+        </p>
+        <p className="text-xs text-blue-700 dark:text-blue-400">
+          Your card will be charged automatically when the trial ends. Cancel anytime before then.
+        </p>
+      </div>
+      <Link
+        href="/pricing"
+        className="mt-2 shrink-0 text-xs font-semibold text-blue-800 underline underline-offset-2 hover:text-blue-600 dark:text-blue-300 sm:mt-0"
+      >
+        Manage subscription
+      </Link>
+    </div>
+  ) : null;
+
   // ── Editor ─────────────────────────────────────────────────────────────────
   return (
     <div>
+      {trialBanner}
       <div className="z-20 mb-6 flex flex-col gap-4 rounded border border-gray-200 bg-white/90 p-5 shadow-sm backdrop-blur-md md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">

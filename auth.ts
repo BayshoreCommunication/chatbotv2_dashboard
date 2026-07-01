@@ -55,6 +55,59 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         }
       },
     }),
+
+    // Passwordless sign-in — email + 6-digit OTP, hits the separate
+    // /api/v1/auth/verify-login-otp endpoint.
+    Credentials({
+      id: "otp-credentials",
+      name: "OTP",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        otp_code: { label: "OTP", type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.otp_code) return null;
+
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/v1/auth/verify-login-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: credentials.email,
+              otp_code: credentials.otp_code,
+            }),
+            cache: "no-store",
+          });
+
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("OTP sign-in failed with status:", res.status, errorText);
+            return null;
+          }
+
+          const data = await res.json();
+
+          if (!data?.access_token || !data?.user_id) {
+            console.error("OTP sign-in response missing required fields:", data);
+            return null;
+          }
+
+          return {
+            id: data.user_id,
+            email: credentials.email as string,
+            name: data.company_name,
+            accessToken: data.access_token,
+            role: data.role,
+            companyName: data.company_name,
+            has_paid_subscription: data.has_paid_subscription ?? false,
+            subscription_type: data.subscription_type ?? "free",
+          };
+        } catch (error) {
+          console.error("OTP authorize function crashed:", error);
+          return null;
+        }
+      },
+    }),
   ],
 
   callbacks: {

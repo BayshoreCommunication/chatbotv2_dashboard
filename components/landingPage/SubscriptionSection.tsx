@@ -5,8 +5,6 @@ import { PricingPlan, pricingPlans } from "@/config/pricing";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BiCheckCircle } from "react-icons/bi";
-import { BsArrowRight } from "react-icons/bs";
 import { IoSparkles } from "react-icons/io5";
 import { LuSparkles } from "react-icons/lu";
 import { PricingCard } from "./PricingCard";
@@ -20,11 +18,14 @@ interface User {
 interface SubscriptionSectionProps {
   isAuthenticated: boolean;
   user: User | null;
+  /** When set, the checkout page redirects here on success instead of /dashboard */
+  redirectAfterCheckout?: string;
 }
 
 const SubscriptionSection = ({
   isAuthenticated,
   user,
+  redirectAfterCheckout,
 }: SubscriptionSectionProps) => {
   const [isYearly, setIsYearly] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
@@ -54,17 +55,18 @@ const SubscriptionSection = ({
     plan: PricingPlan,
     billingCycle: "monthly" | "yearly"
   ) => {
+    const redirectParam = redirectAfterCheckout
+      ? `&redirect=${encodeURIComponent(redirectAfterCheckout)}`
+      : "";
+
     if (!isAuthenticated) {
-      const checkoutUrl = `/checkout?plan=${plan.id}&billing=${billingCycle}`;
+      const checkoutUrl = `/checkout?plan=${plan.id}&billing=${billingCycle}${redirectParam}`;
       router.push(`/sign-in?callbackUrl=${encodeURIComponent(checkoutUrl)}`);
       return;
     }
 
     setLoading(plan.id);
-    // Custom checkout page handles the rest: auto-detecting an existing
-    // subscription vs. brand-new signup, and showing the Stripe Elements
-    // card form only if actually needed.
-    router.push(`/checkout?plan=${plan.id}&billing=${billingCycle}`);
+    router.push(`/checkout?plan=${plan.id}&billing=${billingCycle}${redirectParam}`);
   };
 
   return (
@@ -91,7 +93,8 @@ const SubscriptionSection = ({
             </span>
           </h2>
           <p className="mx-auto mb-8 max-w-3xl text-xl text-gray-600 dark:text-gray-400">
-            Start free, scale as you grow. No hidden fees, cancel anytime.
+            Start with a 14-day free trial, scale as you grow. No hidden
+            fees, cancel anytime.
           </p>
 
           {/* Billing Cycle Toggle */}
@@ -216,57 +219,19 @@ const SubscriptionSection = ({
           {/* Simple glow effect */}
           <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/20 opacity-20 blur-[120px]" />
 
-          {pricingPlans
-            .filter((plan) => !plan.isCustomPricing)
-            .map((plan) => (
-              <PricingCard
-                key={plan.id}
-                plan={plan}
-                loading={loading}
-                handleSubscribe={handleSubscribe}
-                isAuthenticated={isAuthenticated}
-                isYearly={isYearly}
-                hasActiveSubscription={hasActiveSubscription}
-                currentTier={currentTier}
-              />
-            ))}
-        </motion.div>
-
-        {/* Enterprise — custom pricing, shown as a distinct full-width banner */}
-        {pricingPlans
-          .filter((plan) => plan.isCustomPricing)
-          .map((plan) => (
-            <motion.div
+          {pricingPlans.map((plan) => (
+            <PricingCard
               key={plan.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="relative mx-auto mt-20 max-w-6xl overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-900 to-black p-8 dark:border-gray-800 sm:p-10"
-            >
-              <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-                <div>
-                  <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
-                  <p className="mt-2 max-w-xl text-gray-400">{plan.description}</p>
-                  <ul className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-300 sm:justify-start">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <BiCheckCircle className="h-4 w-4 text-blue-400" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <a
-                  href="mailto:sales@bayshorecommunication.com?subject=Enterprise%20Plan%20Inquiry"
-                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-lg transition-transform hover:scale-105"
-                >
-                  Contact Sales
-                  <BsArrowRight className="h-5 w-5" />
-                </a>
-              </div>
-            </motion.div>
+              plan={plan}
+              loading={loading}
+              handleSubscribe={handleSubscribe}
+              isAuthenticated={isAuthenticated}
+              isYearly={isYearly}
+              hasActiveSubscription={hasActiveSubscription}
+              currentTier={currentTier}
+            />
           ))}
+        </motion.div>
       </div>
     </section>
   );

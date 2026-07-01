@@ -31,6 +31,10 @@ export type SubscriptionData = {
   current_period_end: string | null;
   trial_end: string | null;
   is_active: boolean;
+  is_in_trial: boolean;
+  conversation_limit: number | null;
+  conversations_used: number;
+  free_trial_used: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -132,6 +136,10 @@ export async function createSubscriptionIntentAction(
     subscription_id: string;
     client_secret: string | null;
     requires_payment: boolean;
+    /** "setup" during a free trial (no charge due yet, just saving the
+     *  card) — "payment" otherwise. Determines which Stripe.js confirm
+     *  method the frontend must call. */
+    intent_kind: "payment" | "setup";
   }>
 > {
   const { token, companyId } = await getSession();
@@ -230,6 +238,18 @@ export async function cancelSubscriptionAction(
       body: JSON.stringify({ immediately }),
     }
   );
+}
+
+/**
+ * Returns the current session's email and name — used by the checkout page
+ * to show the billing email without requiring a separate API call.
+ */
+export async function getSessionInfoAction(): Promise<{ email: string; name: string }> {
+  const { session } = await getSession();
+  return {
+    email: session?.user?.email ?? "",
+    name: session?.user?.name ?? "",
+  };
 }
 
 /**

@@ -1,9 +1,12 @@
 "use client";
 
+import { getSubscriptionAction } from "@/app/actions/subscriptions";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { BsArrowRight } from "react-icons/bs";
 import ChatbotRightSideView from "./ChatbotRighSIdeView";
-import TrainLeftSideForm from "./TrainLeftSideForm";
+import TrainLeftSideForm, { type LiveProgress } from "./TrainLeftSideForm";
 
 // --- Training Data Interface ---
 interface TrainingData {
@@ -25,31 +28,51 @@ interface Session {
 }
 
 // --- Main Component ---
-const FreeTrailMainPage = ({ session }: { session: Session | null }) => {
+const FreeTrailMainPage = ({
+  session,
+  isDashboard = false,
+}: {
+  session: Session | null;
+  isDashboard?: boolean;
+}) => {
+  const router = useRouter();
   const [companyName, setCompanyName] = useState("");
   const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
   const [isTrainingComplete, setIsTrainingComplete] = useState(false);
   const [companyId, setCompanyId] = useState(session?.user?.id || "");
+  const [liveProgress, setLiveProgress] = useState<LiveProgress | null>(null);
+  const [conversationCount, setConversationCount] = useState(0);
+  const [hasActiveSub, setHasActiveSub] = useState(false);
+
+  // Check subscription once on mount so the CTA goes to the right place
+  useEffect(() => {
+    getSubscriptionAction().then((res) => {
+      if (res.ok && res.data?.is_active) setHasActiveSub(true);
+    });
+  }, []);
 
   const handleTrainingComplete = (data: TrainingData) => {
     setTrainingData(data);
     setIsTrainingComplete(true);
   };
 
-  return (
-    <div className="min-h-screen w-full overflow-hidden bg-white text-slate-900 dark:bg-black dark:text-white pt-36">
-      {/* Background Gradient */}
-      <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top_left,var(--tw-gradient-stops))] from-blue-100/50 via-white to-gray-50 opacity-70 dark:from-blue-900/20 dark:via-black dark:to-gray-900" />
+  const handleSetupClick = () => {
+    router.push(
+      hasActiveSub ? "/widget-settings" : "/pricing?redirect=widget-settings"
+    );
+  };
 
+  return (
+    <div className={isDashboard ? "w-full" : "min-h-screen w-full bg-white text-gray-900 dark:bg-black dark:text-white pt-32"}>
       {/* Main Content Container */}
-      <div className="relative z-10 mx-auto min-h-screen max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className={isDashboard ? "w-full py-6" : "relative z-10 mx-auto min-h-screen max-w-7xl px-6 py-12 sm:px-8 lg:px-10"}>
         {/* Two Column Layout */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left Column - Training Form */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="flex flex-col"
           >
             <TrainLeftSideForm
@@ -58,14 +81,15 @@ const FreeTrailMainPage = ({ session }: { session: Session | null }) => {
               setCompanyName={setCompanyName}
               onTrainingComplete={handleTrainingComplete}
               onCompanyIdFound={setCompanyId}
+              onProgressUpdate={setLiveProgress}
             />
           </motion.div>
 
           {/* Right Column - Chatbot Preview */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
             className="flex flex-col items-center justify-start lg:sticky lg:top-8"
           >
             <ChatbotRightSideView
@@ -73,9 +97,33 @@ const FreeTrailMainPage = ({ session }: { session: Session | null }) => {
               companyName={companyName}
               isTrainingComplete={isTrainingComplete}
               trainingData={trainingData}
+              liveProgress={liveProgress}
+              onConversationCountChange={setConversationCount}
             />
           </motion.div>
         </div>
+
+        {trainingData && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="mx-auto mt-20 flex max-w-md flex-col items-center gap-4 border-t border-gray-100 pt-12 text-center dark:border-gray-900"
+          >
+            <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              Your chatbot is trained and ready. Add it to your website in just
+              a few minutes to start chatting with your visitors.
+            </p>
+            <button
+              type="button"
+              onClick={handleSetupClick}
+              className="group inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+            >
+              Set up on your website
+              <BsArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </button>
+          </motion.div>
+        )}
       </div>
     </div>
   );

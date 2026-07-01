@@ -2,6 +2,7 @@
 
 import { signIn, signOut } from "@/auth";
 import { cookies } from "next/headers";
+import { updateTag } from "next/cache";
 
 const API = `${process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com"}/api/v1`;
 
@@ -16,6 +17,7 @@ export async function signupAction(data: {
   company_name: string;
   company_type: string;
   company_website: string;
+  phone_number: string;
   email: string;
   password: string;
 }): Promise<ActionResult> {
@@ -104,6 +106,9 @@ export async function signinAction(
       password,
       redirect: false,
     });
+    // Force the navbar's cached user-details fetch to refetch on the next render
+    // instead of serving up to 120s of stale data from the previous session/user.
+    updateTag("user_full_details");
     return { ok: true, redirectTo: callbackUrl };
   } catch (error: any) {
     // NextAuth throws a specific error string on failed credentials
@@ -123,4 +128,65 @@ export async function signinAction(
 
 export async function signoutAction(): Promise<void> {
   await signOut({ redirectTo: "/sign-in" });
+}
+
+// ── Passwordless sign-in: request OTP ─────────────────────────────────────────
+
+export async function requestLoginOtpAction(email: string): Promise<ActionResult> {
+  if (!email) {
+    return { success: false, message: "Email is required." };
+  }
+
+  try {
+    const res = await fetch(`${API}/auth/request-login-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+      cache: "no-store",
+    });
+    const body = await res.json();
+    if (!res.ok) {
+      return { success: false, message: body.detail || "Failed to send sign-in code." };
+    }
+    return { success: true, message: body.message || "Sign-in code sent! Check your email." };
+  } catch {
+    return { success: false, message: "Network error. Please try again." };
+  }
+}
+
+// ── Passwordless sign-in: verify OTP via NextAuth Credentials ────────────────
+// Goes through the "otp-credentials" provider registered in auth.ts, which
+// calls the backend's separate /api/v1/auth/verify-login-otp.
+
+export async function otpSigninAction(
+  prevState: SigninResult,
+  formData: FormData,
+): Promise<SigninResult> {
+  const email = formData.get("email") as string;
+  const otp_code = formData.get("otp_code") as string;
+  const callbackUrl = (formData.get("callbackUrl") as string) || "/dashboard";
+
+  if (!email || !otp_code) {
+    return { ok: false, error: "Email and code are required." };
+  }
+
+  try {
+    await signIn("otp-credentials", {
+      email,
+      otp_code,
+      redirect: false,
+    });
+    updateTag("user_full_details");
+    return { ok: true, redirectTo: callbackUrl };
+  } catch (error: any) {
+    const msg: string = error?.message || "";
+    if (
+      msg.includes("CredentialsSignin") ||
+      msg.includes("credentials") ||
+      error?.type === "CredentialsSignin"
+    ) {
+      return { ok: false, error: "Invalid or expired code." };
+    }
+    return { ok: false, error: "An error occurred. Please try again." };
+  }
 }

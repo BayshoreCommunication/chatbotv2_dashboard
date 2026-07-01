@@ -10,26 +10,11 @@ export interface PricingPlan {
   stripePriceIdYearly: string;
   /** True for custom-priced plans with no fixed Stripe price — contact sales instead of checkout. */
   isCustomPricing?: boolean;
+  /** Days of free trial before the first real charge — undefined means no trial. */
+  trialDays?: number;
 }
 
 export const pricingPlans: PricingPlan[] = [
-  {
-    id: "trial",
-    name: "Free Trial",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    description: "Experience the full power risk-free",
-    features: [
-      "Complete access to all premium features",
-      "Up to 1,000 AI-powered conversations",
-      "Advanced analytics dashboard",
-      "Email & chat support",
-      "Multi-channel integration",
-      "No credit card required",
-    ],
-    stripePriceIdMonthly: "price_1RyxWWFS3P7wS29bZsXvMCOR",
-    stripePriceIdYearly: "price_1RyxWWFS3P7wS29bZsXvMCOR",
-  },
   {
     id: "professional",
     name: "Professional",
@@ -44,9 +29,9 @@ export const pricingPlans: PricingPlan[] = [
       "CRM & tool integrations",
       "Custom branding & themes",
     ],
-    recommended: true,
     stripePriceIdMonthly: "price_1RyxVtFS3P7wS29b940JDA7E",
     stripePriceIdYearly: "price_1SRPfGFS3P7wS29b1LEGA6HR",
+    trialDays: 14,
   },
   {
     id: "advanced",
@@ -62,8 +47,10 @@ export const pricingPlans: PricingPlan[] = [
       "Custom AI model training",
       "Premium API access & webhooks",
     ],
+    recommended: true,
     stripePriceIdMonthly: "price_1RyxUsFS3P7wS29bjiaTZag4",
     stripePriceIdYearly: "price_1SRPh0FS3P7wS29bfAjG9QGZ",
+    trialDays: 14,
   },
   {
     id: "enterprise",

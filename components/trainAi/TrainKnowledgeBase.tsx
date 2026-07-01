@@ -6,18 +6,77 @@ import {
   getMissingInfoAction,
   trainKnowledgeBaseAction,
   type FillMissingItem,
+  type FoundItem,
   type MissingInfoItem,
   type TrainResult,
   type TrainStatus,
 } from "@/app/actions/knowledgeBase";
+import { AnimatePresence, motion } from "framer-motion";
 import { getUserData } from "@/app/actions/user";
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
   type ReactNode,
 } from "react";
+import {
+  BiBuilding,
+  BiCategory,
+  BiCheckCircle,
+  BiData,
+  BiGlobe,
+  BiLoaderAlt,
+  BiRefresh,
+  BiStar,
+  BiTime,
+} from "react-icons/bi";
+
+// ── Live-progress polling (same pattern as the free-trial form) ────────────────
+
+const KB_API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
+
+async function fetchLiveProgress(companyId: string) {
+  try {
+    const res = await fetch(
+      `${KB_API_URL}/api/v1/knowledge/progress/${companyId}`,
+      { cache: "no-store" },
+    );
+    if (!res.ok) return null;
+    return (await res.json()) as { percent: number; message: string | null; stage: string | null; found: FoundItem[] };
+  } catch {
+    return null;
+  }
+}
+
+function estimateRemaining(elapsed: number, percent: number): string {
+  if (percent < 10) return "estimating…";
+  if (percent >= 100) return "almost done";
+  const remaining = Math.max(0, Math.round((elapsed / percent) * 100 - elapsed));
+  if (remaining < 5) return "a few seconds left";
+  if (remaining < 60) return `~${remaining}s left`;
+  const m = Math.floor(remaining / 60);
+  const s = remaining % 60;
+  return `~${m}m ${s}s left`;
+}
+
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function buildFoundLine(item: FoundItem): string {
+  return `✓ Found ${item.category}${item.label ? ` — ${item.label}` : ""}${
+    item.source_url && item.source_url !== "web_search"
+      ? ` on ${item.source_url}`
+      : ""
+  }`;
+}
+
+// ── Types ──────────────────────────────────────────────────────────────────────
 
 type Props = {
   companyId: string;
@@ -44,26 +103,28 @@ const COMPANY_TYPE_OPTIONS = [
 
 function formatCompanyType(value: string) {
   return (
-    COMPANY_TYPE_OPTIONS.find((option) => option.value === value)?.label ??
-    value.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+    COMPANY_TYPE_OPTIONS.find((opt) => opt.value === value)?.label ??
+    value.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
   );
 }
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
 
 function ScoreBadge({ score }: { score: number }) {
   const tone =
     score >= 75
-      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      ? "border-green-200 bg-green-50 text-green-700"
       : score >= 45
         ? "border-amber-200 bg-amber-50 text-amber-700"
-        : "border-rose-200 bg-rose-50 text-rose-700";
-
+        : "border-red-200 bg-red-50 text-red-700";
   const label = score >= 75 ? "Excellent" : score >= 45 ? "Good" : "Needs work";
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${tone}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${tone}`}
     >
-      {score.toFixed(1)} / 100 {label}
+      <BiStar className="h-3 w-3" />
+      {score.toFixed(1)} / 100 · {label}
     </span>
   );
 }
@@ -72,49 +133,52 @@ function StatCard({
   label,
   value,
   hint,
+  icon,
 }: {
   label: string;
   value: string | number;
   hint?: string;
+  icon?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-        {label}
-      </p>
-      <p className="mt-3 text-2xl font-semibold text-slate-900">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-slate-500">{hint}</p> : null}
-    </div>
-  );
-}
-
-function SectionLabel({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <div>
-      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-      <p className="mt-1 text-sm text-slate-500">{description}</p>
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="mb-3 flex items-center gap-2">
+        {icon && <span className="text-gray-400">{icon}</span>}
+        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+          {label}
+        </p>
+      </div>
+      <p className="text-2xl font-semibold text-gray-900">{value}</p>
+      {hint ? <p className="mt-1 text-xs text-gray-500">{hint}</p> : null}
     </div>
   );
 }
 
 function FieldShell({
   label,
+  icon,
   children,
 }: {
   label: string;
+  icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <label className="block space-y-2">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
-      {children}
-    </label>
+    <div className="space-y-1.5">
+      <label className="block text-xs font-semibold text-gray-600">
+        {label}
+      </label>
+      {icon ? (
+        <div className="relative">
+          <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+            {icon}
+          </div>
+          {children}
+        </div>
+      ) : (
+        children
+      )}
+    </div>
   );
 }
 
@@ -144,7 +208,6 @@ function MissingInfoPanel({
 
   const handleConfirm = () => {
     if (!filledItems.length) return;
-
     setSaveError(null);
     setSaveSuccess(null);
 
@@ -160,7 +223,6 @@ function MissingInfoPanel({
         setSaveError(res.error || "Failed to save missing information.");
         return;
       }
-
       setSaveSuccess(res.data?.message || "Information saved successfully.");
       onResolved(res.data?.remaining_missing ?? []);
     });
@@ -169,45 +231,50 @@ function MissingInfoPanel({
   if (!items.length) return null;
 
   return (
-    <div className="rounded-md border border-amber-200 bg-amber-50/80 p-6 shadow-sm">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <SectionLabel
-          title="Missing website details"
-          description="We could not find these details on your website. Add them here so your AI can answer with better company context."
-        />
-        <span className="inline-flex w-fit rounded-full bg-white px-3 py-1 text-xs font-semibold text-amber-700">
+    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-amber-900">
+            Missing website details
+          </h3>
+          <p className="mt-0.5 text-xs text-amber-700">
+            We could not find these on your website. Add them so your AI
+            answers with better company context.
+          </p>
+        </div>
+        <span className="inline-flex w-fit rounded-full border border-amber-200 bg-white px-3 py-1 text-xs font-semibold text-amber-700">
           {items.length} item{items.length === 1 ? "" : "s"}
         </span>
       </div>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {items.map((item) => (
-          <FieldShell key={item.key} label={item.label}>
+          <div key={item.key} className="space-y-1.5">
+            <label className="block text-xs font-semibold text-amber-800">
+              {item.label}
+            </label>
             <input
               type="text"
               value={values[item.key] ?? ""}
-              onChange={(event) =>
-                setOverrides((prev) => ({
-                  ...prev,
-                  [item.key]: event.target.value,
-                }))
+              onChange={(e) =>
+                setOverrides((prev) => ({ ...prev, [item.key]: e.target.value }))
               }
               placeholder={`Enter ${item.label.toLowerCase()}`}
               disabled={isSaving}
-              className="w-full rounded-2xl border border-amber-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl border border-amber-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
             />
-          </FieldShell>
+          </div>
         ))}
       </div>
 
       {saveError ? (
-        <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div className="mt-4 rounded-xl border border-red-100 bg-white px-4 py-3 text-sm text-red-600">
           {saveError}
         </div>
       ) : null}
 
       {saveSuccess ? (
-        <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="mt-4 rounded-xl border border-green-100 bg-white px-4 py-3 text-sm text-green-600">
           {saveSuccess}
         </div>
       ) : null}
@@ -216,7 +283,7 @@ function MissingInfoPanel({
         type="button"
         onClick={handleConfirm}
         disabled={isSaving || !filledItems.length}
-        className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-amber-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-amber-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSaving
           ? "Saving details..."
@@ -226,58 +293,7 @@ function MissingInfoPanel({
   );
 }
 
-function ProfileSummary({
-  form,
-  profileLoaded,
-}: {
-  form: FormState;
-  profileLoaded: boolean;
-}) {
-  return (
-    <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <SectionLabel
-          title="Company information"
-          description={
-            profileLoaded
-              ? "Loaded from your account profile. You can adjust anything before training."
-              : "Fill in your company details before starting training."
-          }
-        />
-        <span className="inline-flex w-fit rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-          {profileLoaded ? "Profile synced" : "Manual entry"}
-        </span>
-      </div>
-
-      <div className="mt-5 grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-white bg-white px-4 py-3">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-            Company
-          </p>
-          <p className="mt-2 text-sm font-medium text-slate-800">
-            {form.companyName || "Not set"}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-white bg-white px-4 py-3">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-            Website
-          </p>
-          <p className="mt-2 truncate text-sm font-medium text-slate-800">
-            {form.websiteUrl || "Not set"}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-white bg-white px-4 py-3">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-            Type
-          </p>
-          <p className="mt-2 text-sm font-medium text-slate-800">
-            {formatCompanyType(form.companyType)}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+// ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function TrainKnowledgeBase({
   companyId,
@@ -295,9 +311,20 @@ export default function TrainKnowledgeBase({
   const [trainResult, setTrainResult] = useState<TrainResult | null>(null);
   const [status, setStatus] = useState<TrainStatus | null>(null);
   const [missingInfo, setMissingInfo] = useState<MissingInfoItem[]>([]);
-  const [isPending, startTransition] = useTransition();
+  const [isTraining, setIsTraining] = useState(false);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Live training progress
+  const [trainPercent, setTrainPercent] = useState(0);
+  const [trainElapsed, setTrainElapsed] = useState(0);
+  const [hasLiveData, setHasLiveData] = useState(false);
+  const [trainMessage, setTrainMessage] = useState<string | null>(null);
+  const [trainFound, setTrainFound] = useState<FoundItem[]>([]);
+  const [typedCount, setTypedCount] = useState(0);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const elapsedIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const elapsedRef = useRef(0);
 
   useEffect(() => {
     let active = true;
@@ -322,9 +349,7 @@ export default function TrainKnowledgeBase({
         setProfileNotice(null);
         setForm((prev) => ({
           companyName:
-            userRes.data?.companyName?.trim() ||
-            prev.companyName ||
-            companyName,
+            userRes.data?.companyName?.trim() || prev.companyName || companyName,
           websiteUrl:
             userRes.data?.website?.trim() || prev.websiteUrl || websiteUrl,
           companyType:
@@ -359,23 +384,38 @@ export default function TrainKnowledgeBase({
     };
 
     loadData();
-
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [companyId, companyName, companyType, websiteUrl]);
 
   const updatesLeft = status
     ? (status.update_limit ?? 10) - (status.update_count ?? 0)
     : null;
   const isTrained = status?.is_trained ?? false;
-  const trainingDisabled = isPending || !form.websiteUrl.trim();
+  const trainingDisabled = isTraining || !form.websiteUrl.trim();
 
   const handleFieldChange = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleTrain = () => {
+  const stopPolling = () => {
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    if (elapsedIntervalRef.current) clearInterval(elapsedIntervalRef.current);
+    progressIntervalRef.current = null;
+    elapsedIntervalRef.current = null;
+  };
+
+  // Reveal found items one at a time (same pattern as free-trial right panel)
+  const foundLength = trainFound.length;
+  useEffect(() => {
+    if (foundLength === 0) setTypedCount(0);
+  }, [foundLength]);
+  useEffect(() => {
+    if (typedCount >= foundLength) return;
+    const t = setTimeout(() => setTypedCount((c) => c + 1), 220);
+    return () => clearTimeout(t);
+  }, [typedCount, foundLength]);
+
+  const handleTrain = async () => {
     setError(null);
     setTrainResult(null);
 
@@ -383,226 +423,420 @@ export default function TrainKnowledgeBase({
       setError("Company name is required.");
       return;
     }
-
     if (!form.websiteUrl.trim()) {
       setError("Website URL is required.");
       return;
     }
-
     try {
       new URL(form.websiteUrl.trim());
     } catch {
-      setError(
-        "Please enter a valid website URL, for example https://example.com.",
-      );
+      setError("Please enter a valid website URL, e.g. https://example.com.");
       return;
     }
 
-    startTransition(async () => {
-      const res = await trainKnowledgeBaseAction(
-        companyId,
-        form.websiteUrl.trim(),
-        form.companyName.trim(),
-        form.companyType || "other",
-      );
+    // Reset live progress counters
+    setTrainPercent(0);
+    setTrainElapsed(0);
+    setHasLiveData(false);
+    setTrainMessage(null);
+    setTrainFound([]);
+    setTypedCount(0);
+    elapsedRef.current = 0;
+    stopPolling();
+    setIsTraining(true);
 
-      if (!res.ok) {
-        setError(res.error || "Training failed.");
-        return;
-      }
+    // Poll progress endpoint every 1.5 s while training POST is in-flight
+    progressIntervalRef.current = setInterval(async () => {
+      const data = await fetchLiveProgress(companyId);
+      if (!data) return;
+      setHasLiveData(true);
+      setTrainPercent(data.percent);
+      setTrainMessage(data.message);
+      setTrainFound(data.found ?? []);
+    }, 1500);
 
-      setTrainResult(res.data ?? null);
-      setMissingInfo(res.data?.missing_info ?? []);
+    elapsedIntervalRef.current = setInterval(() => {
+      elapsedRef.current += 1;
+      setTrainElapsed(elapsedRef.current);
+    }, 1000);
 
-      const statusRes = await getKnowledgeStatusAction(companyId);
-      if (statusRes.ok && statusRes.data) {
-        setStatus(statusRes.data);
-      }
+    const res = await trainKnowledgeBaseAction(
+      companyId,
+      form.websiteUrl.trim(),
+      form.companyName.trim(),
+      form.companyType || "other",
+    );
+
+    stopPolling();
+
+    if (!res.ok) {
+      setError(res.error || "Training failed.");
+      setIsTraining(false);
+      return;
+    }
+
+    // Commit success immediately — UI transitions to result view right away.
+    setTrainPercent(100);
+    setTrainResult(res.data ?? null);
+    setMissingInfo(res.data?.missing_info ?? []);
+    setIsTraining(false);
+
+    // Refresh status in the background (updates stat cards / quality score).
+    getKnowledgeStatusAction(companyId).then((statusRes) => {
+      if (statusRes.ok && statusRes.data) setStatus(statusRes.data);
     });
   };
 
+  // ── Bootstrapping skeleton ──────────────────────────────────────────────────
+
   if (isBootstrapping) {
     return (
-      <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="animate-pulse space-y-4">
-          <div className="h-5 w-40 rounded bg-slate-200" />
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="h-24 rounded-2xl bg-slate-100" />
-            <div className="h-24 rounded-2xl bg-slate-100" />
-            <div className="h-24 rounded-2xl bg-slate-100" />
+      <div className="space-y-6">
+        <div className="animate-pulse rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="h-4 w-16 rounded-full bg-gray-100" />
+          <div className="mt-3 h-6 w-64 rounded-lg bg-gray-100" />
+          <div className="mt-2 h-4 w-80 rounded bg-gray-100" />
+        </div>
+        <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+          <div className="animate-pulse rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="h-12 rounded-xl bg-gray-100" />
+              <div className="h-12 rounded-xl bg-gray-100" />
+            </div>
+            <div className="mt-4 h-12 rounded-xl bg-gray-100" />
+            <div className="mt-6 h-12 w-36 rounded-xl bg-gray-100" />
           </div>
-          <div className="h-40 rounded-3xl bg-slate-100" />
+          <div className="animate-pulse rounded-2xl bg-gray-900/5 p-6">
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 rounded-xl bg-gray-100" />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
+  // ── Main render ─────────────────────────────────────────────────────────────
+
+  const inputClass =
+    "w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white";
+
   return (
     <div className="space-y-6">
-      <div className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+
+      {/* ── Page header ──────────────────────────────────────────────────────── */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-600">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
               Train AI
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-              Build a cleaner knowledge base from your company website
+            </span>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
+              Build your AI knowledge base
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              We use your company profile and website to train the chatbot with
-              business-specific information. Review the details below before you
-              start.
+            <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              Train your chatbot from your company website so it can answer
+              customer questions automatically.
             </p>
           </div>
 
-          {isTrained ? (
-            <div className="flex flex-wrap items-center gap-3">
+          {isTrained && (
+            <div className="flex shrink-0 flex-wrap items-center gap-3">
               <ScoreBadge score={status?.quality_score ?? 0} />
               <button
                 type="button"
                 onClick={handleTrain}
-                disabled={
-                  isPending || (updatesLeft !== null && updatesLeft <= 0)
-                }
-                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isTraining || (updatesLeft !== null && updatesLeft <= 0)}
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
               >
-                {isPending ? "Retraining..." : "Retrain knowledge base"}
+                <BiRefresh className="h-4 w-4" />
+                {isTraining ? "Retraining…" : "Retrain"}
               </button>
             </div>
-          ) : null}
+          )}
         </div>
 
         {profileNotice ? (
-          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-700">
             {profileNotice}
           </div>
         ) : null}
       </div>
 
-      {!isTrained && !trainResult ? (
-        <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-          <div className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
-            <SectionLabel
-              title="Training details"
-              description="These values are prefilled from `getUserData` when available. Update them if needed before starting."
-            />
+      {/* ── Training form / in-progress ─────────────────────────────────────── */}
+      {!isTrained && !trainResult && (
+        isTraining ? (
+          /* ── Training in progress ── */
+          <div className="grid gap-6 lg:grid-cols-[1fr_0.75fr]">
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <FieldShell label="Company name">
-                <input
-                  type="text"
-                  value={form.companyName}
-                  onChange={(event) =>
-                    handleFieldChange("companyName", event.target.value)
-                  }
-                  placeholder="Your company name"
-                  disabled={isPending}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
-                />
-              </FieldShell>
-
-              <FieldShell label="Company type">
-                <select
-                  value={form.companyType}
-                  onChange={(event) =>
-                    handleFieldChange("companyType", event.target.value)
-                  }
-                  disabled={isPending}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {COMPANY_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </FieldShell>
-            </div>
-
-            <div className="mt-4">
-              <FieldShell label="Company website">
-                <input
-                  type="url"
-                  value={form.websiteUrl}
-                  onChange={(event) =>
-                    handleFieldChange("websiteUrl", event.target.value)
-                  }
-                  placeholder="https://example.com"
-                  disabled={isPending}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
-                />
-              </FieldShell>
-            </div>
-
-            {error ? (
-              <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                {error}
-              </div>
-            ) : null}
-
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={handleTrain}
-                disabled={trainingDisabled}
-                className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isPending ? "Training knowledge base..." : "Start training"}
-              </button>
-              <p className="text-sm text-slate-500">
-                Training usually takes 1 to 3 minutes depending on your website.
+            {/* Left — data rows + progress card (mirrors free-trial layout) */}
+            <div className="space-y-4">
+              {/* Section label */}
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                Loaded from your details
               </p>
+
+              {/* Data rows */}
+              <div className="divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white dark:divide-gray-800 dark:border-gray-800 dark:bg-transparent">
+                {[
+                  { label: "Company name", value: form.companyName },
+                  { label: "Company type", value: formatCompanyType(form.companyType) },
+                  { label: "Website URL", value: form.websiteUrl },
+                ]
+                  .filter((r) => r.value)
+                  .map((row) => (
+                    <div
+                      key={row.label}
+                      className="flex items-center justify-between gap-3 px-4 py-3.5"
+                    >
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <BiCheckCircle className="h-4 w-4 shrink-0 text-green-500" />
+                        <div className="min-w-0">
+                          <p className="text-xs text-gray-400">{row.label}</p>
+                          <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
+                            {row.value}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="shrink-0 text-xs font-medium text-gray-400">
+                        Loaded
+                      </span>
+                    </div>
+                  ))}
+              </div>
+
+              {/* Progress card */}
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-transparent">
+                {!hasLiveData ? (
+                  <div className="animate-pulse space-y-3">
+                    <div className="mx-auto h-4 w-40 rounded bg-gray-100 dark:bg-gray-800" />
+                    <div className="h-1.5 w-full rounded-full bg-gray-100 dark:bg-gray-800" />
+                    <div className="flex justify-between">
+                      <div className="h-3 w-16 rounded bg-gray-100 dark:bg-gray-800" />
+                      <div className="h-3 w-20 rounded bg-gray-100 dark:bg-gray-800" />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-3 flex items-center justify-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                      <BiLoaderAlt className="h-4 w-4 animate-spin text-gray-400" />
+                      Training… {trainPercent}%
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                      <div
+                        className="h-full rounded-full bg-gray-900 transition-all duration-500 ease-out dark:bg-white"
+                        style={{ width: `${trainPercent}%` }}
+                      />
+                    </div>
+                    <div className="mt-2.5 flex items-center justify-between text-xs text-gray-400">
+                      <span>{formatTime(trainElapsed)} elapsed</span>
+                      <span>{estimateRemaining(trainElapsed, trainPercent)}</span>
+                    </div>
+                    {trainMessage && (
+                      <p className="mt-3 text-center text-xs leading-relaxed text-gray-400 dark:text-gray-500">
+                        {trainMessage}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Right — live findings feed (mirrors free-trial right panel, no phone) */}
+            <div className="flex flex-col rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+              {/* Card header */}
+              <div className="flex items-center gap-2 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  Scanning your website
+                </p>
+              </div>
+
+              {/* Feed area */}
+              <div className="flex-1 overflow-y-auto px-5 py-4" style={{ minHeight: "280px", maxHeight: "360px" }}>
+                {trainFound.length === 0 ? (
+                  /* Shimmer stays until the first real finding lands */
+                  <div className="flex flex-col gap-2.5 pt-1">
+                    {["w-5/6", "w-full", "w-2/3", "w-full", "w-3/4", "w-1/2"].map((w, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.08, duration: 0.3 }}
+                        className={`relative h-2.5 overflow-hidden rounded bg-gray-100 dark:bg-gray-800 ${w}`}
+                      >
+                        <motion.div
+                          className="absolute inset-0 bg-linear-to-r from-transparent via-white/80 to-transparent dark:via-white/10"
+                          animate={{ x: ["-100%", "100%"] }}
+                          transition={{ duration: 1.2, repeat: Infinity, ease: "linear", delay: i * 0.12 }}
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  /* Findings revealed one at a time */
+                  <AnimatePresence initial={false}>
+                    {trainFound.slice(0, typedCount).map((item, i) => (
+                      <motion.p
+                        key={i}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
+                        className="mb-2 whitespace-pre-wrap wrap-break-word text-xs leading-relaxed text-gray-600 dark:text-gray-400"
+                      >
+                        {buildFoundLine(item)}
+                      </motion.p>
+                    ))}
+                  </AnimatePresence>
+                )}
+              </div>
             </div>
           </div>
+        ) : (
+          /* Training form */
+          <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Training details
+                  </h3>
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                    Review and update your details before starting.
+                  </p>
+                </div>
+                {profileLoaded && (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-green-100 bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-400">
+                    <BiCheckCircle className="h-3 w-3" />
+                    Profile synced
+                  </span>
+                )}
+              </div>
 
-          <div className="rounded-md border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 p-6 text-white shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200">
-              Before you start
-            </p>
-            <h3 className="mt-3 text-xl font-semibold">
-              Strong profile data improves chatbot answers
-            </h3>
-            <div className="mt-6 space-y-4">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-medium text-white">Company name</p>
-                <p className="mt-1 text-sm text-slate-300">
-                  Helps the AI answer brand-specific questions more naturally.
-                </p>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FieldShell label="Company name" icon={<BiBuilding size={15} />}>
+                  <input
+                    type="text"
+                    value={form.companyName}
+                    onChange={(e) => handleFieldChange("companyName", e.target.value)}
+                    placeholder="Your company name"
+                    disabled={isTraining}
+                    className={inputClass}
+                  />
+                </FieldShell>
+
+                <FieldShell label="Company type" icon={<BiCategory size={15} />}>
+                  <select
+                    value={form.companyType}
+                    onChange={(e) => handleFieldChange("companyType", e.target.value)}
+                    disabled={isTraining}
+                    className={`${inputClass} appearance-none`}
+                  >
+                    {COMPANY_TYPE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </FieldShell>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-medium text-white">Website URL</p>
-                <p className="mt-1 text-sm text-slate-300">
-                  This is the source we crawl to build the knowledge base.
-                </p>
+
+              <div className="mt-4">
+                <FieldShell label="Company website" icon={<BiGlobe size={15} />}>
+                  <input
+                    type="url"
+                    value={form.websiteUrl}
+                    onChange={(e) => handleFieldChange("websiteUrl", e.target.value)}
+                    placeholder="https://example.com"
+                    disabled={isTraining}
+                    className={inputClass}
+                  />
+                </FieldShell>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-medium text-white">Company type</p>
-                <p className="mt-1 text-sm text-slate-300">
-                  Gives the assistant better industry context during training.
+
+              {error ? (
+                <div className="mt-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-900/10 dark:text-red-400">
+                  {error}
+                </div>
+              ) : null}
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <button
+                  type="button"
+                  onClick={handleTrain}
+                  disabled={trainingDisabled}
+                  className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+                >
+                  Start training
+                </button>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Usually takes 1–3 minutes depending on your website size.
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-      ) : null}
 
-      {isTrained ? (
+            {/* Tips card */}
+            <div className="rounded-2xl bg-linear-to-br from-gray-900 via-gray-800 to-blue-900 p-6 text-white shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-200">
+                Before you start
+              </p>
+              <h3 className="mt-3 text-base font-semibold leading-snug">
+                Strong profile data improves chatbot answers
+              </h3>
+              <div className="mt-5 space-y-3">
+                {[
+                  {
+                    title: "Company name",
+                    desc: "Helps the AI answer brand-specific questions naturally.",
+                  },
+                  {
+                    title: "Website URL",
+                    desc: "The source we crawl to build the knowledge base.",
+                  },
+                  {
+                    title: "Company type",
+                    desc: "Gives the AI better industry context during training.",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="rounded-xl border border-white/10 bg-white/5 p-4"
+                  >
+                    <p className="text-sm font-medium text-white">{item.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-gray-300">
+                      {item.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      )}
+
+      {/* ── Trained — stat cards + status card ────────────────────────────────── */}
+      {isTrained && (
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               label="Facts stored"
               value={status?.entries_stored ?? 0}
-              hint="Knowledge entries saved for the chatbot"
+              hint="Knowledge entries for the chatbot"
+              icon={<BiData size={16} />}
             />
             <StatCard
               label="Pages crawled"
               value={status?.pages_crawled ?? 0}
-              hint="Website pages successfully processed"
+              hint="Website pages processed"
+              icon={<BiGlobe size={16} />}
             />
             <StatCard
               label="Runs left"
               value={`${updatesLeft ?? 0} / ${status?.update_limit ?? 10}`}
-              hint="Available retraining runs in your plan"
+              hint="Remaining retraining runs in your plan"
+              icon={<BiRefresh size={16} />}
             />
             <StatCard
               label="Last updated"
@@ -612,28 +846,36 @@ export default function TrainKnowledgeBase({
                   : "Not available"
               }
               hint="Most recent successful training"
+              icon={<BiTime size={16} />}
             />
           </div>
 
-          <div className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <SectionLabel
-                title="Knowledge base status"
-                description="Your AI is trained and ready. Use the progress data below to decide when to retrain."
-              />
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Knowledge base status
+                </h3>
+                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  Your AI is trained and ready. Use the usage data below to
+                  decide when to retrain.
+                </p>
+              </div>
               <ScoreBadge score={status?.quality_score ?? 0} />
             </div>
 
-            <div className="mt-6 rounded-md border border-slate-200 bg-slate-50 p-5">
-              <div className="flex items-center justify-between text-sm text-slate-500">
-                <span>Training usage</span>
-                <span className="font-semibold text-slate-700">
+            <div className="mt-5 rounded-xl bg-gray-50 p-4 dark:bg-gray-900/50">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400">
+                  Training usage
+                </span>
+                <span className="font-semibold text-gray-700 dark:text-gray-300">
                   {status?.update_count ?? 0} / {status?.update_limit ?? 10}
                 </span>
               </div>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
                 <div
-                  className="h-full rounded-full bg-slate-900 transition-all"
+                  className="h-full rounded-full bg-gray-900 transition-all dark:bg-white"
                   style={{
                     width: `${Math.min(
                       100,
@@ -644,39 +886,48 @@ export default function TrainKnowledgeBase({
                   }}
                 />
               </div>
-
-              {status?.categories?.length ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {status.categories.map((category) => (
-                    <span
-                      key={category}
-                      className="rounded-full bg-white px-3 py-1 text-xs font-medium capitalize text-slate-600"
-                    >
-                      {category}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
             </div>
 
+            {status?.categories?.length ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {status.categories.map((category) => (
+                  <span
+                    key={category}
+                    className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium capitalize text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
             {updatesLeft !== null && updatesLeft <= 0 ? (
-              <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                Training limit reached. Upgrade your plan to continue
-                retraining.
+              <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-900/10 dark:text-red-400">
+                Training limit reached. Upgrade your plan to continue retraining.
               </div>
             ) : null}
           </div>
         </div>
-      ) : null}
+      )}
 
+      {/* ── Train result success card ─────────────────────────────────────────── */}
       {trainResult ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50/80 p-6 shadow-sm">
-          <SectionLabel
-            title="Training complete"
-            description="Your latest training run finished successfully. Here is the result from the most recent crawl."
-          />
+        <div className="rounded-2xl border border-green-200 bg-green-50 p-6 dark:border-green-900/40 dark:bg-green-900/10">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <BiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-green-900 dark:text-green-300">
+                Training complete
+              </h3>
+              <p className="text-xs text-green-700 dark:text-green-400">
+                Latest run finished successfully.
+              </p>
+            </div>
+          </div>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               label="Pages crawled"
               value={trainResult.pages_crawled}
@@ -685,7 +936,7 @@ export default function TrainKnowledgeBase({
             <StatCard
               label="Search results"
               value={trainResult.search_results}
-              hint="Relevant website results found"
+              hint="Relevant results found"
             />
             <StatCard
               label="Facts stored"
@@ -695,16 +946,16 @@ export default function TrainKnowledgeBase({
             <StatCard
               label="Quality score"
               value={trainResult.quality_score.toFixed(1)}
-              hint="Estimated quality of the trained data"
+              hint="Estimated quality of trained data"
             />
           </div>
 
           {trainResult.categories.length ? (
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               {trainResult.categories.map((category) => (
                 <span
                   key={category}
-                  className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold capitalize text-emerald-700"
+                  className="rounded-full border border-green-200 bg-white px-3 py-1 text-xs font-semibold capitalize text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-400"
                 >
                   {category}
                 </span>
@@ -714,6 +965,7 @@ export default function TrainKnowledgeBase({
         </div>
       ) : null}
 
+      {/* ── Missing info panel ────────────────────────────────────────────────── */}
       {missingInfo.length > 0 ? (
         <MissingInfoPanel
           companyId={companyId}

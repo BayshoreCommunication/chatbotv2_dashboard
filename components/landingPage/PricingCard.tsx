@@ -117,10 +117,15 @@ export const PricingCard = memo(
                     /month
                   </span>
                 </div>
-                {isYearly && plan.id !== "trial" && (
+                {isYearly && (
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Billed ${price} annually
                   </p>
+                )}
+                {plan.trialDays && !isCurrentPlan && (
+                  <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                    {plan.trialDays}-day free trial
+                  </span>
                 )}
               </>
             )}
@@ -178,7 +183,9 @@ export const PricingCard = memo(
                             ? isUpgrade
                               ? `Upgrade to ${plan.name}`
                               : `Downgrade to ${plan.name}`
-                            : "Get Started"}
+                            : plan.trialDays
+                              ? `Start ${plan.trialDays}-Day Free Trial`
+                              : "Get Started"}
                       <BsArrowRight className="h-5 w-5" />
                     </span>
                   )}

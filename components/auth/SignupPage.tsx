@@ -1,6 +1,6 @@
 "use client";
 
-import { signupAction, verifyOTPAction } from "@/app/actions/auth";
+import { signinAction, signupAction, verifyOTPAction } from "@/app/actions/auth";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -10,11 +10,10 @@ import {
   BiCategory,
   BiEnvelope,
   BiGlobe,
-  BiLockAlt,
+  BiPhone,
   BiShield,
   BiX,
 } from "react-icons/bi";
-import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const companyTypes = [
   { label: "Tech Company", value: "tech-company" },
@@ -27,10 +26,6 @@ const companyTypes = [
 ] as const;
 
 const SignupPage = () => {
-  // UI States
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   // OTP Flow States
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState("");
@@ -43,6 +38,7 @@ const SignupPage = () => {
     company_name: "",
     company_type: "",
     company_website: "",
+    phone_number: "",
   });
 
   // Form States
@@ -62,19 +58,12 @@ const SignupPage = () => {
     setSuccess("");
 
     const form = new FormData(e.currentTarget);
-    const password = form.get("password") as string;
-    const confirmPassword = form.get("confirmPassword") as string;
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      setLoading(false);
-      return;
-    }
+    // No password field in this form — generate one so signup/signin still work.
+    const password =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2) + Date.now().toString(36);
 
     const data = {
       email: form.get("email") as string,
@@ -82,6 +71,7 @@ const SignupPage = () => {
       company_name: form.get("companyName") as string,
       company_type: form.get("companyType") as string,
       company_website: form.get("website") as string,
+      phone_number: form.get("phoneNumber") as string,
     };
 
     try {
@@ -123,9 +113,28 @@ const SignupPage = () => {
         setError(typeof result.message === "string" ? result.message : (result.message as any)?.msg || JSON.stringify(result.message));
         return;
       }
-      setSuccess(
-        result.message || "Account created! Please sign in to continue...",
+      setSuccess(result.message || "Account created! Signing you in...");
+
+      // Account is verified — sign in immediately via NextAuth so a real session is created.
+      const signinForm = new FormData();
+      signinForm.set("email", formData.email);
+      signinForm.set("password", formData.password);
+      signinForm.set("callbackUrl", callbackUrl);
+
+      const signinResult = await signinAction(
+        { ok: false },
+        signinForm,
       );
+
+      if (signinResult.ok) {
+        // Full page navigation so server components (layout, navbar) re-render
+        // with the fresh session cookie instead of serving a stale RSC cache.
+        window.location.href = signinResult.redirectTo || "/dashboard";
+        return;
+      }
+
+      // Account was created but auto sign-in failed — fall back to manual sign-in.
+      setSuccess("Account created! Please sign in to continue...");
       const signInUrl =
         callbackUrl !== "/dashboard"
           ? `/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}`
@@ -282,79 +291,36 @@ const SignupPage = () => {
               />
             </div>
 
-            {/* Email */}
-            <div className="space-y-1">
-              <label className={labelClasses} htmlFor="email">
-                <BiEnvelope /> Work Email{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@company.com"
-                required
-                className={inputClasses}
-              />
-            </div>
-
-            {/* Password & Confirm Password */}
+            {/* Work Email & Phone Number */}
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div className="space-y-1">
-                <label className={labelClasses} htmlFor="password">
-                  <BiLockAlt /> Password <span className="text-red-500">*</span>
+                <label className={labelClasses} htmlFor="email">
+                  <BiEnvelope /> Work Email{" "}
+                  <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Min. 6 characters"
-                    required
-                    minLength={6}
-                    className={inputClasses}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-blue-500 transition-colors"
-                  >
-                    {showPassword ? (
-                      <FiEyeOff className="h-4 w-4" />
-                    ) : (
-                      <FiEye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="you@company.com"
+                  required
+                  className={inputClasses}
+                />
               </div>
 
               <div className="space-y-1">
-                <label className={labelClasses} htmlFor="confirmPassword">
-                  <BiLockAlt /> Confirm Password{" "}
+                <label className={labelClasses} htmlFor="phoneNumber">
+                  <BiPhone /> Phone Number{" "}
                   <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm password"
-                    required
-                    minLength={6}
-                    className={inputClasses}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-blue-500 transition-colors"
-                  >
-                    {showConfirmPassword ? (
-                      <FiEyeOff className="h-4 w-4" />
-                    ) : (
-                      <FiEye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
+                <input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  required
+                  className={inputClasses}
+                />
               </div>
             </div>
 

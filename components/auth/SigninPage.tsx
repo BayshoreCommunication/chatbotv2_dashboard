@@ -1,22 +1,30 @@
 "use client";
 
-import { signinAction } from "@/app/actions/auth";
-import { motion } from "framer-motion";
+import { otpSigninAction, requestLoginOtpAction } from "@/app/actions/auth";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
-import { BiEnvelope, BiLockAlt, BiLogIn } from "react-icons/bi";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { BiEnvelope, BiLogIn, BiShield, BiX } from "react-icons/bi";
 
 const SigninPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction, isPending] = useActionState(signinAction, {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+  // Step 1: request a code for this email
+  const [email, setEmail] = useState("");
+  const [requesting, setRequesting] = useState(false);
+  const [requestError, setRequestError] = useState("");
+
+  // Step 2: OTP modal
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpTimer, setOtpTimer] = useState(0);
+
+  const [state, formAction, isPending] = useActionState(otpSigninAction, {
     ok: false,
     error: "",
   });
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   useEffect(() => {
     if (state.ok) {
@@ -25,6 +33,59 @@ const SigninPage = () => {
       window.location.href = state.redirectTo || callbackUrl;
     }
   }, [state.ok, state.redirectTo, callbackUrl]);
+
+  const startOtpCountdown = () => {
+    const interval = setInterval(() => {
+      setOtpTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleRequestOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRequestError("");
+    setRequesting(true);
+    try {
+      const result = await requestLoginOtpAction(email);
+      if (!result.success) {
+        setRequestError(result.message || "Failed to send sign-in code.");
+        return;
+      }
+      setShowOTPModal(true);
+      setOtp("");
+      setOtpTimer(120);
+      startOtpCountdown();
+    } finally {
+      setRequesting(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setRequestError("");
+    setRequesting(true);
+    try {
+      const result = await requestLoginOtpAction(email);
+      if (!result.success) {
+        setRequestError(result.message || "Failed to resend code.");
+        return;
+      }
+      setOtpTimer(120);
+      startOtpCountdown();
+    } finally {
+      setRequesting(false);
+    }
+  };
 
   // Shared styles
   const inputWrapperClass = "relative flex items-center";
@@ -42,25 +103,27 @@ const SigninPage = () => {
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] dark:invert" />
       </div>
 
-      <div className="container relative z-10 mx-auto flex w-full max-w-[420px] flex-col justify-center space-y-6 px-4">
+      <div className="container relative z-10 mx-auto flex w-full max-w-[520px] flex-col justify-center space-y-8 px-4">
         {/* --- Header --- */}
         <div className="flex flex-col items-center space-y-4 text-center">
-          <div className="space-y-1">
+          <div className="space-y-2">
             <motion.h1
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+              className="text-4xl font-bold tracking-tight"
             >
-              Welcome back
+              <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-white dark:to-gray-400">
+                Welcome Back
+              </span>
             </motion.h1>
             <motion.p
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-sm text-gray-500 dark:text-gray-400"
+              className="text-base text-gray-500 dark:text-gray-400"
             >
-              Enter your credentials to access your account
+              Enter your email and we&apos;ll send you a sign-in code
             </motion.p>
           </div>
         </div>
@@ -70,10 +133,9 @@ const SigninPage = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/40"
+          className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 p-12 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/40"
         >
-          <form action={formAction} className="space-y-5">
-            <input type="hidden" name="callbackUrl" value={callbackUrl} />
+          <form onSubmit={handleRequestOtp} className="space-y-5">
             {/* Email Field */}
             <div className="space-y-1.5">
               <label
@@ -88,6 +150,8 @@ const SigninPage = () => {
                   id="email"
                   name="email"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   required
                   className={inputClass}
@@ -95,68 +159,24 @@ const SigninPage = () => {
               </div>
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                  htmlFor="password"
-                >
-                  Password
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className={inputWrapperClass}>
-                <BiLockAlt className={iconClass} />
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  required
-                  className={inputClass}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-gray-400 hover:text-blue-500 transition-colors"
-                >
-                  {showPassword ? (
-                    <FiEyeOff className="h-5 w-5" />
-                  ) : (
-                    <FiEye className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-
             {/* Status Messages */}
-            {(state?.error || state?.ok) && (
+            {requestError && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
-                className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium ${
-                  state.error
-                    ? "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400"
-                    : "bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400"
-                }`}
+                className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400"
               >
-                {state.error || "Login successful! Redirecting..."}
+                {requestError}
               </motion.div>
             )}
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isPending}
+              disabled={requesting}
               className="mt-2 w-full transform rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 hover:shadow-blue-500/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isPending ? (
+              {requesting ? (
                 <span className="flex items-center justify-center gap-2">
                   <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
                     <circle
@@ -174,11 +194,11 @@ const SigninPage = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Signing in...
+                  Sending code...
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  Sign In <BiLogIn className="h-5 w-5" />
+                  Send Sign-In Code <BiLogIn className="h-5 w-5" />
                 </span>
               )}
             </button>
@@ -196,6 +216,105 @@ const SigninPage = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* OTP Verification Modal */}
+      <AnimatePresence>
+        {showOTPModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              onClick={() => !isPending && setShowOTPModal(false)}
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div
+                className="relative w-full max-w-md rounded-2xl border border-white/20 bg-white p-8 shadow-2xl"
+                style={{ colorScheme: "light" }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => !isPending && setShowOTPModal(false)}
+                  disabled={isPending}
+                  className="absolute right-4 top-4 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
+                >
+                  <BiX className="h-5 w-5" />
+                </button>
+
+                <div className="mb-6 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                    <BiShield className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Enter Your Code
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    We&apos;ve sent a 6-digit code to <strong>{email}</strong>
+                  </p>
+                </div>
+
+                <form action={formAction} className="space-y-6">
+                  <input type="hidden" name="email" value={email} />
+                  <input type="hidden" name="callbackUrl" value={callbackUrl} />
+
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      name="otp_code"
+                      placeholder="Enter 6-digit code"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                      maxLength={6}
+                      required
+                      style={{ colorScheme: "light" }}
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-3xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+                    />
+
+                    <div className="flex items-center justify-between text-sm">
+                      {otpTimer > 0 ? (
+                        <p className="font-mono text-blue-600">
+                          Code expires in {formatTime(otpTimer)}
+                        </p>
+                      ) : (
+                        <p className="text-red-600">Code expired</p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        disabled={requesting || isPending || otpTimer > 0}
+                        className="font-semibold text-blue-600 hover:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Resend Code
+                      </button>
+                    </div>
+                  </div>
+
+                  {(state?.error || requestError) && (
+                    <div className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                      {state?.error || requestError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isPending || otp.length !== 6}
+                    className="w-full transform rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3.5 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 hover:shadow-blue-500/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isPending ? "Verifying..." : "Verify & Sign In"}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

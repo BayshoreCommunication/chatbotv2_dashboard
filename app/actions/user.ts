@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { unstable_cache } from "next/cache";
+import { unstable_cache, updateTag } from "next/cache";
 
 export interface UserProfile {
   id: string;
@@ -11,6 +11,7 @@ export interface UserProfile {
   website?: string | null;
   avatar?: string | null;
   email?: string;
+  phoneNumber?: string;
   role?: string;
 }
 
@@ -205,6 +206,7 @@ export async function updateUserData(updateData: {
     }
 
     const data = await response.json();
+    updateTag("user_profile");
     return {
       ok: true,
       statusCode: response.status,
