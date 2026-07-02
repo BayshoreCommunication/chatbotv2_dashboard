@@ -54,15 +54,14 @@ export const PricingCard = memo(
     const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
     const displayPrice = isYearly && plan.id !== "trial" ? price / 12 : price;
 
+    // Free tier = no paid plan; only show Upgrade/Downgrade for actually paid plans
+    const hasPaidPlan =
+      hasActiveSubscription && !!currentTier && currentTier !== "free";
+
     const isCurrentPlan =
-      hasActiveSubscription &&
-      !!currentTier &&
-      TIER_RANK[plan.id] === TIER_RANK[currentTier];
+      hasPaidPlan && TIER_RANK[plan.id] === TIER_RANK[currentTier!];
     const isUpgrade =
-      hasActiveSubscription &&
-      !!currentTier &&
-      !isCurrentPlan &&
-      TIER_RANK[plan.id] > TIER_RANK[currentTier];
+      hasPaidPlan && !isCurrentPlan && TIER_RANK[plan.id] > TIER_RANK[currentTier!];
 
     return (
       <motion.div
@@ -179,7 +178,7 @@ export const PricingCard = memo(
                         ? "Sign In"
                         : isCurrentPlan
                           ? "Go to Dashboard"
-                          : hasActiveSubscription
+                          : hasPaidPlan
                             ? isUpgrade
                               ? `Upgrade to ${plan.name}`
                               : `Downgrade to ${plan.name}`
