@@ -9,10 +9,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Sidebar - Fixed positioning */}
       <Sidebar />
-
-      {/* Topbar - Fixed positioning */}
       <Topbar />
 
       {/* Main content with proper spacing for fixed sidebar and topbar */}
@@ -29,7 +26,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 export default function LayoutWrapper({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <SidebarProvider>

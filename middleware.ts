@@ -19,6 +19,7 @@ export async function middleware(request: NextRequest) {
     "/chatbot",
     "/pricing",
     "/accept-invite",
+    "/verify-team-access",
   ];
 
   // 2. STATIC ASSETS + NEXTAUTH INTERNALS: Always allow.
