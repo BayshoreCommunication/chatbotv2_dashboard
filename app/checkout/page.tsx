@@ -25,6 +25,8 @@ function CheckoutContent() {
   const successUrl   =
     redirectParam === "widget-settings"
       ? "/widget-settings?subscription=success"
+      : redirectParam === "start-free-trial"
+      ? "/start-free-trial?payment=success"
       : "/dashboard";
 
   const plan =

@@ -1,10 +1,13 @@
 "use client";
 
 import { getSubscriptionAction } from "@/app/actions/subscriptions";
+import { getWidgetSettingsAction } from "@/app/actions/widgetSettings";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BiLoaderAlt } from "react-icons/bi";
 import { BsArrowRight } from "react-icons/bs";
+import { toast } from "react-toastify";
 import ChatbotRightSideView from "./ChatbotRighSIdeView";
 import TrainLeftSideForm, { type LiveProgress } from "./TrainLeftSideForm";
 
@@ -36,6 +39,7 @@ const FreeTrailMainPage = ({
   isDashboard?: boolean;
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [companyName, setCompanyName] = useState("");
   const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
   const [isTrainingComplete, setIsTrainingComplete] = useState(false);
@@ -43,13 +47,29 @@ const FreeTrailMainPage = ({
   const [liveProgress, setLiveProgress] = useState<LiveProgress | null>(null);
   const [conversationCount, setConversationCount] = useState(0);
   const [hasActiveSub, setHasActiveSub] = useState(false);
+  const [widgetReady, setWidgetReady]   = useState<boolean | null>(null);
+  const [navigating, setNavigating]     = useState(false);
 
-  // Check subscription once on mount so the CTA goes to the right place
+  const isPaymentReturn = searchParams.get("payment") === "success";
+
+  // Pre-fetch subscription + widget status in parallel on mount so button
+  // click navigates instantly without an extra round-trip.
   useEffect(() => {
-    getSubscriptionAction().then((res) => {
-      if (res.ok && res.data?.is_active) setHasActiveSub(true);
-    });
+    Promise.all([getSubscriptionAction(), getWidgetSettingsAction()]).then(
+      ([sub, ws]) => {
+        if (sub.ok && sub.data?.is_active && sub.data.subscription_tier !== "free")
+          setHasActiveSub(true);
+        setWidgetReady(!!(ws.ok && ws.data));
+      }
+    );
   }, []);
+
+  // After payment return: once widgetReady is resolved, show toast and navigate.
+  useEffect(() => {
+    if (!isPaymentReturn || widgetReady === null) return;
+    toast.success("Payment confirmed! Setting up your workspace…");
+    router.replace(widgetReady ? "/dashboard" : "/widget-settings");
+  }, [isPaymentReturn, widgetReady, router]);
 
   const handleTrainingComplete = (data: TrainingData) => {
     setTrainingData(data);
@@ -57,9 +77,14 @@ const FreeTrailMainPage = ({
   };
 
   const handleSetupClick = () => {
-    router.push(
-      hasActiveSub ? "/widget-settings" : "/pricing?redirect=widget-settings"
-    );
+    if (navigating) return;
+    setNavigating(true);
+    if (hasActiveSub) {
+      // widgetReady is already known from the mount fetch — instant navigation.
+      router.push(widgetReady ? "/dashboard" : "/widget-settings");
+    } else {
+      router.push("/pricing?redirect=start-free-trial");
+    }
   };
 
   return (
@@ -116,11 +141,21 @@ const FreeTrailMainPage = ({
             </p>
             <button
               type="button"
-              onClick={handleSetupClick}
-              className="group inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+              onClick={() => void handleSetupClick()}
+              disabled={navigating}
+              className="group inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700 disabled:opacity-60 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
             >
-              Set up on your website
-              <BsArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              {navigating ? (
+                <>
+                  <BiLoaderAlt className="h-4 w-4 animate-spin" />
+                  Please wait…
+                </>
+              ) : (
+                <>
+                  Set up on your website
+                  <BsArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </>
+              )}
             </button>
           </motion.div>
         )}

@@ -19,7 +19,11 @@ const page = async ({
   // Pass the redirect intent through so the checkout page knows where to send
   // the user after payment (e.g. "widget-settings" from the free-trial CTA).
   const redirectAfterCheckout =
-    params.redirect === "widget-settings" ? "widget-settings" : undefined;
+    params.redirect === "widget-settings"
+      ? "widget-settings"
+      : params.redirect === "start-free-trial"
+      ? "start-free-trial"
+      : undefined;
 
   return (
     <div className="pt-24">
