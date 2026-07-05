@@ -8,18 +8,32 @@ import {
 import { useState } from "react";
 import { BiLock, BiLoaderAlt } from "react-icons/bi";
 
+export type BeforeConfirmResult = {
+  clientSecret: string | null;
+  intentKind: "payment" | "setup";
+  requiresPayment: boolean;
+};
+
 export function SignupPaymentForm({
   onSuccess,
-  onCancel: _onCancel,
-  intentKind = "payment",
+  onBeforeConfirm,
+  returnUrl,
+  isTrial = false,
   planName,
   trialDays,
   price,
   billingCycle = "monthly",
 }: {
   onSuccess: () => void;
-  onCancel?: () => void;
-  intentKind?: "payment" | "setup";
+  /**
+   * Called on submit (before Stripe confirmation) to create or change the
+   * subscription server-side. Returns the intent details needed to confirm.
+   * No Stripe subscription is created until the user actually clicks submit.
+   */
+  onBeforeConfirm: () => Promise<BeforeConfirmResult>;
+  /** Fallback URL for payment methods that require a browser redirect (e.g. 3D Secure). */
+  returnUrl: string;
+  isTrial?: boolean;
   planName?: string;
   trialDays?: number;
   price?: number;
@@ -43,13 +57,56 @@ export function SignupPaymentForm({
     setSubmitting(true);
     setError(null);
 
+    // 1. Create / change the subscription server-side (only on submit).
+    let confirmResult: BeforeConfirmResult;
+    try {
+      confirmResult = await onBeforeConfirm();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start subscription.");
+      setSubmitting(false);
+      return;
+    }
+
+    const { clientSecret, intentKind, requiresPayment } = confirmResult;
+
+    // 2. Existing subscriber whose saved card was auto-charged — nothing more to do.
+    if (!requiresPayment) {
+      onSuccess();
+      return;
+    }
+
+    if (!clientSecret) {
+      setError("Failed to start subscription.");
+      setSubmitting(false);
+      return;
+    }
+
+    // 3. Validate card fields before confirming (required for deferred intents).
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
+      setError(submitError.message ?? "Please check your card details.");
+      setSubmitting(false);
+      return;
+    }
+
+    // 4. Confirm payment / setup with the freshly created intent's client_secret.
     const { error: confirmError } =
       intentKind === "setup"
-        ? await stripe.confirmSetup({ elements, redirect: "if_required" })
-        : await stripe.confirmPayment({ elements, redirect: "if_required" });
+        ? await stripe.confirmSetup({
+            elements,
+            clientSecret,
+            confirmParams: { return_url: returnUrl },
+            redirect: "if_required",
+          })
+        : await stripe.confirmPayment({
+            elements,
+            clientSecret,
+            confirmParams: { return_url: returnUrl },
+            redirect: "if_required",
+          });
 
     if (confirmError) {
-      setError(confirmError.message || "Payment failed.");
+      setError(confirmError.message ?? "Payment failed.");
       setSubmitting(false);
       return;
     }
@@ -58,22 +115,18 @@ export function SignupPaymentForm({
   };
 
   const cycleLabel = billingCycle === "annual" ? "year" : "month";
-  const isTrial = intentKind === "setup";
-
+  const buttonLabel = isTrial
+    ? `Start ${trialDays ?? 14}-Day Free Trial`
+    : `Subscribe to ${planName ?? "Plan"}`;
   const chargeText =
     isTrial && price
       ? `$${price}/${cycleLabel} after my free trial, unless I cancel`
       : "";
 
-  const buttonLabel = isTrial
-    ? `Start ${trialDays ?? 14}-Day Free Trial`
-    : `Subscribe to ${planName ?? "Plan"}`;
-
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <PaymentElement options={{ layout: "tabs" }} />
 
-      {/* Terms of Service checkbox */}
       <label className="flex cursor-pointer items-start gap-3">
         <input
           type="checkbox"
@@ -96,14 +149,12 @@ export function SignupPaymentForm({
         </span>
       </label>
 
-      {/* Error message */}
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
           {error}
         </div>
       )}
 
-      {/* Submit */}
       <button
         type="submit"
         disabled={!stripe || submitting || !agreed}
@@ -117,7 +168,6 @@ export function SignupPaymentForm({
         {submitting ? "Processing…" : buttonLabel}
       </button>
 
-      {/* Security note */}
       <p className="text-center text-xs text-gray-400 dark:text-gray-500">
         Payments are secure and encrypted
         {isTrial ? " · $0.00 due today" : price ? ` · $${price} due today` : ""}

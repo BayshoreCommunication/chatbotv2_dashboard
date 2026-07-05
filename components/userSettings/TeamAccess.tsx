@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/team-access";
 import { useCallback, useEffect, useState } from "react";
 import { BiBlock, BiCheck, BiUserPlus, BiX } from "react-icons/bi";
+import { toast } from "react-toastify";
 
 const MAX_MEMBERS = 5;
 
@@ -36,7 +37,6 @@ export default function TeamAccess({ isTeamMember = false }: { isTeamMember?: bo
   const [adding, setAdding]         = useState(false);
   const [actionId, setActionId]     = useState<string | null>(null);
   const [error, setError]           = useState<string | null>(null);
-  const [success, setSuccess]       = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const res = await getTeamMembersAction();
@@ -52,7 +52,6 @@ export default function TeamAccess({ isTeamMember = false }: { isTeamMember?: bo
 
   const handleAdd = async () => {
     setError(null);
-    setSuccess(null);
     const n = name.trim();
     const e = email.trim();
     if (!n || !e) { setError("Name and email are required."); return; }
@@ -62,11 +61,11 @@ export default function TeamAccess({ isTeamMember = false }: { isTeamMember?: bo
     setAdding(true);
     try {
       const res = await addTeamMemberAction(n, e);
-      if (!res.ok) { setError(res.error ?? "Failed to add member."); return; }
+      if (!res.ok) { toast.error(res.error ?? "Failed to add member."); return; }
       if (res.data) setMembers((prev) => [res.data!, ...prev]);
       setName("");
       setEmail("");
-      setSuccess(`Verification email sent to ${e}.`);
+      toast.success(`Verification email sent to ${e}.`);
     } finally {
       setAdding(false);
     }
@@ -154,8 +153,7 @@ export default function TeamAccess({ isTeamMember = false }: { isTeamMember?: bo
               Member limit reached. Revoke a member to add someone new.
             </p>
           )}
-          {error   && <p className="text-xs text-red-600">{error}</p>}
-          {success && <p className="text-xs text-green-600">{success}</p>}
+          {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
 
         {/* Members list */}

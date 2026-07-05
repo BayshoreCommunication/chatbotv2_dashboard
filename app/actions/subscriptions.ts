@@ -173,6 +173,7 @@ export async function changeSubscriptionPlanAction(
     ok: boolean;
     requires_payment: boolean;
     client_secret: string | null;
+    intent_kind?: "payment" | "setup";
   }>
 > {
   const { token, companyId } = await getSession();

@@ -7,7 +7,7 @@ import { useState } from "react";
 import { BiX } from "react-icons/bi";
 import { BillingCycleToggle } from "./BillingCycleToggle";
 import { PlanCard } from "./PlanCard";
-import { SignupPaymentForm } from "./SignupPaymentForm";
+import { BeforeConfirmResult, SignupPaymentForm } from "./SignupPaymentForm";
 import { StripeElementsProvider } from "./StripeElementsProvider";
 import { BillingCycle, DisplayPlan } from "./types";
 
@@ -29,6 +29,7 @@ export function ChangePlanModal({
   const [switchingPlanId, setSwitchingPlanId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pendingPayment, setPendingPayment] = useState<string | null>(null);
+  const [pendingIntentKind, setPendingIntentKind] = useState<"payment" | "setup">("payment");
 
   const selectedCycle: BillingCycle = isYearly ? "annual" : "monthly";
 
@@ -62,6 +63,7 @@ export function ChangePlanModal({
 
         if (result.data.client_secret) {
           setPendingPayment(result.data.client_secret);
+          setPendingIntentKind(result.data.intent_kind ?? "payment");
         } else {
           setError("Failed to switch plan.");
           setSwitchingPlanId(null);
@@ -87,6 +89,7 @@ export function ChangePlanModal({
 
       if (result.data.client_secret) {
         setPendingPayment(result.data.client_secret);
+        setPendingIntentKind(result.data.intent_kind ?? "payment");
       } else {
         setError("Failed to start signup.");
         setSwitchingPlanId(null);
@@ -101,11 +104,6 @@ export function ChangePlanModal({
     setPendingPayment(null);
     onChanged();
     onClose();
-  };
-
-  const handlePaymentCancel = () => {
-    setPendingPayment(null);
-    setSwitchingPlanId(null);
   };
 
   return (
@@ -138,7 +136,16 @@ export function ChangePlanModal({
               <StripeElementsProvider clientSecret={pendingPayment}>
                 <SignupPaymentForm
                   onSuccess={handlePaymentSuccess}
-                  onCancel={handlePaymentCancel}
+                  onBeforeConfirm={async (): Promise<BeforeConfirmResult> => ({
+                    clientSecret: pendingPayment,
+                    intentKind: pendingIntentKind,
+                    requiresPayment: true,
+                  })}
+                  returnUrl={
+                    typeof window !== "undefined"
+                      ? window.location.href
+                      : "/dashboard/settings"
+                  }
                 />
               </StripeElementsProvider>
             </div>

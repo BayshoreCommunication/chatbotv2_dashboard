@@ -12,7 +12,9 @@ const SigninPage = () => {
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   // Step 1: request a code for this email
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(
+    () => searchParams.get("email") ?? ""
+  );
   const [requesting, setRequesting] = useState(false);
   const [requestError, setRequestError] = useState("");
 

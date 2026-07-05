@@ -6,7 +6,7 @@ import {
   getSessionInfoAction,
   getSubscriptionAction,
 } from "@/app/actions/subscriptions";
-import { SignupPaymentForm } from "@/components/billing/SignupPaymentForm";
+import { type BeforeConfirmResult, SignupPaymentForm } from "@/components/billing/SignupPaymentForm";
 import { StripeElementsProvider } from "@/components/billing/StripeElementsProvider";
 import { pricingPlans } from "@/config/pricing";
 import Link from "next/link";
@@ -15,19 +15,14 @@ import { Suspense, useEffect, useState } from "react";
 import { BiArrowBack, BiCheckCircle, BiEnvelope } from "react-icons/bi";
 import { BsShieldCheck } from "react-icons/bs";
 
-type Status = "loading" | "payment" | "error";
-
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const planId = searchParams.get("plan") ?? "professional";
-  const billingCycle =
-    searchParams.get("billing") === "yearly" ? "annual" : "monthly";
+  const planId       = searchParams.get("plan") ?? "professional";
+  const billingCycle = searchParams.get("billing") === "yearly" ? "annual" : "monthly";
   const redirectParam = searchParams.get("redirect");
-  // "widget-settings" → go to widget settings after payment (free-trial flow)
-  // anything else (or absent) → go to dashboard (landing page flow)
-  const successUrl =
+  const successUrl   =
     redirectParam === "widget-settings"
       ? "/widget-settings?subscription=success"
       : "/dashboard";
@@ -36,82 +31,64 @@ function CheckoutContent() {
     pricingPlans.find((p) => p.id === planId) ??
     pricingPlans.find((p) => p.id === "professional")!;
 
-  const [status, setStatus] = useState<Status>("loading");
-  const [error, setError] = useState<string | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [intentKind, setIntentKind] = useState<"payment" | "setup">("payment");
   const [userEmail, setUserEmail] = useState("");
 
+  // Only read session info on load — no Stripe API calls here.
   useEffect(() => {
-    let cancelled = false;
+    getSessionInfoAction().then((info) => setUserEmail(info.email));
+  }, []);
 
-    // Fetch email in parallel — non-blocking
-    getSessionInfoAction().then((info) => {
-      if (!cancelled) setUserEmail(info.email);
-    });
+  const tier = plan.id === "trial"
+    ? "free"
+    : (plan.id as "free" | "professional" | "advanced" | "enterprise");
 
-    (async () => {
-      try {
-        const tier =
-          plan.id === "trial"
-            ? "free"
-            : (plan.id as "free" | "professional" | "advanced" | "enterprise");
+  const isTrial      = !!plan.trialDays;
+  const price        = billingCycle === "annual" ? plan.yearlyPrice : plan.monthlyPrice;
+  const cycleLabel   = billingCycle === "annual" ? "year" : "month";
 
-        const existingSub = await getSubscriptionAction();
-        const result =
-          existingSub.ok && existingSub.data
-            ? await changeSubscriptionPlanAction(tier, billingCycle)
-            : await createSubscriptionIntentAction(tier, billingCycle);
-
-        if (cancelled) return;
-
-        if (!result.ok || !result.data) {
-          setError(result.error || "Failed to start subscription.");
-          setStatus("error");
-          return;
-        }
-
-        if (!result.data.requires_payment) {
-          router.replace(successUrl);
-          return;
-        }
-
-        if (result.data.client_secret) {
-          const kind = (result.data as { intent_kind?: "payment" | "setup" })
-            .intent_kind;
-          setIntentKind(kind ?? "payment");
-          setClientSecret(result.data.client_secret);
-          setStatus("payment");
-        } else {
-          setError("Failed to start subscription.");
-          setStatus("error");
-        }
-      } catch {
-        if (!cancelled) {
-          setError("An unexpected error occurred.");
-          setStatus("error");
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [plan.id, billingCycle, router]);
-
-  const price = billingCycle === "annual" ? plan.yearlyPrice : plan.monthlyPrice;
-  const cycleLabel = billingCycle === "annual" ? "year" : "month";
-  const isPlanWithTrial = !!plan.trialDays;
+  // Deferred Elements mode: "setup" collects a card for future billing (trial),
+  // "payment" collects a card for immediate charge (no trial).
+  const elementsMode   = isTrial ? ("setup" as const) : ("payment" as const);
+  const elementsAmount = isTrial ? 0 : Math.round(price * 100);
 
   const trialEndDate = plan.trialDays
-    ? new Date(
-        Date.now() + plan.trialDays * 24 * 60 * 60 * 1000
-      ).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })
+    ? new Date(Date.now() + plan.trialDays * 24 * 60 * 60 * 1000).toLocaleDateString(
+        "en-US",
+        { month: "long", day: "numeric", year: "numeric" }
+      )
     : null;
+
+  // Called only when the user clicks the submit button — no subscription is
+  // created or modified until this point.
+  const handleBeforeConfirm = async (): Promise<BeforeConfirmResult> => {
+    const existingSub = await getSubscriptionAction();
+    const hasActivePaidSub =
+      existingSub.ok &&
+      existingSub.data &&
+      existingSub.data.subscription_tier !== "free" &&
+      (existingSub.data.subscription_status === "active" ||
+        existingSub.data.subscription_status === "trialing");
+
+    if (hasActivePaidSub) {
+      const result = await changeSubscriptionPlanAction(tier, billingCycle);
+      if (!result.ok || !result.data)
+        throw new Error(result.error ?? "Failed to change plan.");
+      return {
+        clientSecret:    result.data.client_secret,
+        intentKind:      "payment",
+        requiresPayment: result.data.requires_payment,
+      };
+    }
+
+    const result = await createSubscriptionIntentAction(tier, billingCycle);
+    if (!result.ok || !result.data)
+      throw new Error(result.error ?? "Failed to start subscription.");
+    return {
+      clientSecret:    result.data.client_secret,
+      intentKind:      result.data.intent_kind ?? "payment",
+      requiresPayment: result.data.requires_payment,
+    };
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -133,79 +110,58 @@ function CheckoutContent() {
           {/* ── Left: Payment form ─────────────────────────────────────── */}
           <div className="lg:col-span-3">
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-              {isPlanWithTrial
+              {isTrial
                 ? `Start your ${plan.name} trial`
                 : `Subscribe to ${plan.name}`}
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-              {isPlanWithTrial
+              {isTrial
                 ? `Add a payment method to activate your AI assistant. You won't be charged during your ${plan.trialDays}-day free trial — cancel anytime before it ends.`
                 : "Your subscription begins immediately upon payment."}
             </p>
 
             {/* Form card */}
             <div className="mt-7 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-              {/* Loading skeleton */}
-              {status === "loading" && (
-                <div className="animate-pulse space-y-4">
-                  <div className="h-3.5 w-28 rounded-md bg-gray-100 dark:bg-gray-800" />
-                  <div className="h-11 rounded-xl bg-gray-100 dark:bg-gray-800" />
-                  <div className="h-11 rounded-xl bg-gray-100 dark:bg-gray-800" />
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="h-11 rounded-xl bg-gray-100 dark:bg-gray-800" />
-                    <div className="h-11 rounded-xl bg-gray-100 dark:bg-gray-800" />
+              {/* Billing email */}
+              <div className="mb-6">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                  Billing Details
+                </p>
+                <div className="mt-3 space-y-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Billing email
+                  </label>
+                  <div className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                    <BiEnvelope className="shrink-0 text-gray-400" size={16} />
+                    {userEmail || (
+                      <span className="h-4 w-40 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                    )}
                   </div>
-                  <div className="h-11 rounded-xl bg-gray-100 dark:bg-gray-800" />
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="h-11 rounded-xl bg-gray-100 dark:bg-gray-800" />
-                    <div className="h-11 rounded-xl bg-gray-100 dark:bg-gray-800" />
-                  </div>
-                  <div className="mt-2 h-12 rounded-xl bg-gray-200 dark:bg-gray-700" />
                 </div>
-              )}
+              </div>
 
-              {/* Error */}
-              {status === "error" && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
-                  {error}
-                </div>
-              )}
-
-              {/* Payment form */}
-              {status === "payment" && clientSecret && (
-                <>
-                  {/* Billing email */}
-                  <div className="mb-6">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                      Billing Details
-                    </p>
-                    <div className="mt-3 space-y-1.5">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Billing email
-                      </label>
-                      <div className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                        <BiEnvelope className="shrink-0 text-gray-400" size={16} />
-                        {userEmail || (
-                          <span className="h-4 w-40 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <StripeElementsProvider clientSecret={clientSecret}>
-                    <SignupPaymentForm
-                      intentKind={intentKind}
-                      planName={plan.name}
-                      trialDays={plan.trialDays}
-                      price={price}
-                      billingCycle={billingCycle}
-                      onSuccess={() =>
-                        router.push(successUrl)
-                      }
-                    />
-                  </StripeElementsProvider>
-                </>
-              )}
+              {/* Payment form — Elements mounted in deferred mode; no Stripe
+                  subscription is created until the user clicks submit. */}
+              <StripeElementsProvider
+                mode={elementsMode}
+                amount={elementsAmount}
+                currency="usd"
+              >
+                <SignupPaymentForm
+                  onBeforeConfirm={handleBeforeConfirm}
+                  onSuccess={() => router.push(successUrl)}
+                  returnUrl={
+                    typeof window !== "undefined"
+                      ? `${window.location.origin}${successUrl}`
+                      : successUrl
+                  }
+                  isTrial={isTrial}
+                  planName={plan.name}
+                  trialDays={plan.trialDays}
+                  price={price}
+                  billingCycle={billingCycle}
+                />
+              </StripeElementsProvider>
             </div>
           </div>
 
@@ -246,7 +202,7 @@ function CheckoutContent() {
               </div>
 
               {/* Trial box */}
-              {isPlanWithTrial && trialEndDate && (
+              {isTrial && trialEndDate && (
                 <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 dark:border-green-900 dark:bg-green-950">
                   <div className="flex items-center gap-2">
                     <BiCheckCircle
@@ -274,7 +230,7 @@ function CheckoutContent() {
                       ${price}.00
                     </span>
                   </div>
-                  {isPlanWithTrial && (
+                  {isTrial && (
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600 dark:text-gray-400">
                         {plan.trialDays}-day free trial
@@ -289,14 +245,14 @@ function CheckoutContent() {
                       Due today
                     </span>
                     <span className="text-xl font-bold text-gray-900 dark:text-white">
-                      ${isPlanWithTrial ? "0.00" : `${price}.00`}
+                      ${isTrial ? "0.00" : `${price}.00`}
                     </span>
                   </div>
                 </div>
               )}
 
               {/* After-trial note */}
-              {isPlanWithTrial && trialEndDate && (
+              {isTrial && trialEndDate && (
                 <p className="mt-3 text-xs leading-relaxed text-gray-400 dark:text-gray-500">
                   After your trial, you&apos;ll be charged ${price}/{cycleLabel}{" "}
                   starting {trialEndDate}. Cancel anytime before then and you
@@ -328,10 +284,7 @@ function CheckoutContent() {
               {/* Guarantee + Change plan */}
               <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800">
                 <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  <BsShieldCheck
-                    className="shrink-0 text-green-500"
-                    size={13}
-                  />
+                  <BsShieldCheck className="shrink-0 text-green-500" size={13} />
                   14-day money-back guarantee
                 </div>
                 <Link

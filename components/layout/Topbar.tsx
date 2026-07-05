@@ -54,7 +54,7 @@ const SEARCH_PAGES: SearchPage[] = [
   { label: "Billing",          href: "/billing",          icon: BiWallet },
 ];
 
-const Topbar = () => {
+const Topbar = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
   const { isExpanded } = useSidebarContext();
   const [user, setUser] = useState<User | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
