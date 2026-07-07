@@ -3,17 +3,19 @@
 import {
   changeSubscriptionPlanAction,
   createSubscriptionIntentAction,
+  getIsSubscribedAction,
   getSessionInfoAction,
   getSubscriptionAction,
 } from "@/app/actions/subscriptions";
+import { invalidateUserProfileCacheAction } from "@/app/actions/user";
 import { getWidgetSettingsAction } from "@/app/actions/widgetSettings";
 import { type BeforeConfirmResult, SignupPaymentForm } from "@/components/billing/SignupPaymentForm";
 import { StripeElementsProvider } from "@/components/billing/StripeElementsProvider";
 import { pricingPlans } from "@/config/pricing";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
-import { BiArrowBack, BiCheckCircle, BiEnvelope } from "react-icons/bi";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { BiArrowBack, BiCheckCircle, BiEnvelope, BiLoaderAlt } from "react-icons/bi";
 import { BsShieldCheck } from "react-icons/bs";
 
 function CheckoutContent() {
@@ -23,30 +25,93 @@ function CheckoutContent() {
   const planId       = searchParams.get("plan") ?? "professional";
   const billingCycle = searchParams.get("billing") === "yearly" ? "annual" : "monthly";
   const redirectParam = searchParams.get("redirect");
-  // Needs a widget-readiness check to pick the right destination — see
-  // handlePaymentSuccess. This is only the static fallback used as Stripe's
-  // 3D-Secure return_url, for the rare case that redirects away from this
-  // page entirely before we get a chance to check.
-  const successUrl =
-    redirectParam === "widget-settings" || redirectParam === "start-free-trial"
-      ? "/widget-settings?subscription=success"
-      : "/dashboard?subscription=success";
+  const [confirming, setConfirming] = useState(false);
+  const [redirectError, setRedirectError] = useState<string | null>(null);
+  const paymentHandledRef = useRef(false);
+
+  // Canonical /checkout URL (same plan/billing/redirect params) — this is
+  // what Stripe sends the browser back to for payment methods that require a
+  // full-page redirect (3D Secure / SCA). Must stay on this page (middleware-
+  // exempt) rather than /dashboard or /widget-settings (both gated on
+  // is_subscribed) so handlePaymentSuccess's poll below can actually run
+  // before we navigate onward — landing straight on a gated page with zero
+  // wait is what was bouncing users back to "/".
+  const returnUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/checkout?plan=${encodeURIComponent(planId)}&billing=${
+          billingCycle === "annual" ? "yearly" : "monthly"
+        }${redirectParam ? `&redirect=${encodeURIComponent(redirectParam)}` : ""}`
+      : "/checkout";
+
+  // Stripe's webhook writes the subscription doc and flips users.is_subscribed
+  // — the exact field middleware.ts requires on every page except /checkout
+  // and /widget-settings — asynchronously, after confirmPayment/confirmSetup
+  // has already resolved. Poll from this exempt page until it lands;
+  // otherwise the very next navigation to /dashboard gets bounced straight
+  // back to "/" by middleware seeing a still-stale is_subscribed. Checking
+  // getIsSubscribedAction specifically (not getSubscriptionAction's
+  // is_active) matters: they read different Mongo collections written by two
+  // separate updates in the same webhook handler, so is_active can go true
+  // while is_subscribed is still lagging (or never lands).
+  //
+  // Checks immediately first (the common case — an existing active
+  // subscriber changing plans — is already true with zero wait) and only
+  // then backs off, so a fresh signup's webhook lag costs as little latency
+  // as possible instead of a flat 2s tax per attempt.
+  const waitForSubscriptionActive = async () => {
+    const delaysMs = [0, 400, 800, 1200, 1600, 2000]; // ~6s worst case, was a flat 10s
+    for (const delay of delaysMs) {
+      if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+      const res = await getIsSubscribedAction();
+      if (res.ok && res.data) return;
+    }
+  };
 
   // After payment, land the user on the most useful page in one hop instead
   // of bouncing through an intermediate page that re-derives the same
   // decision (avoids a duplicate subscription/widget fetch + extra page load).
   const handlePaymentSuccess = async () => {
+    setConfirming(true);
+    // Cache-bust is fire-and-forget — nothing downstream needs to wait on it,
+    // it only has to land before some *later* page reads the cached profile.
+    invalidateUserProfileCacheAction();
+
     if (redirectParam === "start-free-trial" || redirectParam === "widget-settings") {
       const widget = await getWidgetSettingsAction();
-      router.push(
-        widget.ok && widget.data
-          ? "/dashboard?subscription=success"
-          : "/widget-settings?subscription=success"
-      );
+      if (widget.ok && widget.data) {
+        // Already has a configured widget — this is a returning subscriber
+        // upgrading, not a first-time trial signup. /dashboard is gated, so
+        // wait for is_subscribed before heading there.
+        await waitForSubscriptionActive();
+        router.push("/dashboard?subscription=success");
+      } else {
+        // /widget-settings is middleware-exempt and has its own webhook-wait
+        // polling ("activating" view state) built in — no need to duplicate
+        // that wait here, just get the user there immediately.
+        router.push("/widget-settings?subscription=success");
+      }
       return;
     }
-    router.push(successUrl);
+
+    await waitForSubscriptionActive();
+    router.push("/dashboard?subscription=success");
   };
+
+  // Handles the case where Stripe redirected the browser away for 3D Secure /
+  // SCA authentication and back to this same /checkout URL (returnUrl above)
+  // instead of calling onSuccess() directly in-page — Stripe appends
+  // redirect_status to the URL when it does this.
+  useEffect(() => {
+    const redirectStatus = searchParams.get("redirect_status");
+    if (!redirectStatus || paymentHandledRef.current) return;
+    paymentHandledRef.current = true;
+    if (redirectStatus === "succeeded") {
+      handlePaymentSuccess();
+    } else {
+      setRedirectError("Card authentication was not completed. Please try again.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const plan =
     pricingPlans.find((p) => p.id === planId) ??
@@ -181,11 +246,7 @@ function CheckoutContent() {
                 <SignupPaymentForm
                   onBeforeConfirm={handleBeforeConfirm}
                   onSuccess={handlePaymentSuccess}
-                  returnUrl={
-                    typeof window !== "undefined"
-                      ? `${window.location.origin}${successUrl}`
-                      : successUrl
-                  }
+                  returnUrl={returnUrl}
                   isTrial={isTrial}
                   planName={plan.name}
                   trialDays={plan.trialDays}
@@ -193,6 +254,19 @@ function CheckoutContent() {
                   billingCycle={billingCycle}
                 />
               </StripeElementsProvider>
+
+              {confirming && (
+                <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-gray-500 dark:text-gray-400">
+                  <BiLoaderAlt className="animate-spin" size={14} />
+                  Payment received — confirming your subscription…
+                </p>
+              )}
+
+              {redirectError && (
+                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+                  {redirectError}
+                </div>
+              )}
             </div>
           </div>
 

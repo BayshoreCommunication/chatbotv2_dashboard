@@ -96,6 +96,12 @@ export async function middleware(request: NextRequest) {
       "/confirm-subscription",
       "/paymenttest",
       "/checkout",
+      // WidgetSettingView already gates itself on subscription_status (its own
+      // "paywall" view state) and has a dedicated "activating" polling state
+      // for the exact post-checkout webhook race this middleware check can't
+      // safely wait out — double-gating it here only fights that logic and
+      // bounces users mid-poll.
+      "/widget-settings",
     ];
 
     if (subscriptionExemptPaths.some((path) => pathname.startsWith(path))) {

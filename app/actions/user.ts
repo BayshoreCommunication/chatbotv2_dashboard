@@ -222,6 +222,17 @@ export async function updateUserData(updateData: {
   }
 }
 
+/**
+ * Busts the cached /api/user and /api/v1/users/{id} reads (getUserData,
+ * getCurrentUserDetails) so pages relying on them — e.g. UserDetails.tsx's
+ * plan badge — don't keep showing pre-upgrade subscription data for up to
+ * their 360s/120s revalidate window after checkout confirms a new plan.
+ */
+export async function invalidateUserProfileCacheAction(): Promise<void> {
+  updateTag("user_profile");
+  updateTag("user_full_details");
+}
+
 export async function getAllUserData(
   page: number = 1,
   pageSize: number = 50

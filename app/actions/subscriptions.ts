@@ -269,3 +269,25 @@ export async function getSubscriptionAction(): Promise<
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+
+/**
+ * GET /api/user — the exact same endpoint + field middleware.ts checks
+ * (via lib/fetchUserProfile.ts) to gate every non-exempt page on
+ * `is_subscribed`. Poll THIS, not getSubscriptionAction, before navigating
+ * to a gated page post-checkout: is_subscribed lives on the `users`
+ * collection, written by a separate Mongo update than the `subscriptions`
+ * collection's `is_active` — if that second write ever lags or fails to
+ * match, checking is_active alone would report "ready" while middleware
+ * still bounces.
+ */
+export async function getIsSubscribedAction(): Promise<ActionResponse<boolean>> {
+  const { token } = await getSession();
+  if (!token) return { ok: false, error: "You must be logged in." };
+
+  const result = await apiFetch<{ payload?: { user?: { is_subscribed?: boolean } } }>(
+    "/api/user",
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!result.ok) return { ok: false, error: result.error };
+  return { ok: true, data: !!result.data?.payload?.user?.is_subscribed };
+}
