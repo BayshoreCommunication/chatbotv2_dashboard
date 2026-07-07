@@ -6,6 +6,7 @@ import {
   getSessionInfoAction,
   getSubscriptionAction,
 } from "@/app/actions/subscriptions";
+import { getWidgetSettingsAction } from "@/app/actions/widgetSettings";
 import { type BeforeConfirmResult, SignupPaymentForm } from "@/components/billing/SignupPaymentForm";
 import { StripeElementsProvider } from "@/components/billing/StripeElementsProvider";
 import { pricingPlans } from "@/config/pricing";
@@ -22,12 +23,30 @@ function CheckoutContent() {
   const planId       = searchParams.get("plan") ?? "professional";
   const billingCycle = searchParams.get("billing") === "yearly" ? "annual" : "monthly";
   const redirectParam = searchParams.get("redirect");
-  const successUrl   =
-    redirectParam === "widget-settings"
+  // Needs a widget-readiness check to pick the right destination — see
+  // handlePaymentSuccess. This is only the static fallback used as Stripe's
+  // 3D-Secure return_url, for the rare case that redirects away from this
+  // page entirely before we get a chance to check.
+  const successUrl =
+    redirectParam === "widget-settings" || redirectParam === "start-free-trial"
       ? "/widget-settings?subscription=success"
-      : redirectParam === "start-free-trial"
-      ? "/start-free-trial?payment=success"
-      : "/dashboard";
+      : "/dashboard?subscription=success";
+
+  // After payment, land the user on the most useful page in one hop instead
+  // of bouncing through an intermediate page that re-derives the same
+  // decision (avoids a duplicate subscription/widget fetch + extra page load).
+  const handlePaymentSuccess = async () => {
+    if (redirectParam === "start-free-trial" || redirectParam === "widget-settings") {
+      const widget = await getWidgetSettingsAction();
+      router.push(
+        widget.ok && widget.data
+          ? "/dashboard?subscription=success"
+          : "/widget-settings?subscription=success"
+      );
+      return;
+    }
+    router.push(successUrl);
+  };
 
   const plan =
     pricingPlans.find((p) => p.id === planId) ??
@@ -39,6 +58,23 @@ function CheckoutContent() {
   useEffect(() => {
     getSessionInfoAction().then((info) => setUserEmail(info.email));
   }, []);
+
+  const [trialEndDate, setTrialEndDate] = useState<string | null>(null);
+
+  // Date.now() is impure — compute the trial end date in an effect rather
+  // than inline during render (React purity rule).
+  useEffect(() => {
+    if (!plan.trialDays) {
+      setTrialEndDate(null);
+      return;
+    }
+    setTrialEndDate(
+      new Date(Date.now() + plan.trialDays * 24 * 60 * 60 * 1000).toLocaleDateString(
+        "en-US",
+        { month: "long", day: "numeric", year: "numeric" }
+      )
+    );
+  }, [plan.trialDays]);
 
   const tier = plan.id === "trial"
     ? "free"
@@ -52,13 +88,6 @@ function CheckoutContent() {
   // "payment" collects a card for immediate charge (no trial).
   const elementsMode   = isTrial ? ("setup" as const) : ("payment" as const);
   const elementsAmount = isTrial ? 0 : Math.round(price * 100);
-
-  const trialEndDate = plan.trialDays
-    ? new Date(Date.now() + plan.trialDays * 24 * 60 * 60 * 1000).toLocaleDateString(
-        "en-US",
-        { month: "long", day: "numeric", year: "numeric" }
-      )
-    : null;
 
   // Called only when the user clicks the submit button — no subscription is
   // created or modified until this point.
@@ -151,7 +180,7 @@ function CheckoutContent() {
               >
                 <SignupPaymentForm
                   onBeforeConfirm={handleBeforeConfirm}
-                  onSuccess={() => router.push(successUrl)}
+                  onSuccess={handlePaymentSuccess}
                   returnUrl={
                     typeof window !== "undefined"
                       ? `${window.location.origin}${successUrl}`

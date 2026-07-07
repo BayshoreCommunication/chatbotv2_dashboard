@@ -3,11 +3,10 @@
 import { getSubscriptionAction } from "@/app/actions/subscriptions";
 import { getWidgetSettingsAction } from "@/app/actions/widgetSettings";
 import { motion } from "framer-motion";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BiLoaderAlt } from "react-icons/bi";
 import { BsArrowRight } from "react-icons/bs";
-import { toast } from "react-toastify";
 import ChatbotRightSideView from "./ChatbotRighSIdeView";
 import TrainLeftSideForm, { type LiveProgress } from "./TrainLeftSideForm";
 
@@ -39,7 +38,6 @@ const FreeTrailMainPage = ({
   isDashboard?: boolean;
 }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [companyName, setCompanyName] = useState("");
   const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
   const [isTrainingComplete, setIsTrainingComplete] = useState(false);
@@ -49,8 +47,6 @@ const FreeTrailMainPage = ({
   const [hasActiveSub, setHasActiveSub] = useState(false);
   const [widgetReady, setWidgetReady]   = useState<boolean | null>(null);
   const [navigating, setNavigating]     = useState(false);
-
-  const isPaymentReturn = searchParams.get("payment") === "success";
 
   // Pre-fetch subscription + widget status in parallel on mount so button
   // click navigates instantly without an extra round-trip.
@@ -63,13 +59,6 @@ const FreeTrailMainPage = ({
       }
     );
   }, []);
-
-  // After payment return: once widgetReady is resolved, show toast and navigate.
-  useEffect(() => {
-    if (!isPaymentReturn || widgetReady === null) return;
-    toast.success("Payment confirmed! Setting up your workspace…");
-    router.replace(widgetReady ? "/dashboard" : "/widget-settings");
-  }, [isPaymentReturn, widgetReady, router]);
 
   const handleTrainingComplete = (data: TrainingData) => {
     setTrainingData(data);
