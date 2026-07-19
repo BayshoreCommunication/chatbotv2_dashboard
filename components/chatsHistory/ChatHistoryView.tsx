@@ -101,7 +101,11 @@ const ChatHistoryView = ({
   );
 
   return (
-    <div className="flex h-[calc(100vh-115px)] bg-gray-50 rounded overflow-hidden ">
+    // @container: RightNotification is supplementary (unlike the list/body,
+    // which are the actual chat interface and must never shrink below a
+    // usable width) — hide it below @7xl instead of letting all three
+    // columns fight over space the sidebar's expand/collapse can shrink.
+    <div className="@container flex h-[calc(100vh-115px)] bg-gray-50 rounded overflow-hidden ">
       {initialError && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded bg-red-100 px-4 py-2 text-sm text-red-700">
           {initialError}
@@ -120,7 +124,7 @@ const ChatHistoryView = ({
         onSessionActivity={handleSessionActivity}
       />
 
-      <div className="flex items-start pl-4">
+      <div className="hidden items-start pl-4 @7xl:flex">
         <RightNotification
           recentSessions={recentSessions}
           visitors={visitors}

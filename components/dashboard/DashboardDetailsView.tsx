@@ -21,9 +21,9 @@ import {
   BiUser,
 } from "react-icons/bi";
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -59,6 +59,17 @@ const HOURLY_RATE_BY_COMPANY_TYPE: Record<string, number> = {
   other: 35,
 };
 const DEFAULT_HOURLY_RATE = 35;
+
+// Estimated value of a single captured lead (name + email/phone), used to
+// translate "leads captured" into a dollar figure alongside staff time saved.
+// Flat across every organization by design — not industry-adjusted.
+const LEAD_VALUE_USD = 100;
+
+function fmtMoney(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${Math.round(n).toLocaleString()}`;
+}
 
 function fmt(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -114,9 +125,16 @@ const DashboardDetailsView = ({
     : 0;
 
   const hourlyRate = companyType
-    ? HOURLY_RATE_BY_COMPANY_TYPE[companyType] ?? DEFAULT_HOURLY_RATE
+    ? (HOURLY_RATE_BY_COMPANY_TYPE[companyType] ?? DEFAULT_HOURLY_RATE)
     : DEFAULT_HOURLY_RATE;
   const dollarsSaved = hoursSaved * hourlyRate;
+
+  const totalLeads = summary?.total_leads ?? 0;
+  const leadValue = totalLeads * LEAD_VALUE_USD;
+
+  const totalValue = dollarsSaved + leadValue;
+  const monthlyPrice = subscription?.payment_amount ?? 0;
+  const roiMultiple = monthlyPrice > 0 ? totalValue / monthlyPrice : null;
 
   const stats = [
     {
@@ -159,7 +177,6 @@ const DashboardDetailsView = ({
     },
   ];
 
-  const monthlyPrice = subscription?.payment_amount ?? 0;
   const showValueBanner = !!summary && summary.total_sessions > 0;
 
   // Right sidebar: recent sessions as notifications
@@ -247,49 +264,75 @@ const DashboardDetailsView = ({
       ];
 
   return (
-    <div className="flex gap-6 bg-gray-50 h-[calc(100vh-115px)]">
+    // @container: the row↔column switch and sidebar width below react to the
+    // ACTUAL space available for this layout, not the raw viewport — the
+    // fixed sidebar's expand/collapse toggle changes that available space
+    // without changing the viewport at all, which a viewport breakpoint can't see.
+    <div className="@container">
+      <div className="flex flex-col gap-6 @5xl:flex-row bg-gray-50 min-h-[calc(100vh-115px)]">
       {/* Main Content */}
-      <div className="flex-1">
-        {/* Analytics Header */}
-        <div className="mb-6 flex items-center justify-between rounded border border-gray-200 bg-white p-6">
-          <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-          <button className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-white transition-colors">
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
-        </div>
-
+      <div className="min-w-0 flex-1">
         {/* Cost vs. Value Banner */}
         {showValueBanner && (
-          <div className="mb-6 rounded border border-blue-100 bg-blue-50 p-5">
-            <p className="text-sm text-gray-800">
-              {monthlyPrice > 0 ? (
-                <>
-                  You paid <span className="font-semibold">${monthlyPrice.toFixed(0)}</span> this month.{" "}
-                </>
-              ) : null}
-              Your AI handled{" "}
-              <span className="font-semibold">{fmt(summary!.total_sessions)} conversations</span> and
-              captured <span className="font-semibold">{fmt(summary!.total_leads)} leads</span> — that&apos;s an
-              estimated <span className="font-semibold text-green-700">${fmt(dollarsSaved)} saved</span> in
-              staff time (~{fmt(hoursSaved)} hours).
-            </p>
+          <div className="mb-6 rounded border border-green-100 bg-gradient-to-br from-green-50 to-blue-50 p-5">
+            {/* Headline: total value vs. what was paid, plus the ROI callout */}
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Value delivered this month
+                </p>
+                <p className="mt-1 text-2xl font-bold text-gray-900 @7xl:text-3xl">
+                  {fmtMoney(totalValue)}
+                  {monthlyPrice > 0 && (
+                    <span className="ml-2 text-sm font-normal text-gray-500">
+                      vs {fmtMoney(monthlyPrice)} paid
+                    </span>
+                  )}
+                </p>
+              </div>
+              {roiMultiple !== null && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-600 px-3 py-1.5 text-sm font-semibold text-white">
+                  <BiTrendingUp size={16} />
+                  {roiMultiple.toFixed(1)}&times; return
+                </span>
+              )}
+            </div>
+
+            {/* Where the value comes from */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="flex items-center gap-3 rounded-lg bg-white/70 p-3">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
+                  <BiTime size={18} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">
+                    {fmtMoney(dollarsSaved)} in staff time
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    ~{fmt(hoursSaved)} hrs saved on{" "}
+                    {fmt(summary!.total_sessions)} conversations
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg bg-white/70 p-3">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-600">
+                  <BiDollar size={18} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">
+                    {fmtMoney(leadValue)} in lead value
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {fmt(totalLeads)} leads captured &times; ~${LEAD_VALUE_USD}/lead
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Statistics Cards */}
-        <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid grid-cols-2 gap-5 @7xl:grid-cols-4">
           {stats.map((stat, index) => (
             <div
               key={index}
@@ -298,7 +341,7 @@ const DashboardDetailsView = ({
               <h3 className="mb-2 text-sm font-medium text-gray-700">
                 {stat.title}
               </h3>
-              <p className="mb-1 text-3xl font-bold text-gray-900">
+              <p className="mb-1 text-2xl font-bold text-gray-900 @7xl:text-3xl">
                 {stat.value}
               </p>
               <p className="text-xs text-gray-500">{stat.subtitle}</p>
@@ -309,16 +352,22 @@ const DashboardDetailsView = ({
         {/* What People Are Asking About */}
         {leadCategories.length > 0 && (
           <div className="mb-6 rounded border border-gray-200 bg-white p-6">
-            <div className="mb-4 flex items-center gap-2">
-              <BiClipboard size={18} className="text-gray-500" />
-              <h2 className="text-base font-bold text-gray-900">
-                What People Are Asking About
-              </h2>
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <BiClipboard size={18} className="text-gray-500" />
+                <h2 className="text-base font-bold text-gray-900">
+                  What People Are Asking About
+                </h2>
+              </div>
+              <span className="text-xs text-gray-400">Est. value by topic</span>
             </div>
             <div className="space-y-3">
               {leadCategories.map((cat) => {
                 const maxCount = leadCategories[0]?.count || 1;
-                const widthPct = Math.max(8, Math.round((cat.count / maxCount) * 100));
+                const widthPct = Math.max(
+                  8,
+                  Math.round((cat.count / maxCount) * 100),
+                );
                 return (
                   <div key={cat.category} className="flex items-center gap-3">
                     <span className="w-36 flex-shrink-0 truncate text-sm text-gray-700">
@@ -332,6 +381,9 @@ const DashboardDetailsView = ({
                     </div>
                     <span className="w-8 flex-shrink-0 text-right text-sm font-semibold text-gray-900">
                       {cat.count}
+                    </span>
+                    <span className="w-16 flex-shrink-0 text-right text-xs text-gray-400">
+                      {fmtMoney(cat.count * LEAD_VALUE_USD)}
                     </span>
                   </div>
                 );
@@ -404,9 +456,9 @@ const DashboardDetailsView = ({
           </div>
 
           {/* Chart */}
-          <div className="h-96">
+          <div className="h-80 @7xl:h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+              <AreaChart
                 data={chartData}
                 margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
               >
@@ -418,7 +470,7 @@ const DashboardDetailsView = ({
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.12} />
                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
@@ -451,11 +503,12 @@ const DashboardDetailsView = ({
                   }}
                   cursor={{ stroke: "#e5e7eb", strokeWidth: 1 }}
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey={selectedTab === "total-chat" ? "chats" : "visitors"}
                   stroke="#3b82f6"
                   strokeWidth={3}
+                  fill="url(#colorGradient)"
                   dot={false}
                   activeDot={{
                     r: 6,
@@ -464,27 +517,29 @@ const DashboardDetailsView = ({
                     stroke: "#fff",
                   }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* Right Sidebar */}
-      <div className="w-80 flex flex-col gap-5">
+      {/* Right Sidebar — side-by-side when stacked below the main content
+          (plenty of width to share), stacked vertically once it becomes the
+          narrow right column instead (@5xl+). */}
+      <div className="w-full shrink-0 flex flex-row gap-5 @5xl:w-72 @5xl:flex-col @7xl:w-80">
         {/* Notifications */}
-        <div className="rounded border border-gray-200 bg-white overflow-hidden flex flex-col">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="min-w-0 flex-1 rounded border border-gray-200 bg-white overflow-hidden flex flex-col">
+          <div className="px-4 py-3 border-b border-gray-200 @7xl:px-6 @7xl:py-4">
             <h2 className="text-base font-bold text-gray-900">Notifications</h2>
           </div>
-          <div className="overflow-y-auto max-h-[305px] p-4">
+          <div className="overflow-y-auto max-h-[260px] p-3 @7xl:max-h-[305px] @7xl:p-4">
             <div className="space-y-1">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className="flex items-start gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 cursor-pointer group border border-transparent hover:border-gray-200"
+                  className="flex items-start gap-2.5 rounded-xl p-2.5 transition-all hover:bg-gray-50 cursor-pointer group border border-transparent hover:border-gray-200 @7xl:gap-3 @7xl:p-3"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-600 flex-shrink-0 group-hover:bg-gray-600 group-hover:text-white transition-colors">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-600 shrink-0 group-hover:bg-gray-600 group-hover:text-white transition-colors @7xl:h-10 @7xl:w-10">
                     {notification.icon}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -502,20 +557,22 @@ const DashboardDetailsView = ({
         </div>
 
         {/* Bot Performance */}
-        <div className="rounded border border-gray-200 bg-white overflow-y-auto flex flex-col">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-base font-bold text-gray-900">Bot Performance</h2>
+        <div className="min-w-0 flex-1 rounded border border-gray-200 bg-white overflow-y-auto flex flex-col">
+          <div className="px-4 py-3 border-b border-gray-200 @7xl:px-6 @7xl:py-4">
+            <h2 className="text-base font-bold text-gray-900">
+              Bot Performance
+            </h2>
           </div>
-          <div className="overflow-y-auto p-4 max-h-[305px]">
+          <div className="overflow-y-auto p-3 max-h-[260px] @7xl:p-4 @7xl:max-h-[305px]">
             <div className="space-y-1">
               {activeUsers.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-start gap-3 rounded-xl p-3 transition-all hover:bg-gray-50 cursor-pointer group border border-transparent hover:border-gray-200"
+                  className="flex items-start gap-2.5 rounded-xl p-2.5 transition-all hover:bg-gray-50 cursor-pointer group border border-transparent hover:border-gray-200 @7xl:gap-3 @7xl:p-3"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 @7xl:gap-3">
                     <div className="relative">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-600 flex-shrink-0 group-hover:bg-gray-600 group-hover:text-white transition-colors text-xs font-bold">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-600 shrink-0 group-hover:bg-gray-600 group-hover:text-white transition-colors text-xs font-bold @7xl:h-10 @7xl:w-10">
                         {user.initials}
                       </div>
                       <div
@@ -533,6 +590,7 @@ const DashboardDetailsView = ({
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

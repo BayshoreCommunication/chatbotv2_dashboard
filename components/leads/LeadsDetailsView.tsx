@@ -7,19 +7,20 @@ import {
   Lead,
 } from "@/app/actions/leads";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "react-hot-toast";
 import {
-  BiCheck,
+  BiCalendarCheck,
+  BiCalendarEvent,
   BiDownload,
   BiEnvelope,
   BiFile,
   BiGroup,
-  BiPhoneCall,
   BiRefresh,
   BiTrash,
   BiUser,
+  BiX,
 } from "react-icons/bi";
 
 function truncateWords(text: string, limit = 8): string {
@@ -28,43 +29,56 @@ function truncateWords(text: string, limit = 8): string {
   return words.slice(0, limit).join(" ") + "...";
 }
 
-function MessageCell({ message }: { message: string }) {
-  const triggerRef = useRef<HTMLSpanElement>(null);
-  const [show, setShow] = useState(false);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
-
-  const isLong = message.trim().split(/\s+/).length > 8;
-
-  const handleEnter = () => {
-    if (!triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    setCoords({ top: rect.top - 8, left: rect.left });
-    setShow(true);
+function formatAppointment(iso: string | null): { label: string; isPast: boolean } | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return {
+    label: date.toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }),
+    isPast: date.getTime() < Date.now(),
   };
+}
+
+function MessageCell({ message }: { message: string }) {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
-      <span
-        ref={triggerRef}
-        onMouseEnter={handleEnter}
-        onMouseLeave={() => setShow(false)}
-        className="block max-w-xs truncate whitespace-nowrap overflow-hidden text-sm text-gray-700 cursor-default"
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="block max-w-xs truncate whitespace-nowrap overflow-hidden text-left text-sm text-gray-700 hover:text-gray-900 hover:underline"
       >
         {truncateWords(message)}
-      </span>
-      {show &&
-        isLong &&
+      </button>
+      {open &&
         typeof document !== "undefined" &&
         createPortal(
           <div
-            style={{
-              top: coords.top,
-              left: coords.left,
-              transform: "translateY(-100%)",
-            }}
-            className="fixed z-50 w-64 rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            onClick={() => setOpen(false)}
           >
-            {message}
+            <div
+              className="w-full min-w-80 max-w-md min-h-40 rounded-xl bg-white p-5 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-3 flex items-center justify-between gap-4">
+                <h3 className="text-sm font-semibold text-gray-900">Inquiry</h3>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <BiX size={20} />
+                </button>
+              </div>
+              <p className="whitespace-pre-wrap text-sm text-gray-700">{message}</p>
+            </div>
           </div>,
           document.body,
         )}
@@ -126,8 +140,8 @@ const LeadsDetailsView = () => {
     }
   };
 
-  const handleToggleContacted = async (lead: Lead) => {
-    const next = !lead.is_contacted;
+  const handleSetContacted = async (lead: Lead, next: boolean) => {
+    if (next === lead.is_contacted) return;
     setLeads((prev) =>
       prev.map((l) => (l.id === lead.id ? { ...l, is_contacted: next } : l)),
     );
@@ -247,10 +261,16 @@ const LeadsDetailsView = () => {
   console.log("LeadsDetailsView rendered with leads:", leads);
 
   return (
-    <div className="flex flex-col gap-6 bg-gray-50 min-h-screen">
+    // @container: the stat grid below reacts to the actual space available
+    // for this page's content, not the raw viewport — see DashboardDetailsView
+    // for why viewport breakpoints (sm/lg) don't work here (the fixed nav
+    // sidebar's expand/collapse toggle changes available space without
+    // changing the viewport).
+    <div className="@container">
+      <div className="flex flex-col gap-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="rounded border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Visitor Leads</h1>
             <p className="text-sm text-gray-500 mt-1">
@@ -280,7 +300,7 @@ const LeadsDetailsView = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-5 @7xl:grid-cols-4">
         {stats.map((stat, index) => (
           <div
             key={index}
@@ -296,7 +316,7 @@ const LeadsDetailsView = () => {
                 {stat.title}
               </h3>
             </div>
-            <p className="mb-1 text-3xl font-bold text-gray-900">
+            <p className="mb-1 text-2xl font-bold text-gray-900 @7xl:text-3xl">
               {loading ? (
                 <span className="block h-8 w-16 bg-gray-100 animate-pulse rounded"></span>
               ) : (
@@ -330,6 +350,9 @@ const LeadsDetailsView = () => {
                   Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Appointment
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Contacted
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -352,6 +375,9 @@ const LeadsDetailsView = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="h-4 w-48 bg-gray-100 animate-pulse rounded"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-4 w-28 bg-gray-100 animate-pulse rounded"></div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="h-4 w-28 bg-gray-100 animate-pulse rounded"></div>
@@ -409,26 +435,39 @@ const LeadsDetailsView = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <button
-                            onClick={() => handleToggleContacted(lead)}
-                            title={
-                              lead.is_contacted
-                                ? "Mark as not contacted"
-                                : "Mark as contacted"
+                          {(() => {
+                            const appt = formatAppointment(lead.appointment_time);
+                            if (!appt) {
+                              return <span className="text-sm text-gray-700">N/A</span>;
                             }
-                            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                            return appt.isPast ? (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
+                                <BiCalendarCheck size={14} />
+                                Confirmed · {appt.label}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                                <BiCalendarEvent size={14} />
+                                {appt.label}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                            value={lead.is_contacted ? "contacted" : "not_contacted"}
+                            onChange={(e) =>
+                              handleSetContacted(lead, e.target.value === "contacted")
+                            }
+                            className={`cursor-pointer rounded-full border-0 px-3 py-1.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                               lead.is_contacted
-                                ? "bg-green-50 text-green-700 hover:bg-green-100"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                ? "bg-green-50 text-green-700 focus:ring-green-400"
+                                : "bg-gray-100 text-gray-600 focus:ring-gray-400"
                             }`}
                           >
-                            {lead.is_contacted ? (
-                              <BiCheck size={16} />
-                            ) : (
-                              <BiPhoneCall size={14} />
-                            )}
-                            {lead.is_contacted ? "Contacted" : "Not contacted"}
-                          </button>
+                            <option value="not_contacted">Not contacted</option>
+                            <option value="contacted">Contacted</option>
+                          </select>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <button
@@ -461,6 +500,7 @@ const LeadsDetailsView = () => {
             </p>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

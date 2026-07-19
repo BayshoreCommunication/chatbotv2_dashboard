@@ -13,6 +13,9 @@ export interface Lead {
   phone: string | null;
   message: string | null;
   is_contacted: boolean;
+  // Set only once Calendly confirms a real booking (webhook-verified) — null
+  // means no appointment, never a placeholder for "offered but unconfirmed".
+  appointment_time: string | null;
   created_at: string;
 }
 

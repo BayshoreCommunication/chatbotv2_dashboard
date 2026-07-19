@@ -112,8 +112,11 @@ function SkeletonPulse({ className }: { className: string }) {
 
 function SkeletonView() {
   return (
-    <div className="flex flex-col gap-6 bg-gray-50 min-h-screen">
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    // @container: matches UserDetails' own grids below — see its root for why
+    // viewport breakpoints (sm/md/lg) don't work here.
+    <div className="@container">
+      <div className="flex flex-col gap-6 bg-gray-50 min-h-screen">
+      <div className="grid grid-cols-2 gap-5 @7xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
@@ -132,7 +135,7 @@ function SkeletonView() {
         <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
           <SkeletonPulse className="h-4 w-32" />
         </div>
-        <div className="p-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="p-6 grid grid-cols-1 gap-5 @7xl:grid-cols-2">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="space-y-2">
               <SkeletonPulse className="h-3 w-20" />
@@ -145,11 +148,12 @@ function SkeletonView() {
         <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
           <SkeletonPulse className="h-4 w-28" />
         </div>
-        <div className="p-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="p-6 grid grid-cols-1 gap-4 @7xl:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <SkeletonPulse key={i} className="h-20 rounded-lg" />
           ))}
         </div>
+      </div>
       </div>
     </div>
   );
@@ -351,9 +355,14 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
   }
 
   return (
-    <div className="flex flex-col gap-6 bg-gray-50 min-h-screen">
+    // @container: the grids below react to the actual space available for
+    // this page's content, not the raw viewport — the fixed nav sidebar's
+    // expand/collapse toggle changes that available space without changing
+    // the viewport, which sm/md/lg breakpoints can't see.
+    <div className="@container">
+      <div className="flex flex-col gap-6 bg-gray-50 min-h-screen">
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-5 @7xl:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.title}
@@ -378,7 +387,7 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
                 </span>
               )}
             </div>
-            <p className="mb-1 text-2xl font-bold text-gray-900 break-words">
+            <p className="mb-1 text-2xl font-bold text-gray-900 break-words @7xl:text-3xl">
               {stat.value}
             </p>
             <p className="text-xs text-gray-500">{stat.subtitle}</p>
@@ -454,7 +463,7 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 @7xl:grid-cols-2">
             <Field label="Company Name">
               {editing ? (
                 <input
@@ -532,7 +541,7 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
           </div>
 
           {/* Subscription */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 border-t border-gray-100 pt-4">
+          <div className="grid grid-cols-1 gap-4 @7xl:grid-cols-3 border-t border-gray-100 pt-4">
             <InfoBox
               label="Subscription Plan"
               value={prettifyCompanyType(vm.subscriptionType) || "Free"}
@@ -555,6 +564,7 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
 
       {/* Team Access */}
       <TeamAccess isTeamMember={isTeamMember} />
+      </div>
     </div>
   );
 };

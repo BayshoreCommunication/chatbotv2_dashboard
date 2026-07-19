@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BiCheck, BiCopy, BiDownArrowAlt, BiSend } from "react-icons/bi";
+import { BiDownArrowAlt, BiSend } from "react-icons/bi";
 import { sendOwnerReplyAction, toggleTakeoverAction } from "@/app/actions/conversationHistory";
 import type { ConversationHistoryItem, ConversationHistoryMessage } from "@/types/conversation-history";
 
@@ -28,27 +28,12 @@ function formatTimestamp(value: string | null): string {
   return dt.toLocaleString();
 }
 
-async function copyToClipboard(text: string): Promise<void> {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-  const ta = document.createElement("textarea");
-  ta.value = text;
-  Object.assign(ta.style, { position: "fixed", top: "0", left: "0", opacity: "0" });
-  document.body.appendChild(ta);
-  ta.select();
-  document.execCommand("copy");
-  document.body.removeChild(ta);
-}
-
 const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: ChatHistoryBodyProps) => {
   const [replyText, setReplyText] = useState("");
   const [isTakeover, setIsTakeover] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [liveMessages, setLiveMessages] = useState<LiveMessage[]>([]);
   const [isAiTyping, setIsAiTyping] = useState(false);
-  const [copiedJson, setCopiedJson] = useState(false);
   const endRef = useRef<HTMLDivElement | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const pingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -212,15 +197,6 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
     });
   }, [selectedSession?.messages, liveMessages]);
 
-  const handleCopyJson = async () => {
-    if (!selectedSession) return;
-    try {
-      await copyToClipboard(JSON.stringify({ messages: allMessages }, null, 2));
-      setCopiedJson(true);
-      setTimeout(() => setCopiedJson(false), 2000);
-    } catch {}
-  };
-
   if (!selectedSession) {
     return (
       <div className="flex flex-1 items-center justify-center bg-gray-50">
@@ -246,15 +222,6 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleCopyJson}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-          >
-            {copiedJson ? <BiCheck size={16} /> : <BiCopy size={16} />}
-            {copiedJson ? "Copied" : "Copy JSON"}
-          </button>
-
           <button
             type="button"
             onClick={() => endRef.current?.scrollIntoView({ behavior: "smooth" })}
