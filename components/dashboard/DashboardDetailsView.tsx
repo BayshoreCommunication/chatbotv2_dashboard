@@ -144,8 +144,8 @@ const DashboardDetailsView = ({
         ? `${fmt(visitors.new_visitors_30d)} new this month`
         : "People who visited your site",
       icon: <BiUser size={24} />,
-      color: "bg-blue-50",
-      iconColor: "text-blue-600",
+      color: "bg-primary/10",
+      iconColor: "text-primary-dark",
     },
     {
       title: "Conversations Handled",
@@ -274,7 +274,7 @@ const DashboardDetailsView = ({
       <div className="min-w-0 flex-1">
         {/* Cost vs. Value Banner */}
         {showValueBanner && (
-          <div className="mb-6 rounded border border-green-100 bg-gradient-to-br from-green-50 to-blue-50 p-5">
+          <div className="mb-6 rounded border border-green-100 bg-gradient-to-br from-green-50 to-primary/10 p-5">
             {/* Headline: total value vs. what was paid, plus the ROI callout */}
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -375,7 +375,7 @@ const DashboardDetailsView = ({
                     </span>
                     <div className="h-6 flex-1 overflow-hidden rounded bg-gray-100">
                       <div
-                        className="h-full rounded bg-blue-500"
+                        className="h-full rounded bg-primary"
                         style={{ width: `${widthPct}%` }}
                       />
                     </div>
@@ -435,7 +435,7 @@ const DashboardDetailsView = ({
                     onChange={() => setSelectedPeriod("year")}
                     className="peer sr-only"
                   />
-                  <div className="h-4 w-4 rounded-full border-2 border-gray-300 peer-checked:border-blue-600 peer-checked:border-[5px] transition-all" />
+                  <div className="h-4 w-4 rounded-full border-2 border-gray-300 peer-checked:border-primary peer-checked:border-[5px] transition-all" />
                 </div>
                 This year
               </label>
@@ -448,7 +448,7 @@ const DashboardDetailsView = ({
                     onChange={() => setSelectedPeriod("last-year")}
                     className="peer sr-only"
                   />
-                  <div className="h-4 w-4 rounded-full border-2 border-gray-300 peer-checked:border-blue-600 peer-checked:border-[5px] transition-all" />
+                  <div className="h-4 w-4 rounded-full border-2 border-gray-300 peer-checked:border-primary peer-checked:border-[5px] transition-all" />
                 </div>
                 Last year
               </label>
@@ -470,8 +470,8 @@ const DashboardDetailsView = ({
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.12} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#00e0da" stopOpacity={0.12} />
+                    <stop offset="95%" stopColor="#00e0da" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -506,13 +506,13 @@ const DashboardDetailsView = ({
                 <Area
                   type="monotone"
                   dataKey={selectedTab === "total-chat" ? "chats" : "visitors"}
-                  stroke="#3b82f6"
+                  stroke="#00e0da"
                   strokeWidth={3}
                   fill="url(#colorGradient)"
                   dot={false}
                   activeDot={{
                     r: 6,
-                    fill: "#3b82f6",
+                    fill: "#00e0da",
                     strokeWidth: 2,
                     stroke: "#fff",
                   }}

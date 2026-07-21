@@ -206,7 +206,7 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
               animate={{ opacity: 1, x: 0 }}
               className="hidden items-center gap-5 lg:flex"
             >
-              {/* User Info (Desktop) */}
+              {/* User Info (Desktop)
               {user?.email && (
                 <div className="hidden flex-col items-end xl:flex">
                   <span className="text-sm font-semibold text-gray-900">
@@ -216,13 +216,13 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
                     {user.email}
                   </span>
                 </div>
-              )}
+              )} */}
 
               {/* Dashboard Button */}
               <Button
                 variant="outline"
                 onClick={() => router.push("/dashboard")}
-                className="group relative overflow-hidden border-gray-200 bg-white/50 backdrop-blur-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary-dark cursor-pointer"
+                className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90 hover:text-white"
                 title="Dashboard"
               >
                 <LuLayoutDashboard className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
@@ -318,7 +318,7 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
               <div className="mt-3 flex flex-col gap-2 border-t border-gray-100 pt-4">
                 {isAuthenticated ? (
                   <>
-                    {user?.email && (
+                    {/* {user?.email && (
                       <div className="mb-1 flex flex-col px-3">
                         <span className="text-sm font-semibold text-gray-900">
                           {user.companyName || "Company Name"}
@@ -327,14 +327,14 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
                           {user.email}
                         </span>
                       </div>
-                    )}
+                    )} */}
                     <Button
                       variant="outline"
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         router.push("/dashboard");
                       }}
-                      className="w-full justify-center border-gray-200"
+                      className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90"
                     >
                       <LuLayoutDashboard className="mr-2 h-4 w-4" />
                       Dashboard

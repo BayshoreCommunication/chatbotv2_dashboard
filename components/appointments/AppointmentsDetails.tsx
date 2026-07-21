@@ -289,7 +289,7 @@ const AppointmentsDetails = () => {
               href="https://calendly.com/integrations/api_webhooks"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-1 text-blue-600 hover:underline"
+              className="ml-1 text-primary-dark hover:underline"
             >
               Calendly API and Webhooks page
             </a>
@@ -324,7 +324,7 @@ const AppointmentsDetails = () => {
                     })
                   }
                   disabled={tokenLocked || settingsLoading || isSavingToken || isDeletingToken}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />
                 {isConnected && (
                   <p className="text-xs text-green-600">Connected and verified</p>
@@ -345,7 +345,7 @@ const AppointmentsDetails = () => {
                     <button
                       onClick={handleSaveToken}
                       disabled={isSavingToken || !hasInputToken}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="px-4 py-2 bg-thunder-black text-white rounded-lg hover:bg-thunder-black/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       {isSavingToken ? <BiLoaderAlt className="h-4 w-4 animate-spin" /> : <BiSave className="h-4 w-4" />}
                       <span>{isSavingToken ? "Saving..." : hasSavedToken ? "Save Token" : "Add Token"}</span>
@@ -392,7 +392,7 @@ const AppointmentsDetails = () => {
                   </label>
                   <select
                     id="event-type"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
                     value={settings.event_type_uri}
                     onChange={(e) => handleEventTypeChange(e.target.value)}
                   >
@@ -404,7 +404,7 @@ const AppointmentsDetails = () => {
                     ))}
                   </select>
                   {isSavingEventType && (
-                    <p className="text-xs text-blue-600 flex items-center gap-1">
+                    <p className="text-xs text-primary-dark flex items-center gap-1">
                       <BiLoaderAlt className="h-3 w-3 animate-spin" /> Saving selection...
                     </p>
                   )}
@@ -438,7 +438,7 @@ const AppointmentsDetails = () => {
                             <BiTime className="w-3 h-3" />
                             <span>{event.duration} minutes</span>
                           </div>
-                          <span className="px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
+                          <span className="px-2 py-0.5 rounded text-xs bg-primary/10 text-primary-dark">
                             {event.status}
                           </span>
                         </div>
@@ -476,8 +476,8 @@ const AppointmentsDetails = () => {
           ) : isConnected ? (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 border border-gray-200 rounded-lg bg-blue-50">
-                  <div className="text-2xl font-bold text-blue-600">{stats.total_events}</div>
+                <div className="text-center p-4 border border-gray-200 rounded-lg bg-primary/10">
+                  <div className="text-2xl font-bold text-primary-dark">{stats.total_events}</div>
                   <div className="text-sm text-gray-600">Total Events</div>
                 </div>
                 <div className="text-center p-4 border border-gray-200 rounded-lg bg-green-50">
@@ -531,7 +531,7 @@ const AppointmentsDetails = () => {
               return (
                 <div
                   key={slot.start_time}
-                  className="p-3 border border-gray-200 rounded-lg bg-gradient-to-r from-blue-50 to-green-50"
+                  className="p-3 border border-gray-200 rounded-lg bg-gradient-to-r from-primary/10 to-green-50"
                 >
                   <div className="text-sm font-medium text-gray-900">{date}</div>
                   <div className="text-lg font-semibold text-gray-900">{time}</div>
@@ -559,8 +559,8 @@ const AppointmentsDetails = () => {
         <h2 className="text-lg font-semibold text-gray-900 mb-6">How AI Booking Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <BiCalendar className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <BiCalendar className="w-6 h-6 text-primary-dark" />
             </div>
             <h4 className="font-medium mb-2 text-gray-900">1. AI Fetches Availability</h4>
             <p className="text-sm text-gray-600">

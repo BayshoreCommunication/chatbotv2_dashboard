@@ -261,11 +261,11 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
             >
               {msg.role !== "assistant" && (
                 <div className="flex items-start gap-2">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-thunder-black text-sm font-semibold text-white">
                     V
                   </div>
                   <div>
-                    <div className="max-w-md rounded-2xl rounded-tl-sm bg-blue-600 px-4 py-2 text-white">
+                    <div className="max-w-md rounded-2xl rounded-tl-sm bg-thunder-black px-4 py-2 text-white">
                       {msg.content}
                     </div>
                     <span className="mt-1 block text-xs text-gray-400">
@@ -287,7 +287,7 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
                           You
                         </span>
                       ) : (
-                        <span className="rounded px-1.5 py-0.5 bg-blue-100 text-blue-600 text-xs font-medium">
+                        <span className="rounded px-1.5 py-0.5 bg-primary/10 text-primary-dark text-xs font-medium">
                           AI
                         </span>
                       )}
@@ -313,7 +313,7 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
                       <span className="h-2 w-2 animate-bounce rounded-full bg-gray-500 [animation-delay:300ms]" />
                     </div>
                   </div>
-                  <span className="mt-1 rounded px-1.5 py-0.5 bg-blue-100 text-blue-600 text-xs font-medium">AI</span>
+                  <span className="mt-1 rounded px-1.5 py-0.5 bg-primary/10 text-primary-dark text-xs font-medium">AI</span>
                 </div>
               </div>
             </div>

@@ -135,7 +135,7 @@ const KIND_META: Record<
   first_charge: {
     label: "Subscription Started",
     icon: <BsLightningCharge size={16} />,
-    colors: "bg-blue-50 text-blue-600 border-blue-200",
+    colors: "bg-primary/10 text-primary-dark border-primary/20",
   },
   renewal: {
     label: "Renewal",
@@ -237,8 +237,8 @@ const BillingDetails = () => {
             subscription.billing_cycle === "annual" ? "year" : "month"
           }`,
           icon: <BiWallet size={20} />,
-          bg: "bg-blue-50 dark:bg-blue-950",
-          iconColor: "text-blue-600 dark:text-blue-400",
+          bg: "bg-primary/10 dark:bg-primary/20",
+          iconColor: "text-primary-dark dark:text-primary",
         },
         {
           title: "Status",
@@ -352,7 +352,7 @@ const BillingDetails = () => {
           </button>
           <button
             onClick={() => setIsPlanModalOpen(true)}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-lg bg-thunder-black px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-thunder-black/90"
           >
             <BiCreditCard size={16} />
             Manage Billing
@@ -453,7 +453,7 @@ const BillingDetails = () => {
               </div>
               <button
                 onClick={() => setIsPaymentModalOpen(true)}
-                className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                className="text-sm font-medium text-primary-dark hover:text-primary dark:text-primary"
               >
                 Update
               </button>
@@ -576,7 +576,7 @@ const BillingDetails = () => {
                         href={invoice.hostedInvoiceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-lg bg-blue-600 px-3 py-1 text-[11px] font-semibold text-white hover:bg-blue-700"
+                        className="rounded-lg bg-thunder-black px-3 py-1 text-[11px] font-semibold text-white hover:bg-thunder-black/90"
                       >
                         Pay Now
                       </a>

@@ -265,10 +265,10 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
           ? `${formatDate(vm.subscriptionStart)} → ${formatDate(vm.subscriptionEnd)}`
           : "No active subscription",
         icon: <BiCheckCircle size={20} />,
-        color: vm.hasPaidSubscription ? "bg-blue-50" : "bg-gray-50",
-        iconColor: vm.hasPaidSubscription ? "text-blue-600" : "text-gray-500",
+        color: vm.hasPaidSubscription ? "bg-primary/10" : "bg-gray-50",
+        iconColor: vm.hasPaidSubscription ? "text-primary-dark" : "text-gray-500",
         badge: vm.hasPaidSubscription
-          ? { label: "Paid", color: "bg-blue-100 text-blue-700" }
+          ? { label: "Paid", color: "bg-primary/10 text-primary-dark" }
           : { label: "Free", color: "bg-gray-100 text-gray-600" },
       },
       {
@@ -442,7 +442,7 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
                   type="button"
                   onClick={() => void handleSave()}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-lg bg-thunder-black px-3 py-2 text-sm font-medium text-white hover:bg-thunder-black/90 disabled:opacity-60"
                 >
                   <BiSave size={16} /> {saving ? "Saving…" : "Save"}
                 </button>
@@ -473,7 +473,7 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
                     setForm((p) => ({ ...p, companyName: e.target.value }))
                   }
                   placeholder="Enter company name"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
               ) : (
                 renderValue(vm.companyName)
@@ -489,7 +489,7 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
                     setForm((p) => ({ ...p, companyType: e.target.value }))
                   }
                   placeholder="e.g. law-firm"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
               ) : (
                 prettifyCompanyType(vm.companyType)
@@ -505,14 +505,14 @@ const UserDetails = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
                     setForm((p) => ({ ...p, website: e.target.value }))
                   }
                   placeholder="https://example.com"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
               ) : vm.website ? (
                 <a
                   href={vm.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="break-all text-blue-600 hover:underline"
+                  className="break-all text-primary-dark hover:underline"
                 >
                   {vm.website}
                 </a>

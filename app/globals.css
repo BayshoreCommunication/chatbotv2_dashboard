@@ -24,6 +24,27 @@
   --color-primary-dark: #00b2ad;
   --color-thunder-black: #2d2d2d;
   --color-white: #ffffff;
+
+  /* shadcn/ui semantic tokens consumed by components/shared/ui/*.
+     Mapped onto the brand palette above — without these, utilities like
+     `text-primary-foreground` or `bg-destructive` silently produce no CSS
+     (Tailwind v4 only generates a utility if its --color-* token exists),
+     so e.g. button text would fall back to an undefined/inherited color
+     instead of the intended one. */
+  --color-primary-foreground: var(--color-thunder-black);
+  --color-secondary: #f4f4f5;
+  --color-secondary-foreground: var(--color-thunder-black);
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: var(--color-white);
+  --color-accent: #f4f4f5;
+  --color-accent-foreground: var(--color-thunder-black);
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  --color-card: var(--color-white);
+  --color-card-foreground: var(--color-thunder-black);
+  --color-input: #e4e4e7;
+  --color-border: #e4e4e7;
+  --color-ring: var(--color-primary);
 }
 
 body {

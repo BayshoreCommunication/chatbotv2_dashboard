@@ -132,7 +132,7 @@ export function SignupPaymentForm({
           type="checkbox"
           checked={agreed}
           onChange={(e) => setAgreed(e.target.checked)}
-          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-blue-600"
+          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary-dark"
         />
         <span className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
           I agree to the{" "}
@@ -140,7 +140,7 @@ export function SignupPaymentForm({
             href="/terms"
             target="_blank"
             rel="noreferrer"
-            className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+            className="font-medium text-primary-dark hover:underline dark:text-primary"
           >
             Terms of Service
           </a>{" "}
@@ -158,7 +158,7 @@ export function SignupPaymentForm({
       <button
         type="submit"
         disabled={!stripe || submitting || !agreed}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-thunder-black py-3.5 text-sm font-semibold text-white transition-colors hover:bg-thunder-black/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitting ? (
           <BiLoaderAlt className="animate-spin" size={18} />

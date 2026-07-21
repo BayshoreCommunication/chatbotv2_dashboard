@@ -34,7 +34,15 @@ export async function middleware(request: NextRequest) {
   const excludedPaths = [
     "/_next/",
     "/favicon.ico",
-    "/opengraph-image.png",
+    // Next's file-based metadata routes (app/opengraph-image.png etc.) are
+    // served at a generated URL that drops the original file extension —
+    // "/opengraph-image", not "/opengraph-image.png". Without this, social
+    // media crawlers (which never carry an auth cookie) get redirected to
+    // /sign-in instead of the actual preview image.
+    "/opengraph-image",
+    "/twitter-image",
+    "/icon",
+    "/apple-icon",
     "/assets/",
     "/api/auth/",
   ];

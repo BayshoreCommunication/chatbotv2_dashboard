@@ -22,7 +22,7 @@ export function BillingCycleToggle({
           {!isYearly && (
             <motion.div
               layoutId="billingActiveTab"
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 shadow-md"
+              className="absolute inset-0 rounded-full bg-thunder-black shadow-md"
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             />
           )}
@@ -42,7 +42,7 @@ export function BillingCycleToggle({
           {isYearly && (
             <motion.div
               layoutId="billingActiveTab"
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 shadow-md"
+              className="absolute inset-0 rounded-full bg-thunder-black shadow-md"
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             />
           )}

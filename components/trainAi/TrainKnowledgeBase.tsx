@@ -521,7 +521,7 @@ export default function TrainKnowledgeBase({
   // ── Main render ─────────────────────────────────────────────────────────────
 
   const inputClass =
-    "w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white";
+    "w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white";
 
   return (
     <div className="space-y-6">
@@ -530,7 +530,7 @@ export default function TrainKnowledgeBase({
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary-dark dark:bg-primary/20 dark:text-primary">
               Train AI
             </span>
             <h2 className="mt-2 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
@@ -648,7 +648,7 @@ export default function TrainKnowledgeBase({
             <div className="flex flex-col rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
               {/* Card header */}
               <div className="flex items-center gap-2 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
+                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
                   Scanning your website
                 </p>
@@ -778,8 +778,8 @@ export default function TrainKnowledgeBase({
             </div>
 
             {/* Tips card */}
-            <div className="rounded-2xl bg-linear-to-br from-gray-900 via-gray-800 to-blue-900 p-6 text-white shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-200">
+            <div className="rounded-2xl bg-linear-to-br from-gray-900 via-gray-800 to-thunder-black p-6 text-white shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
                 Before you start
               </p>
               <h3 className="mt-3 text-base font-semibold leading-snug">

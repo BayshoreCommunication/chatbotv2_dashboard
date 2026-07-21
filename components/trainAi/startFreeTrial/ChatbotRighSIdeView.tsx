@@ -333,7 +333,7 @@ const ChatbotRightSideView = ({
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="flex w-full justify-center p-4"
       >
-        <div className="w-full max-w-[380px] rounded-3xl bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+        <div className="w-full max-w-[380px] rounded-3xl bg-gradient-to-br from-primary/5 via-white to-purple-50 p-6">
           {/* Flow graphic: your site -> your AI -> your customers */}
           <div className="mb-7 flex items-center justify-center gap-3">
             {[
@@ -424,7 +424,7 @@ const ChatbotRightSideView = ({
     >
       <div className="relative w-full max-w-[380px]">
         {/* Decorative Glow */}
-        <div className="absolute -inset-4 bg-gradient-to-tr from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-3xl" />
+        <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 via-purple-500/20 to-pink-500/20 blur-3xl" />
 
         {/* Main Chat Container */}
         <div className="relative mx-auto flex h-[600px] w-[380px] shrink-0 flex-col overflow-hidden rounded-2xl bg-white shadow-xl">

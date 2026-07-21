@@ -182,8 +182,8 @@ const LeadsDetailsView = () => {
       value: totalLeads,
       subtitle: "Complete contact information",
       icon: <BiUser size={20} />,
-      color: "bg-blue-50",
-      iconColor: "text-blue-600",
+      color: "bg-primary/10",
+      iconColor: "text-primary-dark",
     },
     {
       title: "With Email",
@@ -290,7 +290,7 @@ const LeadsDetailsView = () => {
             <button
               onClick={handleDownloadCSV}
               disabled={leads.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-thunder-black text-white rounded-lg text-sm font-medium hover:bg-thunder-black/90 transition-colors disabled:opacity-50"
             >
               <BiDownload size={18} />
               Download CSV
@@ -397,7 +397,7 @@ const LeadsDetailsView = () => {
                         id={`lead-row-${lead.id}`}
                         className={`transition-colors ${
                           lead.id === highlightedLeadId
-                            ? "bg-blue-50 hover:bg-blue-50"
+                            ? "bg-primary/10 hover:bg-primary/10"
                             : "hover:bg-gray-50"
                         }`}
                       >
@@ -446,7 +446,7 @@ const LeadsDetailsView = () => {
                                 Confirmed · {appt.label}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary-dark">
                                 <BiCalendarEvent size={14} />
                                 {appt.label}
                               </span>

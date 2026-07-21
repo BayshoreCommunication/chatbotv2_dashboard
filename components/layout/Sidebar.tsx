@@ -3,6 +3,7 @@
 import { navigationConfig, NavItem } from "@/config/navigation";
 import { useSidebarContext } from "@/lib/SidebarContext";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -48,12 +49,28 @@ const Sidebar = () => {
     >
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-gray-200 px-4 ml-3">
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-800 cursor-pointer hover:bg-black transition-colors flex-shrink-0">
-            <span className="text-sm font-bold text-white">AI</span>
-          </div>
-          {isExpanded && (
-            <span className="text-lg font-semibold text-gray-800">Bay AI</span>
+        <Link
+          href="/dashboard"
+          className="flex flex-shrink-0 items-center transition-opacity hover:opacity-80"
+        >
+          {isExpanded ? (
+            <Image
+              src="/assets/logo/go-converto-logo-black.png"
+              alt="Go Converto"
+              width={1387}
+              height={312}
+              priority
+              className="h-8 w-auto"
+            />
+          ) : (
+            <Image
+              src="/assets/logo/go-converto-logo-short.png"
+              alt="Go Converto"
+              width={412}
+              height={311}
+              priority
+              className="h-9 w-auto"
+            />
           )}
         </Link>
       </div>

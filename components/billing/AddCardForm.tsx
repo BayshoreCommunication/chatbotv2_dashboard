@@ -62,7 +62,7 @@ export function AddCardForm({
         <button
           type="submit"
           disabled={!stripe || submitting}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-lg bg-thunder-black px-4 py-2 text-sm font-medium text-white hover:bg-thunder-black/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? "Adding…" : "Add Card"}
         </button>

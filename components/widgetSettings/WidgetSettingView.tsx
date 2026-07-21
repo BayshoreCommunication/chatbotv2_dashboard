@@ -291,7 +291,7 @@ const WidgetSettingView = () => {
   if (viewState === "activating") {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4 text-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-200 border-t-primary" />
         <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
           Setting up your subscription…
         </p>
@@ -337,18 +337,18 @@ const WidgetSettingView = () => {
   // Trial banner (shown above the editor when user is in the free trial)
   const daysLeft = trialDaysLeft(subscription?.trial_end ?? null);
   const trialBanner = subscription?.is_in_trial ? (
-    <div className="mb-5 flex flex-col gap-1 rounded-xl border border-blue-200 bg-blue-50 px-5 py-3.5 dark:border-blue-900 dark:bg-blue-950 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mb-5 flex flex-col gap-1 rounded-xl border border-primary/20 bg-primary/10 px-5 py-3.5 dark:border-primary/40 dark:bg-primary/20 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">
+        <p className="text-sm font-semibold text-primary-dark dark:text-primary">
           Free trial — {daysLeft} day{daysLeft !== 1 ? "s" : ""} remaining
         </p>
-        <p className="text-xs text-blue-700 dark:text-blue-400">
+        <p className="text-xs text-primary-dark/80 dark:text-primary">
           Your card will be charged automatically when the trial ends. Cancel anytime before then.
         </p>
       </div>
       <Link
         href="/pricing"
-        className="mt-2 shrink-0 text-xs font-semibold text-blue-800 underline underline-offset-2 hover:text-blue-600 dark:text-blue-300 sm:mt-0"
+        className="mt-2 shrink-0 text-xs font-semibold text-primary-dark underline underline-offset-2 hover:text-primary dark:text-primary sm:mt-0"
       >
         Manage subscription
       </Link>
@@ -373,7 +373,7 @@ const WidgetSettingView = () => {
             <button
               type="button"
               onClick={handleEdit}
-              className="flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 hover:shadow-blue-500/30"
+              className="flex items-center gap-2 rounded-md bg-thunder-black px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-thunder-black/20 transition-all hover:bg-thunder-black/90 hover:shadow-thunder-black/30"
             >
               <BiPencil size={18} /> Edit Widget
             </button>
@@ -390,7 +390,7 @@ const WidgetSettingView = () => {
                 type="button"
                 onClick={handleSave}
                 disabled={saving || !hasChanges}
-                className="flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex items-center gap-2 rounded-md bg-thunder-black px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-thunder-black/20 transition-all hover:bg-thunder-black/90 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {saving ? (
                   <BiRefresh className="animate-spin" size={18} />

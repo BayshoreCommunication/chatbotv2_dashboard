@@ -285,7 +285,7 @@ function CheckoutContent() {
                       {plan.name}
                     </span>
                     {plan.recommended && (
-                      <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                      <span className="rounded-full bg-primary-dark px-2.5 py-0.5 text-xs font-semibold text-white">
                         Most Popular
                       </span>
                     )}
@@ -377,7 +377,7 @@ function CheckoutContent() {
                       className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
                     >
                       <BiCheckCircle
-                        className="mt-0.5 shrink-0 text-blue-500"
+                        className="mt-0.5 shrink-0 text-primary-dark"
                         size={15}
                       />
                       {feature}
@@ -394,7 +394,7 @@ function CheckoutContent() {
                 </div>
                 <Link
                   href="/#pricing"
-                  className="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  className="text-xs font-medium text-primary-dark hover:text-primary dark:text-primary dark:hover:text-primary/80"
                 >
                   Change plan
                 </Link>

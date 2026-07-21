@@ -433,7 +433,7 @@ const Topbar = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
                         {notification.title}
                       </span>
                       {!notification.is_read && (
-                        <span className="h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
                       )}
                     </div>
                     <p className="text-xs text-gray-500">

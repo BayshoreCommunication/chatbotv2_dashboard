@@ -195,8 +195,8 @@ export default function TestLiveChat({ companyId, isKbTrained = false }: Props) 
                 <p className="whitespace-pre-wrap">{bubbleText}</p>
 
                 {parsed && parsed.slots.length > 0 && (
-                  <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-3">
-                    <p className="text-xs font-semibold text-blue-700">Select an available time</p>
+                  <div className="mt-3 rounded-xl border border-primary/20 bg-primary/10 p-3">
+                    <p className="text-xs font-semibold text-primary-dark">Select an available time</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {parsed.slots.map((slot) => (
                         <button
@@ -204,7 +204,7 @@ export default function TestLiveChat({ companyId, isKbTrained = false }: Props) 
                           type="button"
                           onClick={() => sendChatMessage(`Please confirm this slot: ${slot}`)}
                           disabled={isChatting}
-                          className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-medium text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="rounded-full border border-primary/20 bg-white px-3 py-1 text-xs font-medium text-primary-dark transition hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {slot}
                         </button>

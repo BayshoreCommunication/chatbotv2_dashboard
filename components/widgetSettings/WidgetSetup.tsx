@@ -62,7 +62,7 @@ const WidgetSetup = ({ onSetupComplete }: WidgetSetupProps) => {
 
         {/* Header */}
         <div className="mb-10 flex flex-col items-center text-center">
-          <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-500/30">
+          <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-thunder-black shadow-lg shadow-thunder-black/30">
             <BiBot size={40} className="text-white" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
@@ -80,14 +80,14 @@ const WidgetSetup = ({ onSetupComplete }: WidgetSetupProps) => {
               key={step.title}
               className="flex flex-col items-center gap-3 rounded-xl border border-gray-200 bg-white p-5 text-center shadow-sm"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary-dark">
                 {step.icon}
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-800">{step.title}</p>
                 <p className="mt-0.5 text-xs text-gray-400">{step.desc}</p>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-primary-dark">
                 Step {i + 1}
               </span>
             </div>
@@ -123,7 +123,7 @@ const WidgetSetup = ({ onSetupComplete }: WidgetSetupProps) => {
           type="button"
           onClick={handleSetup}
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-blue-600 py-4 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 hover:shadow-blue-500/35 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-thunder-black py-4 text-sm font-semibold text-white shadow-md shadow-thunder-black/20 transition-all hover:bg-thunder-black/90 hover:shadow-thunder-black/35 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? (
             <>

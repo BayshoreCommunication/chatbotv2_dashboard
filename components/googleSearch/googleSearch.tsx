@@ -136,13 +136,13 @@ export default function GoogleSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="e.g. Carter Injury Law"
-            className="flex-1 px-6 py-4 text-lg border border-gray-300 rounded-full focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 shadow-sm transition-all"
+            className="flex-1 px-6 py-4 text-lg border border-gray-300 rounded-full focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary shadow-sm transition-all"
             disabled={loading}
           />
           <button
             onClick={handleSearch}
             disabled={loading}
-            className="px-8 py-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all font-medium shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-w-[140px]"
+            className="px-8 py-4 bg-thunder-black text-white rounded-full hover:bg-thunder-black/90 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all font-medium shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-w-[140px]"
           >
             {loading ? (
               <>
@@ -178,7 +178,7 @@ export default function GoogleSearch() {
           {results.map((result, index) => (
             <div
               key={index}
-              className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300"
+              className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl hover:border-primary/20 transition-all duration-300"
             >
               <div className="flex flex-col md:flex-row">
                 {/* Visual Preview / Icon */}
@@ -241,7 +241,7 @@ export default function GoogleSearch() {
                     </span>
 
                     {result.metadata?.type && (
-                      <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full font-medium border border-blue-100 capitalize">
+                      <span className="px-2.5 py-0.5 bg-primary/10 text-primary-dark text-xs rounded-full font-medium border border-primary/20 capitalize">
                         {result.metadata.type}
                       </span>
                     )}
@@ -251,7 +251,7 @@ export default function GoogleSearch() {
                     href={result.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xl md:text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2"
+                    className="text-xl md:text-2xl font-bold text-gray-900 group-hover:text-primary-dark transition-colors line-clamp-2 mb-2"
                   >
                     {result.title}
                   </a>
@@ -318,7 +318,7 @@ export default function GoogleSearch() {
                   );
                   alert("JSON copied to clipboard!");
                 }}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+                className="px-4 py-2 bg-thunder-black hover:bg-thunder-black/90 text-white text-sm rounded-lg transition-colors"
               >
                 Copy JSON
               </button>

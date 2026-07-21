@@ -4,6 +4,7 @@ import Footer from "@/components/landingPage/Footer";
 import Navbar from "@/components/landingPage/Navbar";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { OG_IMAGE } from "@/config/seo";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -16,9 +17,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const LANDING_TITLE = "Go Converto — AI That Turns Visitors Into Customers";
+const LANDING_DESCRIPTION =
+  "Instant replies, more leads, and happier customers — all powered by AI. Train Go Converto on your website and start converting visitors in minutes.";
+
 export const metadata: Metadata = {
-  title: "AI Assistant",
-  description: "Your intelligent workflow partner",
+  // `absolute` opts out of the root layout's `%s · Go Converto` title
+  // template — this title is already complete, the template would just
+  // append "· Go Converto" a second time onto the end of it.
+  title: { absolute: LANDING_TITLE },
+  description: LANDING_DESCRIPTION,
+  openGraph: {
+    title: LANDING_TITLE,
+    description: LANDING_DESCRIPTION,
+    type: "website",
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: LANDING_TITLE,
+    description: LANDING_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
 };
 
 export default async function LandingPageLayout({

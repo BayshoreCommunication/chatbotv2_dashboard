@@ -76,7 +76,7 @@ export function PaymentMethodsModal({
                       •••• {card.last4}
                     </p>
                     {card.isDefault && (
-                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                      <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary-dark">
                         Default
                       </span>
                     )}
@@ -90,7 +90,7 @@ export function PaymentMethodsModal({
                 {!card.isDefault && (
                   <button
                     onClick={() => onSetDefault(card.id)}
-                    className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                    className="text-xs font-medium text-primary-dark hover:text-primary"
                   >
                     Set as default
                   </button>
@@ -125,7 +125,7 @@ export function PaymentMethodsModal({
               <button
                 onClick={handleStartAddCard}
                 disabled={loadingSetup}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 py-3 text-sm font-medium text-gray-600 hover:border-primary/40 hover:text-primary-dark transition-colors disabled:opacity-60"
               >
                 <BiPlus size={16} />
                 {loadingSetup ? "Loading…" : "Add New Card"}
@@ -151,7 +151,7 @@ export function PaymentMethodsModal({
               type="button"
               onClick={onToggleAutoPayment}
               className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors ${
-                autoPayment ? "bg-blue-600" : "bg-gray-300"
+                autoPayment ? "bg-primary" : "bg-gray-300"
               }`}
             >
               <span

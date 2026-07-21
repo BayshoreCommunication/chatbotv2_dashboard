@@ -12,8 +12,6 @@ import SubscriptionSection from "@/components/landingPage/SubscriptionSection";
 const page = async () => {
   const session = await auth();
 
-  console.log("check session 250255", session);
-
   // Transform session to match LandingPage's expected type
   const transformedSession = session
     ? {

@@ -92,7 +92,7 @@ const SigninPage = () => {
   // Shared styles
   const inputWrapperClass = "relative flex items-center";
   const inputClass =
-    "w-full rounded-xl border border-gray-200 bg-gray-50/50 py-3 pl-11 pr-4 text-sm text-gray-900 placeholder-gray-400 transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:bg-black/40";
+    "w-full rounded-xl border border-gray-200 bg-gray-50/50 py-3 pl-11 pr-4 text-sm text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:bg-black/40";
   const iconClass =
     "absolute left-3.5 h-5 w-5 text-gray-400 dark:text-gray-500";
 
@@ -100,8 +100,8 @@ const SigninPage = () => {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-50 dark:bg-[#050505]">
       {/* --- Ambient Background --- */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute left-[20%] top-[20%] h-[400px] w-[400px] rounded-full bg-blue-400/20 blur-[120px] dark:bg-blue-600/10" />
-        <div className="absolute right-[20%] bottom-[20%] h-[400px] w-[400px] rounded-full bg-indigo-400/20 blur-[120px] dark:bg-indigo-600/10" />
+        <div className="absolute left-[20%] top-[20%] h-[400px] w-[400px] rounded-full bg-primary/20 blur-[120px] dark:bg-primary/10" />
+        <div className="absolute right-[20%] bottom-[20%] h-[400px] w-[400px] rounded-full bg-thunder-black/10 blur-[120px] dark:bg-thunder-black/20" />
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] dark:invert" />
       </div>
 
@@ -176,7 +176,7 @@ const SigninPage = () => {
             <button
               type="submit"
               disabled={requesting}
-              className="mt-2 w-full transform rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 hover:shadow-blue-500/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-2 w-full transform rounded-xl bg-thunder-black px-4 py-3 font-bold text-white shadow-lg shadow-thunder-black/25 transition-all hover:-translate-y-0.5 hover:bg-thunder-black/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {requesting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -211,7 +211,7 @@ const SigninPage = () => {
             <span className="text-gray-500 dark:text-gray-400">New here? </span>
             <Link
               href={`/sign-up${callbackUrl !== "/dashboard" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
-              className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              className="font-semibold text-primary-dark hover:text-primary dark:text-primary"
             >
               Create an account
             </Link>
@@ -251,8 +251,8 @@ const SigninPage = () => {
                 </button>
 
                 <div className="mb-6 text-center">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-                    <BiShield className="h-8 w-8 text-blue-600" />
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                    <BiShield className="h-8 w-8 text-primary-dark" />
                   </div>
                   <h2 className="text-2xl font-bold text-gray-900">
                     Enter Your Code
@@ -276,12 +276,12 @@ const SigninPage = () => {
                       maxLength={6}
                       required
                       style={{ colorScheme: "light" }}
-                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-3xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-3xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10"
                     />
 
                     <div className="flex items-center justify-between text-sm">
                       {otpTimer > 0 ? (
-                        <p className="font-mono text-blue-600">
+                        <p className="font-mono text-primary-dark">
                           Code expires in {formatTime(otpTimer)}
                         </p>
                       ) : (
@@ -291,7 +291,7 @@ const SigninPage = () => {
                         type="button"
                         onClick={handleResendOtp}
                         disabled={requesting || isPending || otpTimer > 0}
-                        className="font-semibold text-blue-600 hover:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="font-semibold text-primary-dark hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Resend Code
                       </button>
@@ -307,7 +307,7 @@ const SigninPage = () => {
                   <button
                     type="submit"
                     disabled={isPending || otp.length !== 6}
-                    className="w-full transform rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3.5 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 hover:shadow-blue-500/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                    className="w-full transform rounded-xl bg-thunder-black px-4 py-3.5 font-bold text-white shadow-lg shadow-thunder-black/25 transition-all hover:-translate-y-0.5 hover:bg-thunder-black/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {isPending ? "Verifying..." : "Verify & Sign In"}
                   </button>

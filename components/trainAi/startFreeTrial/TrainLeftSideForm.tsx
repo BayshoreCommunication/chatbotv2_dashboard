@@ -283,10 +283,10 @@ const TrainLeftSideForm = ({
 
   // Shared field styles — clean modern SaaS input.
   const inputClasses =
-    "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-500 dark:focus:border-blue-400";
+    "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-500 dark:focus:border-primary";
   // Input with left icon padding
   const inputIconClasses =
-    "w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-500 dark:focus:border-blue-400";
+    "w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-500 dark:focus:border-primary";
   const labelClasses =
     "mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400";
   const primaryButtonClasses =
@@ -1341,7 +1341,7 @@ const TrainLeftSideForm = ({
 
           {/* Info Card */}
           <div className="flex items-start gap-2.5 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
-            <div className="mt-1 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-blue-500" />
+            <div className="mt-1 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-primary" />
             <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
               <strong className="font-semibold text-gray-900 dark:text-white">
                 Your AI is ready.
