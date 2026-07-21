@@ -1,5 +1,13 @@
 import { auth } from "@/auth";
+import BlogSection from "@/components/landingPage/home/BlogSection";
+import ContactForm from "@/components/landingPage/home/ContactForm";
+import FAQSection from "@/components/landingPage/home/FAQSection";
+import HeroSection from "@/components/landingPage/home/HeroSection";
+import HowItsWork from "@/components/landingPage/home/HowItsWork";
+import IndustriesSections from "@/components/landingPage/home/IndustriesSections";
+import TrustedByBusiness from "@/components/landingPage/home/TrustedByBusiness";
 import LandingPage from "@/components/landingPage/MainPage";
+import SubscriptionSection from "@/components/landingPage/SubscriptionSection";
 
 const page = async () => {
   const session = await auth();
@@ -19,9 +27,21 @@ const page = async () => {
       }
     : null;
 
+     // Authentication State
+  const isAuthenticated = !!session?.user;
+  const user = session?.user || null;
+
   return (
-    <div>
-      <LandingPage session={transformedSession} />
+    <div className="mt-16">
+      {/* <LandingPage session={transformedSession} /> */}
+      <HeroSection/>
+      <TrustedByBusiness/>
+      <IndustriesSections/>
+      <HowItsWork/>
+      <SubscriptionSection isAuthenticated={isAuthenticated} user={user} />
+      <FAQSection/>
+      <BlogSection/>
+      <ContactForm/>
     </div>
   );
 };

@@ -427,7 +427,10 @@ const FeaturesSection = () => {
 // How It Works Section
 // ----------------------------------------------------------------------------
 const HowItWorksSection = () => (
-  <section className="relative overflow-hidden bg-white  dark:bg-black pb-20">
+  <section
+    id="how-it-works"
+    className="relative overflow-hidden bg-white  dark:bg-black pb-20 scroll-mt-24"
+  >
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {/* Section Header */}
       <div className="mb-12 text-center sm:mb-16">

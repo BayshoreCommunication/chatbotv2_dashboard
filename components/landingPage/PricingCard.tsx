@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/shared/ui/badge";
 import { Button, buttonVariants } from "@/components/shared/ui/button";
 import {
   Card,
@@ -9,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shared/ui/card";
+import { cn } from "@/lib/utils";
 import { PricingPlan } from "@/config/pricing";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -73,75 +73,67 @@ export const PricingCard = memo(
         whileInView="visible"
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className={`relative ${
-          plan.recommended ? "lg:-my-8 lg:h-[calc(100%+4rem)]" : "h-full"
-        }`}
+        className="relative h-full"
       >
         {plan.recommended && (
-          <Badge
-            variant="gradient"
-            className="absolute -top-1 left-1/2 z-50 -translate-x-1/2 transform rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-2 text-sm font-medium text-white shadow-lg"
-          >
+          <span className="absolute -top-3.5 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary-dark px-4 py-1.5 text-xs font-semibold text-white shadow-md">
             Most Popular
-          </Badge>
+          </span>
         )}
 
         <Card
-          className={`relative flex h-full flex-col overflow-hidden border backdrop-blur-xl ${
+          className={cn(
+            "relative flex h-full flex-col overflow-visible rounded-2xl bg-white",
             plan.recommended
-              ? "mt-4 border-blue-500/50 bg-gradient-to-br from-blue-50 to-purple-50 shadow-[0_0_30px_rgba(59,130,246,0.2)] dark:from-gray-900 dark:to-black"
-              : "border-gray-200 bg-gradient-to-br from-white to-gray-50 hover:border-gray-300 dark:border-gray-800 dark:from-gray-900 dark:to-black dark:hover:border-gray-700"
-          }`}
+              ? "border-2 border-primary shadow-lg"
+              : "border border-gray-200 hover:border-gray-300"
+          )}
         >
-          <CardHeader className="relative z-10 pb-8 pt-8 text-center">
-            <CardTitle className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+          <CardHeader className="pb-2 pt-8 text-left">
+            <CardTitle className="mb-1 text-xl font-bold text-thunder-black">
               {plan.name}
             </CardTitle>
-            <CardDescription className="mb-6 text-gray-600 dark:text-gray-400">
+            <CardDescription className="mb-6 text-sm leading-relaxed text-gray-500">
               {plan.description}
             </CardDescription>
+
             {plan.isCustomPricing ? (
-              <div className="mb-6 flex items-baseline justify-center">
-                <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-5xl font-bold text-transparent dark:from-white dark:to-gray-300">
+              <div className="mb-6">
+                <span className="text-4xl font-extrabold text-thunder-black">
                   Custom
                 </span>
+                <p className="mt-1 text-sm text-gray-500">
+                  Tailored to your usage
+                </p>
               </div>
             ) : (
-              <>
-                <div className="mb-6 flex items-baseline justify-center">
-                  <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-5xl font-bold text-transparent dark:from-white dark:to-gray-300">
+              <div className="mb-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-extrabold text-thunder-black">
                     ${displayPrice.toFixed(0)}
                   </span>
-                  <span className="ml-2 text-lg text-gray-600 dark:text-gray-400">
-                    /month
-                  </span>
+                  <span className="text-base text-gray-500">/month</span>
                 </div>
-                {isYearly && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Billed ${price} annually
-                  </p>
-                )}
+                <p className="mt-1 text-sm text-gray-500">
+                  {isYearly ? `Billed $${price} annually` : "Billed monthly"}
+                </p>
                 {plan.trialDays && !isCurrentPlan && (
-                  <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                    {plan.trialDays}-day free trial
+                  <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                    {plan.trialDays}-day free trial — then billed automatically
                   </span>
                 )}
-              </>
+              </div>
             )}
           </CardHeader>
 
-          <CardContent className="relative z-10 flex flex-grow flex-col">
-            <ul className="mb-8 flex-grow space-y-4">
+          <CardContent className="flex flex-grow flex-col pt-0">
+            <ul className="mb-8 flex-grow space-y-3">
               {plan.features.map((feature, featureIndex) => (
                 <li
                   key={featureIndex}
-                  className="group flex items-center text-gray-700 dark:text-gray-300"
+                  className="flex items-start gap-2.5 text-sm text-gray-700"
                 >
-                  <BiCheckCircle
-                    className={`mr-3 h-5 w-5 ${
-                      plan.recommended ? "text-blue-400" : "text-blue-500"
-                    }`}
-                  />
+                  <BiCheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary-dark" />
                   <span>{feature}</span>
                 </li>
               ))}
@@ -151,7 +143,12 @@ export const PricingCard = memo(
               {plan.isCustomPricing ? (
                 <a
                   href={CONTACT_SALES_HREF}
-                  className={buttonVariants({ variant: "outline", size: "xl", className: "w-full" })}
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "xl",
+                    className:
+                      "w-full rounded-lg border-thunder-black bg-white text-thunder-black hover:bg-gray-50",
+                  })}
                 >
                   <span className="flex items-center justify-center gap-2">
                     Contact Sales
@@ -160,9 +157,14 @@ export const PricingCard = memo(
                 </a>
               ) : (
                 <Button
-                  variant={plan.recommended ? "gradient" : "outline"}
+                  variant="outline"
                   size="xl"
-                  className="w-full"
+                  className={cn(
+                    "w-full rounded-lg",
+                    plan.recommended
+                      ? "border-thunder-black bg-thunder-black text-white hover:bg-thunder-black/90"
+                      : "border-thunder-black bg-white text-thunder-black hover:bg-gray-50"
+                  )}
                   onClick={() =>
                     isCurrentPlan
                       ? router.push("/dashboard")

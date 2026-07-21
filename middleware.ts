@@ -18,6 +18,11 @@ export async function middleware(request: NextRequest) {
     "/create-assistent",
     "/chatbot",
     "/pricing",
+    "/industries",
+    "/how-it-works",
+    "/faq",
+    "/blog",
+    "/contact",
     "/accept-invite",
     "/verify-team-access",
   ];

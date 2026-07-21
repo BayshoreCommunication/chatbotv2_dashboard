@@ -15,6 +15,15 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Brand colors */
+  --color-primary: #00e0da;
+  /* Darker shade of primary — #00e0da is too light for legible text/hover
+     states on a white background, so small accent text and button hovers
+     use this instead of the raw brand teal. */
+  --color-primary-dark: #00b2ad;
+  --color-thunder-black: #2d2d2d;
+  --color-white: #ffffff;
 }
 
 body {

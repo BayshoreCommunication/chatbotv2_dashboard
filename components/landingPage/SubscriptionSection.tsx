@@ -5,8 +5,7 @@ import { PricingPlan, pricingPlans } from "@/config/pricing";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { IoSparkles } from "react-icons/io5";
-import { LuSparkles } from "react-icons/lu";
+import { HiSparkles } from "react-icons/hi";
 import { PricingCard } from "./PricingCard";
 
 interface User {
@@ -72,140 +71,65 @@ const SubscriptionSection = ({
   return (
     <section
       id="pricing"
-      className="relative overflow-hidden bg-white pb-32 dark:bg-black"
+      className="relative overflow-hidden bg-white py-10 lg:py-20"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-gray-50 opacity-50 dark:from-gray-900 dark:via-black dark:to-black" />
-
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mb-20 text-center"
+          className="mb-14 text-center"
         >
-          <h2 className="mb-6 mt-10 text-4xl font-bold sm:text-6xl">
-            <span className="block bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent dark:from-white dark:to-gray-300">
-              Choose your
-            </span>
-            <span className="block bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              perfect plan
-            </span>
+          <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-[7px] text-[13px] font-semibold text-primary-dark">
+            <HiSparkles className="h-4 w-4 text-primary" />
+            Pricing
+          </span>
+
+          <h2 className="mb-6 mt-4 text-4xl font-extrabold tracking-tight text-thunder-black sm:text-5xl">
+            Simple plans that scale with your business
           </h2>
-          <p className="mx-auto mb-8 max-w-3xl text-xl text-gray-600 dark:text-gray-400">
-            Start with a 14-day free trial, scale as you grow. No hidden
-            fees, cancel anytime.
+          <p className="mx-auto mb-10 max-w-xl text-lg text-gray-600">
+            Start free for 14 days. Upgrade, downgrade, or cancel anytime.
           </p>
 
           {/* Billing Cycle Toggle */}
-          <div className="mx-auto mb-6 flex w-fit flex-col items-center gap-4">
-            <motion.div
-              className="relative flex items-center justify-center gap-3 rounded-full border border-gray-300 bg-white p-1.5 shadow-lg dark:border-gray-700 dark:bg-gray-900"
-              layout
+          <div className="flex items-center justify-center gap-3">
+            <span
+              className={`text-sm font-semibold transition-colors ${
+                !isYearly ? "text-thunder-black" : "text-gray-400"
+              }`}
             >
-              <motion.div
-                className="absolute inset-0 rounded-full"
-                animate={{
-                  background: isYearly
-                    ? "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1))"
-                    : "linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05))",
-                }}
-                transition={{ duration: 0.3 }}
+              Monthly
+            </span>
+
+            <button
+              onClick={() => setIsYearly((prev) => !prev)}
+              role="switch"
+              aria-checked={isYearly}
+              aria-label="Toggle yearly billing"
+              className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
+                isYearly ? "bg-primary" : "bg-gray-200"
+              }`}
+            >
+              <motion.span
+                animate={{ x: isYearly ? 20 : 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-md"
               />
+            </button>
 
-              <motion.button
-                onClick={() => setIsYearly(false)}
-                className="relative z-10 rounded-full px-6 py-2.5 text-sm font-semibold transition-all"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {!isYearly && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 shadow-xl"
-                    transition={{
-                      type: "spring",
-                      bounce: 0.2,
-                      duration: 0.6,
-                    }}
-                  />
-                )}
-                <span
-                  className={`relative z-10 ${
-                    !isYearly
-                      ? "text-white"
-                      : "text-gray-600 dark:text-gray-400"
-                  }`}
-                >
-                  Monthly
-                </span>
-              </motion.button>
-
-              <motion.button
-                onClick={() => setIsYearly(true)}
-                className="relative z-10 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-all"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {isYearly && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 shadow-xl"
-                    transition={{
-                      type: "spring",
-                      bounce: 0.2,
-                      duration: 0.6,
-                    }}
-                  />
-                )}
-                <span
-                  className={`relative z-10 ${
-                    isYearly ? "text-white" : "text-gray-600 dark:text-gray-400"
-                  }`}
-                >
-                  Yearly
-                </span>
-                <motion.span
-                  className="relative z-10 rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white shadow-md"
-                  animate={{ scale: isYearly ? [1, 1.1, 1] : 1 }}
-                  transition={{
-                    duration: 0.5,
-                    repeat: isYearly ? Infinity : 0,
-                    repeatDelay: 2,
-                  }}
-                >
-                  Save 17%
-                </motion.span>
-              </motion.button>
-            </motion.div>
-
-            {/* Savings Indicator */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{
-                opacity: isYearly ? 1 : 0,
-                y: isYearly ? 0 : -10,
-              }}
-              transition={{ duration: 0.3 }}
-              className="flex items-center gap-2 text-center"
+            <span
+              className={`text-sm font-semibold transition-colors ${
+                isYearly ? "text-thunder-black" : "text-gray-400"
+              }`}
             >
-              <motion.div
-                animate={{ rotate: isYearly ? 360 : 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <IoSparkles className="h-4 w-4 text-green-500" />
-              </motion.div>
-              <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-sm font-semibold text-transparent dark:from-green-400 dark:to-emerald-400">
-                Save $118/year with Professional plan or $178/year with
-                Enterprise plan!
-              </span>
-              <motion.div
-                animate={{ rotate: isYearly ? -360 : 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <LuSparkles className="h-4 w-4 text-green-500" />
-              </motion.div>
-            </motion.div>
+              Yearly
+            </span>
+
+            <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">
+              Save 17%
+            </span>
           </div>
         </motion.div>
 
@@ -214,11 +138,8 @@ const SubscriptionSection = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="relative mx-auto grid max-w-6xl grid-cols-1 gap-8 pt-6 lg:grid-cols-3"
+          className="relative mx-auto grid max-w-6xl grid-cols-1 gap-8 pt-6 lg:grid-cols-3 lg:items-stretch"
         >
-          {/* Simple glow effect */}
-          <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/20 opacity-20 blur-[120px]" />
-
           {pricingPlans.map((plan) => (
             <PricingCard
               key={plan.id}

@@ -1,85 +1,142 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import {
-  BiBot,
-  BiLogoGithub,
+  BiLogoFacebookCircle,
+  BiLogoInstagramAlt,
   BiLogoLinkedin,
-  BiLogoTwitter,
 } from "react-icons/bi";
+import { BsTwitterX } from "react-icons/bs";
 
+// ============================================================================
+// DATA
+// ============================================================================
+const SOCIAL_LINKS = [
+  { icon: BsTwitterX, label: "Twitter / X", href: "#" },
+  { icon: BiLogoLinkedin, label: "LinkedIn", href: "#" },
+  { icon: BiLogoFacebookCircle, label: "Facebook", href: "#" },
+  { icon: BiLogoInstagramAlt, label: "Instagram", href: "#" },
+];
+
+const FOOTER_COLUMNS = [
+  {
+    title: "Product",
+    links: [
+      { label: "Industries", href: "/#industries" },
+      { label: "How It Works", href: "/#how-it-works" },
+      { label: "Pricing", href: "/#pricing" },
+      { label: "FAQ", href: "/#faq" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About", href: "/" },
+      { label: "Contact", href: "/#contact" },
+      { label: "Careers", href: "#" },
+      { label: "Blog", href: "/#blog" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "#" },
+      { label: "Terms of Service", href: "#" },
+      { label: "Cookie Policy", href: "#" },
+    ],
+  },
+];
+
+// ============================================================================
+// FOOTER
+// ============================================================================
 const Footer = () => {
   return (
-    <footer className="border-t border-gray-200 bg-white/50 pt-10 pb-6 backdrop-blur-sm dark:border-gray-800 dark:bg-black/50">
+    <motion.footer
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      className="bg-thunder-black px-6 pb-8 pt-16 text-gray-400 lg:px-8"
+    >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Main Footer Content */}
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          {/* Left: Brand */}
-          <div className="flex items-center">
-            <Link href="/" className="group flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-md transition-transform group-hover:scale-110">
-                <BiBot className="h-5 w-5" />
-              </div>
-              <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-xl font-bold text-transparent dark:from-white dark:to-gray-400">
-                Bay AI
-              </span>
+        {/* --- Top: brand + link columns --- */}
+        <div className="grid grid-cols-1 gap-10 pb-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-10">
+          {/* Brand */}
+          <div>
+            <Link href="/" className="group mb-3.5 flex items-center">
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Image
+                  src="/assets/logo/go-converto-logo-white.png"
+                  alt="Go Converto"
+                  width={1387}
+                  height={312}
+                  className="h-8 w-auto"
+                />
+              </motion.div>
             </Link>
+            <p className="mb-5 max-w-[280px] text-sm leading-relaxed">
+              The AI chatbot that learns your business automatically and
+              turns visitors into customers, 24/7.
+            </p>
+            <div className="flex gap-2.5">
+              {SOCIAL_LINKS.map((social) => {
+                const Icon = social.icon;
+                return (
+                  <motion.a
+                    key={social.label}
+                    href={social.href}
+                    aria-label={social.label}
+                    whileHover={{ y: -2 }}
+                    className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-white/[0.08] text-white transition-colors hover:bg-primary hover:text-thunder-black"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </motion.a>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Center: Simple Links */}
-          <div className="flex gap-8 text-sm font-medium text-gray-600 dark:text-gray-400">
-            <Link
-              href="#"
-              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="#"
-              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              Terms of Service
-            </Link>
-          </div>
-
-          {/* Right: Socials */}
-          <div className="flex space-x-6">
-            <motion.a
-              whileHover={{ y: -2 }}
-              href="#"
-              className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-            >
-              <span className="sr-only">Twitter</span>
-              <BiLogoTwitter className="h-5 w-5" />
-            </motion.a>
-            <motion.a
-              whileHover={{ y: -2 }}
-              href="#"
-              className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <span className="sr-only">GitHub</span>
-              <BiLogoGithub className="h-5 w-5" />
-            </motion.a>
-            <motion.a
-              whileHover={{ y: -2 }}
-              href="#"
-              className="text-gray-400 hover:text-blue-700 dark:hover:text-blue-600 transition-colors"
-            >
-              <span className="sr-only">LinkedIn</span>
-              <BiLogoLinkedin className="h-5 w-5" />
-            </motion.a>
-          </div>
+          {/* Link columns */}
+          {FOOTER_COLUMNS.map((column) => (
+            <div key={column.title}>
+              <h4 className="mb-4.5 text-[13px] font-bold uppercase tracking-wide text-white">
+                {column.title}
+              </h4>
+              <ul className="flex flex-col gap-3">
+                {column.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-400 transition-colors hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        {/* Bottom: Copyright */}
-        <div className="mt-8 border-t border-gray-200/50 pt-6 text-center dark:border-gray-800/50">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            &copy; {new Date().getFullYear()} Bay AI Inc. All rights reserved.
-          </p>
+        {/* --- Bottom: copyright --- */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-7 text-[13px]">
+          <span>&copy; {new Date().getFullYear()} BayAI. All rights reserved.</span>
+          <div className="flex gap-6">
+            <a
+              href="https://bayshorecommunication.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 transition-colors hover:text-white"
+            >
+              Product by Bayshore Communication
+            </a>
+          </div>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 };
 
