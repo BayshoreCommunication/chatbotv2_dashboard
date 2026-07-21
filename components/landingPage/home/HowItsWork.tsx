@@ -247,7 +247,7 @@ const StatsStrip = () => (
         <motion.div
           key={stat.title}
           whileHover={{ y: -3 }}
-          className="flex items-center gap-3 px-2 sm:px-6"
+          className="flex items-center justify-center gap-3 px-2 text-center sm:px-6 lg:justify-start lg:text-left"
         >
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Icon className="h-5 w-5" />
@@ -271,7 +271,7 @@ const HowItsWork = () => {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-2 lg:gap-20">
           {/* --- Left: intro + illustration --- */}
-          <div>
+          <div className="text-center lg:text-left">
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -299,7 +299,7 @@ const HowItsWork = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.16 }}
-              className="mb-10 max-w-md text-base text-gray-600 sm:text-lg"
+              className="mx-auto mb-10 max-w-md text-base text-gray-600 sm:text-lg lg:mx-0"
             >
               Eight steps, fully automatic — from setup, to training, to
               responding, to growing your business.

@@ -87,9 +87,9 @@ const ContactForm = () => {
   return (
     <section id="contact" className="bg-gray-50 py-10 lg:py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="grid grid-cols-1 items-start gap-16 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-6 lg:gap-16 lg:grid-cols-2">
           {/* --- Left: intro + contact info --- */}
-          <div>
+          <div className="text-center lg:text-left">
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -118,7 +118,7 @@ const ContactForm = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.16 }}
-              className="mb-8 max-w-md text-base text-gray-600"
+              className="mx-auto mb-8 max-w-md text-base text-gray-600 lg:mx-0"
             >
               Have a question about plans, setup, or your business
               specifically? Send us a message and our team will get back to
@@ -135,7 +135,7 @@ const ContactForm = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-40px" }}
                     transition={{ duration: 0.5, delay: 0.2 + index * 0.08 }}
-                    className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4"
+                    className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 text-left"
                   >
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Icon className="h-5 w-5" />

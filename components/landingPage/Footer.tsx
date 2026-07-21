@@ -61,12 +61,12 @@ const Footer = () => {
       transition={{ duration: 0.6 }}
       className="bg-thunder-black px-6 pb-8 pt-16 text-gray-400 lg:px-8"
     >
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 text-center lg:px-8 lg:text-left">
         {/* --- Top: brand + link columns --- */}
         <div className="grid grid-cols-1 gap-10 pb-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-10">
           {/* Brand */}
-          <div>
-            <Link href="/" className="group mb-3.5 flex items-center">
+          <div className="flex flex-col items-center lg:items-start">
+            <Link href="/" className="group mb-3.5 flex items-center justify-center lg:justify-start">
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Image
                   src="/assets/logo/go-converto-logo-white.png"
@@ -81,7 +81,7 @@ const Footer = () => {
               The AI chatbot that learns your business automatically and
               turns visitors into customers, 24/7.
             </p>
-            <div className="flex gap-2.5">
+            <div className="flex justify-center gap-2.5 lg:justify-start">
               {SOCIAL_LINKS.map((social) => {
                 const Icon = social.icon;
                 return (
@@ -122,7 +122,7 @@ const Footer = () => {
         </div>
 
         {/* --- Bottom: copyright --- */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-7 text-[13px]">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 text-[13px] lg:flex-row">
           <span>&copy; {new Date().getFullYear()} BayAI. All rights reserved.</span>
           <div className="flex gap-6">
             <a

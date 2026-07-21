@@ -71,7 +71,7 @@ const SubscriptionSection = ({
   return (
     <section
       id="pricing"
-      className="relative overflow-hidden bg-white py-10 lg:py-20"
+      className="relative overflow-hidden bg-white py-3 lg:py-20"
     >
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -86,7 +86,7 @@ const SubscriptionSection = ({
             Pricing
           </span>
 
-          <h2 className="mb-6 mt-4 text-4xl font-extrabold tracking-tight text-thunder-black sm:text-5xl">
+          <h2 className="mb-4 mt-4 text-4xl font-extrabold tracking-tight text-thunder-black sm:text-5xl lg:mb-6">
             Simple plans that scale with your business
           </h2>
           <p className="mx-auto mb-10 max-w-xl text-lg text-gray-600">
@@ -138,7 +138,7 @@ const SubscriptionSection = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="relative mx-auto grid max-w-6xl grid-cols-1 gap-8 pt-6 lg:grid-cols-3 lg:items-stretch"
+          className="relative mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-3 lg:items-stretch"
         >
           {pricingPlans.map((plan) => (
             <PricingCard

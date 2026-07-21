@@ -89,7 +89,7 @@ export const PricingCard = memo(
               : "border border-gray-200 hover:border-gray-300"
           )}
         >
-          <CardHeader className="pb-2 pt-8 text-left">
+          <CardHeader className="pb-2 pt-8 text-center lg:text-left">
             <CardTitle className="mb-1 text-xl font-bold text-thunder-black">
               {plan.name}
             </CardTitle>
@@ -108,7 +108,7 @@ export const PricingCard = memo(
               </div>
             ) : (
               <div className="mb-6">
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline justify-center gap-1 lg:justify-start">
                   <span className="text-4xl font-extrabold text-thunder-black">
                     ${displayPrice.toFixed(0)}
                   </span>
@@ -131,7 +131,7 @@ export const PricingCard = memo(
               {plan.features.map((feature, featureIndex) => (
                 <li
                   key={featureIndex}
-                  className="flex items-start gap-2.5 text-sm text-gray-700"
+                  className="flex items-start justify-center gap-2.5 text-sm text-gray-700 lg:justify-start"
                 >
                   <BiCheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary-dark" />
                   <span>{feature}</span>
@@ -173,7 +173,7 @@ export const PricingCard = memo(
                   disabled={loading === plan.id}
                 >
                   {loading === plan.id ? (
-                    <span className="flex items-center">Processing...</span>
+                    <span className="flex items-center justify-center">Processing...</span>
                   ) : (
                     <span className="flex items-center justify-center gap-2">
                       {!isAuthenticated

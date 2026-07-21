@@ -121,12 +121,152 @@ const GrowthVisualCard = () => {
   const urlTyped = URL_TEXT.slice(0, typedChars);
   const urlDone = typedChars >= URL_TEXT.length;
 
+  // Shared content for the three detail callouts — floated as absolute
+  // badges on sm+ (desktop), stacked as plain cards below the chart on
+  // mobile (see the `sm:hidden` block after the card).
+  const moneySavedContent = (
+    <>
+      <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-sm text-emerald-600 sm:h-[34px] sm:w-[34px] sm:rounded-[10px] sm:text-base">
+        $
+      </span>
+      <span>
+        ${moneySaved} saved
+        <br />
+        <span className="text-[9.5px] font-semibold text-emerald-600 sm:text-[11.5px]">
+          on support costs / mo
+        </span>
+      </span>
+    </>
+  );
+
+  const instantAnswersContent = (
+    <>
+      <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm text-primary-dark sm:h-[34px] sm:w-[34px] sm:rounded-[10px] sm:text-base">
+        ⚡
+      </span>
+      <span>
+        Answers in 2 sec
+        <br />
+        <span className="text-[9.5px] font-semibold text-primary-dark sm:text-[11.5px]">
+          24/7, every visitor
+        </span>
+      </span>
+    </>
+  );
+
+  const autoTrainingContent = (
+    <div>
+      <div className="mb-2.5 flex w-full items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 sm:px-2.5 sm:py-1.5">
+        <span className="shrink-0 text-[9.5px] sm:text-[11px]">🌐</span>
+        <span className="whitespace-nowrap border-r-2 border-primary pr-0.5 font-mono text-[9.5px] font-semibold text-gray-900 sm:text-[11.5px]">
+          {urlTyped}
+        </span>
+        {urlDone && (
+          <motion.span
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[9px] font-extrabold text-emerald-600 sm:h-4 sm:w-4 sm:text-[10px]"
+          >
+            ✓
+          </motion.span>
+        )}
+      </div>
+
+      <div className="mt-0.5 text-[9.5px] font-medium leading-[1.4] text-gray-600 sm:text-[11.5px]">
+        Reads your pages, services &amp; FAQs — no manual setup.
+      </div>
+      <div className="mt-2 flex flex-col gap-0.5">
+        <span className="flex items-center gap-1 text-[9px] font-semibold text-primary-dark sm:text-[11px]">
+          ✓ No coding required
+        </span>
+        <span className="flex items-center gap-1 text-[9px] font-semibold text-primary-dark sm:text-[11px]">
+          ✓ Ready in minutes
+        </span>
+      </div>
+
+      <div className="relative mt-2.5 w-full border-t border-gray-200 pt-2.5">
+        {trainStage === "scanning" ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="mb-2 flex items-center gap-1.5 text-[9px] font-bold text-primary-dark sm:text-[11px]">
+              <motion.span
+                animate={{ opacity: [1, 0.35, 1] }}
+                transition={{ duration: 0.9, repeat: Infinity }}
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-dark"
+              />
+              Scanning your website…
+            </div>
+            <div
+              className="mb-1.5 h-1.5 w-full animate-[shimmer_1.4s_linear_infinite] rounded bg-[length:400%_100%]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%)",
+              }}
+            />
+            <div
+              className="mb-1.5 h-1.5 w-4/5 animate-[shimmer_1.4s_linear_infinite] rounded bg-[length:400%_100%]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%)",
+              }}
+            />
+            <div
+              className="h-1.5 w-3/5 animate-[shimmer_1.4s_linear_infinite] rounded bg-[length:400%_100%]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%)",
+              }}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-emerald-600 sm:text-[11px]">
+              <motion.span
+                animate={{ opacity: [1, 0.35, 1] }}
+                transition={{ duration: 1.4, repeat: Infinity }}
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-600"
+              />
+              ✓ Trained — chat is live
+            </div>
+            <div className="mt-2.5 flex items-center gap-1.5 rounded-lg rounded-bl-[3px] bg-primary px-2 py-1 sm:px-2.5 sm:py-1.5">
+              <span className="shrink-0 text-[10px] sm:text-xs">🤖</span>
+              <span className="flex items-center gap-0.5 py-0.5">
+                {[0, 0.15, 0.3].map((delay) => (
+                  <motion.span
+                    key={delay}
+                    animate={{ opacity: [0.5, 1, 0.5], y: [0, -3, 0] }}
+                    transition={{
+                      duration: 1.2,
+                      repeat: Infinity,
+                      delay,
+                      ease: "easeInOut",
+                    }}
+                    className="h-[5px] w-[5px] rounded-full bg-white"
+                  />
+                ))}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
-      className="relative mx-9 my-7 w-full max-w-[460px] rounded-2xl bg-white/[0.36] p-7 pb-14 shadow-[0_30px_60px_-20px_rgba(138,138,138,0.18)]"
+      className="relative mx-4 my-7 w-full max-w-[460px] rounded-2xl bg-white/[0.36] p-5 pb-9 shadow-[0_30px_60px_-20px_rgba(138,138,138,0.18)] sm:mx-9 sm:p-7 sm:pb-14"
     >
       {/* Header */}
       <div className="mb-5 flex items-center justify-between">
@@ -136,13 +276,13 @@ const GrowthVisualCard = () => {
           </div>
           <div className="mt-0.5 text-xs text-gray-400">Since adding BayAI</div>
         </div>
-        <span className="relative top-[50px] inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">
           <span>▲</span> +{revenuePct}
         </span>
       </div>
 
       {/* Big number */}
-      <div className="text-[38px] font-extrabold tracking-tight text-thunder-black">
+      <div className="text-[28px] font-extrabold tracking-tight text-thunder-black sm:text-[38px]">
         ${revenue}
       </div>
       <div className="mb-4 mt-0.5 text-[13px] text-gray-600">
@@ -211,8 +351,10 @@ const GrowthVisualCard = () => {
         />
       </svg>
 
-      {/* Mini stats */}
-      <div className="mt-4 flex max-w-[65%] flex-col gap-1.5">
+      {/* Mini stats — hidden on mobile: the auto-training chip floats over
+          this area and is too tall to avoid covering it at mobile card
+          widths, and this info is already echoed by the floating badges. */}
+      <div className="mt-4 hidden max-w-[65%] flex-col gap-1.5 sm:flex">
         <div className="flex flex-row items-baseline gap-1.5 whitespace-nowrap text-left">
           <span className="text-sm font-extrabold text-thunder-black">+{leads}</span>
           <span className="text-[11px] text-gray-600">Leads captured</span>
@@ -230,18 +372,9 @@ const GrowthVisualCard = () => {
         initial={{ opacity: 0, y: 10, scale: 0.92 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.9, ease: [0.4, 0, 0.2, 1] }}
-        className="absolute -right-7 -top-5 z-10 hidden items-center gap-2.5 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-[13px] font-bold text-thunder-black shadow-[0_16px_30px_-12px_rgba(204,204,204,0.49)] sm:flex"
+        className="absolute -right-2 -top-3 z-10 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-[10.5px] font-bold text-thunder-black shadow-[0_16px_30px_-12px_rgba(204,204,204,0.49)] sm:-right-7 sm:-top-5 sm:gap-2.5 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-[13px]"
       >
-        <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-emerald-50 text-base text-emerald-600">
-          $
-        </span>
-        <span>
-          ${moneySaved} saved
-          <br />
-          <span className="text-[11.5px] font-semibold text-emerald-600">
-            on support costs / mo
-          </span>
-        </span>
+        {moneySavedContent}
       </motion.div>
 
       {/* Floating callout: instant answers */}
@@ -249,18 +382,9 @@ const GrowthVisualCard = () => {
         initial={{ opacity: 0, y: 10, scale: 0.92 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, delay: 1.05, ease: [0.4, 0, 0.2, 1] }}
-        className="absolute -bottom-4 -left-8 z-10 hidden items-center gap-2.5 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-[13px] font-bold text-thunder-black shadow-[0_16px_30px_-12px_rgba(204,204,204,0.49)] sm:flex"
+        className="absolute -bottom-2 -left-2 z-10 flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-[10.5px] font-bold text-thunder-black shadow-[0_16px_30px_-12px_rgba(204,204,204,0.49)] sm:-bottom-4 sm:-left-8 sm:gap-2.5 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-[13px]"
       >
-        <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-primary/10 text-base text-primary-dark">
-          ⚡
-        </span>
-        <span>
-          Answers in 2 sec
-          <br />
-          <span className="text-[11.5px] font-semibold text-primary-dark">
-            24/7, every visitor
-          </span>
-        </span>
+        {instantAnswersContent}
       </motion.div>
 
       {/* Floating callout: auto-training chip */}
@@ -268,112 +392,9 @@ const GrowthVisualCard = () => {
         initial={{ opacity: 0, y: 10, scale: 0.92 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.75, ease: [0.4, 0, 0.2, 1] }}
-        className="absolute -bottom-12 -right-16 z-20 hidden max-w-[270px] items-start gap-2.5 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-[0_16px_30px_-12px_rgba(204,204,204,0.49)] lg:flex"
+        className="absolute -bottom-3 -right-2 z-20 flex max-w-[200px] items-start gap-1.5 rounded-xl border border-gray-200 bg-white px-2.5 py-2 shadow-[0_16px_30px_-12px_rgba(204,204,204,0.49)] sm:-bottom-12 sm:-right-16 sm:max-w-[270px] sm:gap-2.5 sm:rounded-2xl sm:px-4 sm:py-3"
       >
-        <div>
-          <div className="mb-2.5 flex w-full items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5">
-            <span className="shrink-0 text-[11px]">🌐</span>
-            <span className="whitespace-nowrap border-r-2 border-primary pr-0.5 font-mono text-[11.5px] font-semibold text-gray-900">
-              {urlTyped}
-            </span>
-            {urlDone && (
-              <motion.span
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[10px] font-extrabold text-emerald-600"
-              >
-                ✓
-              </motion.span>
-            )}
-          </div>
-
-          <div className="mt-0.5 text-[11.5px] font-medium leading-[1.4] text-gray-600">
-            Reads your pages, services &amp; FAQs — no manual setup.
-          </div>
-          <div className="mt-2 flex flex-col gap-0.5">
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-primary-dark">
-              ✓ No coding required
-            </span>
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-primary-dark">
-              ✓ Ready in minutes
-            </span>
-          </div>
-
-          <div className="relative mt-2.5 w-full border-t border-gray-200 pt-2.5">
-            {trainStage === "scanning" ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold text-primary-dark">
-                  <motion.span
-                    animate={{ opacity: [1, 0.35, 1] }}
-                    transition={{ duration: 0.9, repeat: Infinity }}
-                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-dark"
-                  />
-                  Scanning your website…
-                </div>
-                <div
-                  className="mb-1.5 h-1.5 w-full animate-[shimmer_1.4s_linear_infinite] rounded bg-[length:400%_100%]"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%)",
-                  }}
-                />
-                <div
-                  className="mb-1.5 h-1.5 w-4/5 animate-[shimmer_1.4s_linear_infinite] rounded bg-[length:400%_100%]"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%)",
-                  }}
-                />
-                <div
-                  className="h-1.5 w-3/5 animate-[shimmer_1.4s_linear_infinite] rounded bg-[length:400%_100%]"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%)",
-                  }}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600">
-                  <motion.span
-                    animate={{ opacity: [1, 0.35, 1] }}
-                    transition={{ duration: 1.4, repeat: Infinity }}
-                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-600"
-                  />
-                  ✓ Trained — chat is live
-                </div>
-                <div className="mt-2.5 flex items-center gap-1.5 rounded-lg rounded-bl-[3px] bg-primary px-2.5 py-1.5">
-                  <span className="shrink-0 text-xs">🤖</span>
-                  <span className="flex items-center gap-0.5 py-0.5">
-                    {[0, 0.15, 0.3].map((delay) => (
-                      <motion.span
-                        key={delay}
-                        animate={{ opacity: [0.5, 1, 0.5], y: [0, -3, 0] }}
-                        transition={{
-                          duration: 1.2,
-                          repeat: Infinity,
-                          delay,
-                          ease: "easeInOut",
-                        }}
-                        className="h-[5px] w-[5px] rounded-full bg-white"
-                      />
-                    ))}
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </div>
+        {autoTrainingContent}
       </motion.div>
     </motion.div>
   );
@@ -412,6 +433,7 @@ const HeroSection = () => {
           initial="initial"
           animate="animate"
           variants={staggerContainer}
+          className="text-center lg:text-left"
         >
           <motion.div
             variants={fadeInUp}
@@ -433,7 +455,7 @@ const HeroSection = () => {
 
           <motion.p
             variants={fadeInUp}
-            className="mb-8 max-w-[480px] text-base text-gray-600 sm:text-lg"
+            className="mx-auto mb-8 max-w-[480px] text-base text-gray-600 sm:text-lg lg:mx-0"
           >
             Instant replies, more leads, and happier customers—all powered by
             AI.
@@ -441,7 +463,7 @@ const HeroSection = () => {
 
           <motion.div
             variants={fadeInUp}
-            className="mb-9 flex flex-wrap items-center gap-3"
+            className="mb-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
           >
             <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
               <Link
@@ -465,7 +487,7 @@ const HeroSection = () => {
 
           <motion.div
             variants={fadeInUp}
-            className="flex items-center gap-3"
+            className="flex items-center justify-center gap-3 lg:justify-start"
           >
             <div className="flex -space-x-3">
               {[
@@ -498,7 +520,7 @@ const HeroSection = () => {
         </motion.div>
 
         {/* --- Right: business growth visualization --- */}
-        <div className="relative order-first flex w-full items-center justify-center overflow-hidden rounded-[32px] px-6 py-10 sm:px-12 sm:py-14 lg:order-none">
+        <div className="relative order-first flex w-full flex-col items-center justify-center overflow-hidden rounded-[32px] px-3 py-6 sm:px-12 sm:py-14 lg:order-none">
           <div className="pointer-events-none absolute inset-0 [background-image:linear-gradient(rgba(0,224,218,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(0,224,218,0.08)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(circle_at_center,#000_55%,transparent_90%)]" />
           <span className="pointer-events-none absolute left-[8%] top-[6%] rotate-[-8deg] text-3xl opacity-10 sm:text-4xl">
             💬

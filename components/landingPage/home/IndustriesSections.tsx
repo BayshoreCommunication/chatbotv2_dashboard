@@ -83,24 +83,24 @@ const IndustryCard = ({ industry, index }: { industry: Industry; index: number }
         ease: [0.4, 0, 0.2, 1],
         delay: Math.min(index, 3) * 0.08,
       }}
-      className="flex flex-col items-start gap-6 rounded-2xl bg-gray-50 p-7 sm:flex-row sm:items-center"
+      className="flex flex-col items-center gap-6 rounded-2xl bg-gray-50 p-7 text-center lg:flex-row lg:items-center lg:text-left"
     >
       <div className="flex-1">
         <div
-          className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${industry.gradient} text-white shadow-lg shadow-primary/20`}
+          className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${industry.gradient} text-white shadow-lg shadow-primary/20 lg:mx-0`}
         >
           <Icon className="h-5 w-5" />
         </div>
         <h3 className="mb-2 text-lg font-bold text-thunder-black">
           {industry.title}
         </h3>
-        <p className="max-w-md text-sm leading-relaxed text-gray-600">
+        <p className="mx-auto max-w-md text-sm leading-relaxed text-gray-600 lg:mx-0">
           {industry.description}
         </p>
       </div>
 
       <div
-        className={`relative h-56 w-full shrink-0 overflow-hidden rounded-xl bg-gradient-to-br sm:h-64 sm:w-64 ${industry.gradient}`}
+        className={`relative h-56 w-full shrink-0 overflow-hidden rounded-xl bg-gradient-to-br lg:h-64 lg:w-64 ${industry.gradient}`}
       >
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] bg-[length:16px_16px]" />
         <div className="absolute inset-0 bg-gradient-to-t from-thunder-black/30 via-transparent to-transparent" />
@@ -118,7 +118,7 @@ const IndustriesSections = () => {
     <section id="industries" className="bg-white py-10 lg:py-20">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-14 px-6 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 lg:px-8">
         {/* --- Left: sticky intro --- */}
-        <div className="lg:sticky lg:top-32 lg:self-start">
+        <div className="text-center lg:sticky lg:top-32 lg:self-start lg:text-left">
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -148,7 +148,7 @@ const IndustriesSections = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.16 }}
-            className="max-w-md text-base text-gray-600 sm:text-lg"
+            className="mx-auto max-w-md text-base text-gray-600 sm:text-lg lg:mx-0"
           >
             Whatever industry you&apos;re in, BayAI trains itself on your
             content and speaks your customers&apos; language from day one.
