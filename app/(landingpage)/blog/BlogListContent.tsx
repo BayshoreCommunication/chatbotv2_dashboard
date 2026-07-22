@@ -3,55 +3,19 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { BLOG_POSTS } from "@/lib/blogPosts";
+import type { BlogPost } from "@/lib/blogPosts";
 import Container from "@/components/shared/Container";
 
-const FEATURED_POST = BLOG_POSTS[0];
-const POSTS = BLOG_POSTS.slice(1);
-
-// ============================================================================
-// BLOG SECTION
-// ============================================================================
-const BlogSection = () => {
+const BlogListContent = ({
+  featuredPost,
+  posts,
+}: {
+  featuredPost: BlogPost;
+  posts: BlogPost[];
+}) => {
   return (
-    <section id="blog" className="bg-white py-10 lg:py-20">
+    <section className="bg-white py-10 lg:py-16">
       <Container>
-        {/* --- Header --- */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-4 flex justify-center"
-        >
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-[7px] text-[13px] font-semibold text-primary-dark">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Blog
-          </span>
-        </motion.div>
-
-        <motion.h2
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.08 }}
-          className="mb-3 text-center text-3xl font-extrabold tracking-tight text-thunder-black sm:text-4xl"
-        >
-          Insights to grow your business with AI
-        </motion.h2>
-
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.16 }}
-          className="mx-auto mb-14 max-w-xl text-center text-base text-gray-600 sm:text-lg"
-        >
-          Guides, playbooks, and product tips on automating support,
-          capturing more leads, and getting the most out of your AI
-          assistant.
-        </motion.p>
-
         {/* --- Featured post --- */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -60,15 +24,15 @@ const BlogSection = () => {
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         >
           <Link
-            href={`/blog/${FEATURED_POST.slug}`}
+            href={`/blog/${featuredPost.slug}`}
             className="grid grid-cols-1 overflow-hidden rounded-2xl border border-gray-200 transition-shadow hover:shadow-lg md:grid-cols-2"
           >
             <div
-              className={`relative min-h-[220px] bg-gradient-to-br ${FEATURED_POST.gradient} md:min-h-[320px]`}
+              className={`relative min-h-[220px] bg-gradient-to-br ${featuredPost.gradient} md:min-h-[320px]`}
             >
               <Image
-                src={FEATURED_POST.image}
-                alt={FEATURED_POST.title}
+                src={featuredPost.image}
+                alt={featuredPost.title}
                 fill
                 sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover"
@@ -80,23 +44,23 @@ const BlogSection = () => {
 
             <div className="flex flex-col justify-center p-8 sm:p-10">
               <span className="mb-3 text-xs font-bold uppercase tracking-wide text-primary-dark">
-                {FEATURED_POST.tag}
+                {featuredPost.tag}
               </span>
-              <h3 className="mb-3 text-2xl font-extrabold leading-tight tracking-tight text-thunder-black sm:text-[28px]">
-                {FEATURED_POST.title}
-              </h3>
+              <h2 className="mb-3 text-2xl font-extrabold leading-tight tracking-tight text-thunder-black sm:text-[28px]">
+                {featuredPost.title}
+              </h2>
               <p className="mb-6 text-sm leading-relaxed text-gray-600 sm:text-base">
-                {FEATURED_POST.description}
+                {featuredPost.description}
               </p>
               <div className="flex items-center gap-2.5">
                 <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${FEATURED_POST.avatarColor} text-xs font-bold text-white`}
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${featuredPost.avatarColor} text-xs font-bold text-white`}
                 >
-                  {FEATURED_POST.initials}
+                  {featuredPost.initials}
                 </span>
                 <span className="text-sm text-gray-500">
-                  {FEATURED_POST.author} · {FEATURED_POST.date} ·{" "}
-                  {FEATURED_POST.readTime}
+                  {featuredPost.author} · {featuredPost.date} ·{" "}
+                  {featuredPost.readTime}
                 </span>
               </div>
             </div>
@@ -105,7 +69,7 @@ const BlogSection = () => {
 
         {/* --- Post grid --- */}
         <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {POSTS.map((post, index) => (
+          {posts.map((post, index) => (
             <motion.div
               key={post.slug}
               initial={{ opacity: 0, y: 24 }}
@@ -114,7 +78,7 @@ const BlogSection = () => {
               transition={{
                 duration: 0.5,
                 ease: [0.4, 0, 0.2, 1],
-                delay: index * 0.1,
+                delay: (index % 3) * 0.1,
               }}
             >
               <Link
@@ -163,4 +127,4 @@ const BlogSection = () => {
   );
 };
 
-export default BlogSection;
+export default BlogListContent;

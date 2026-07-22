@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import type { ReactNode } from "react";
+import Container from "@/components/shared/Container";
 
 // ============================================================================
 // Custom SVG for the filled chat icon — matches the reference design exactly
@@ -102,7 +103,7 @@ const RobotIllustration = () => (
       transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
     >
       <Image
-        src="/assets/how-its-work.png"
+        src="/assets/how-its-works.png"
         alt="BayAI robot assistant scanning a website and responding to chats from a laptop"
         width={630}
         height={414}
@@ -123,7 +124,10 @@ const RobotIllustration = () => (
 const STEPPER_HEIGHT = 516;
 
 const Stepper = () => (
-  <div className="relative flex w-full max-w-lg" style={{ height: STEPPER_HEIGHT }}>
+  <div
+    className="relative flex w-full max-w-lg"
+    style={{ height: STEPPER_HEIGHT }}
+  >
     {/* LEFT: SVG curve & number nodes */}
     <div className="relative w-28 shrink-0 py-8 sm:w-32">
       <svg
@@ -239,7 +243,7 @@ const StatsStrip = () => (
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-60px" }}
     transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-    className="mt-14 grid grid-cols-1 gap-6 rounded-2xl bg-white p-6 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.15)] sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-gray-100"
+    className="mt-14 grid grid-cols-1 divide-y divide-gray-100 rounded-2xl bg-white p-6 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.15)] sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-y-0"
   >
     {STATS.map((stat) => {
       const Icon = stat.icon;
@@ -247,13 +251,15 @@ const StatsStrip = () => (
         <motion.div
           key={stat.title}
           whileHover={{ y: -3 }}
-          className="flex items-center justify-center gap-3 px-2 text-center sm:px-6 lg:justify-start lg:text-left"
+          className="flex items-center gap-3 py-4 text-left first:pt-0 last:pb-0 sm:justify-center sm:px-6 sm:py-0 sm:text-center sm:first:pt-0 sm:last:pb-0 lg:justify-start lg:text-left"
         >
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Icon className="h-5 w-5" />
           </span>
           <div>
-            <h4 className="text-sm font-bold text-thunder-black">{stat.title}</h4>
+            <h4 className="text-sm font-bold text-thunder-black">
+              {stat.title}
+            </h4>
             <p className="text-xs text-gray-500">{stat.description}</p>
           </div>
         </motion.div>
@@ -268,7 +274,7 @@ const StatsStrip = () => (
 const HowItsWork = () => {
   return (
     <section id="how-it-works" className="bg-gray-50 py-10 lg:py-20">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <Container>
         <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-2 lg:gap-20">
           {/* --- Left: intro + illustration --- */}
           <div className="text-center lg:text-left">
@@ -315,7 +321,7 @@ const HowItsWork = () => {
         </div>
 
         <StatsStrip />
-      </div>
+      </Container>
     </section>
   );
 };

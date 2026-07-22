@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import SubscriptionSection from "@/components/landingPage/SubscriptionSection";
+import PageHero from "@/components/shared/PageHero";
 
 const page = async ({
   searchParams,
@@ -26,13 +27,17 @@ const page = async ({
       : undefined;
 
   return (
-    <div className="pt-24">
+    <>
+      <PageHero
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Pricing" }]}
+        title="Simple, transparent pricing"
+      />
       <SubscriptionSection
         isAuthenticated={!!session?.user}
         user={user}
         redirectAfterCheckout={redirectAfterCheckout}
       />
-    </div>
+    </>
   );
 };
 

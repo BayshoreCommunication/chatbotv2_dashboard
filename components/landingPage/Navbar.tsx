@@ -71,7 +71,7 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
 
   // Detect scroll to toggle glass effect
   useEffect(() => {
-    return scrollY.onChange((latest) => {
+    return scrollY.on("change", (latest) => {
       setIsScrolled(latest > 20);
     });
   }, [scrollY]);
@@ -91,14 +91,14 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
 
         if (visible) {
           const match = sectionLinks.find(
-            (link) => link.href.split("#")[1] === visible.target.id
+            (link) => link.href.split("#")[1] === visible.target.id,
           );
           if (match) setActiveSectionHref(match.href);
         } else if (window.scrollY < 200) {
           setActiveSectionHref("/");
         }
       },
-      { rootMargin: "-35% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
+      { rootMargin: "-35% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
 
     const observedElements = sectionLinks
@@ -140,12 +140,10 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, type: "spring", damping: 20 }}
       className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white/70 py-3 shadow backdrop-blur-xl"
-          : "py-5"
+        isScrolled ? "bg-white/70 py-3 shadow backdrop-blur-xl" : "py-5"
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-8 ">
         {/* --- Logo Area --- */}
         <Link href="/" className="group flex shrink-0 items-center">
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
@@ -177,7 +175,7 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
                 <span
                   className={cn(
                     "relative z-10 transition-colors duration-200",
-                    isDisplayed && "text-gray-900"
+                    isDisplayed && "text-gray-900",
                   )}
                 >
                   {link.label}
@@ -254,13 +252,13 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
                   Sign In
                 </Button>
               </Link>
-                <Link
-                      href="/sign-up"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90"
-                    >
-                      Get Started
-                    </Link>
+              <Link
+                href="/sign-up"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90"
+              >
+                Get Started
+              </Link>
             </motion.div>
           )}
 
@@ -301,7 +299,7 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
                       "relative rounded-lg px-3 py-2.5 text-base font-medium text-gray-700 transition-colors hover:bg-gray-100",
-                      isActive && "bg-gray-100 font-semibold text-gray-900"
+                      isActive && "bg-gray-100 font-semibold text-gray-900",
                     )}
                   >
                     {isActive && (

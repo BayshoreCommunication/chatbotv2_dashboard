@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/shared/PageHero";
-import IndustriesPageContent from "@/components/landingPage/industries/IndustriesPageContent";
+import AboutPageContent from "@/components/landingPage/about/AboutPageContent";
 import { OG_IMAGE } from "@/config/seo";
 
-const PAGE_TITLE = "Industries — Go Converto";
+const PAGE_TITLE = "About — Go Converto";
 const PAGE_DESCRIPTION =
-  "See how Go Converto's AI assistant adapts to your industry — from law firms and healthcare to real estate, agencies, and more.";
+  "Go Converto builds AI assistants that learn your business automatically and turn website visitors into leads and appointments.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
@@ -24,16 +24,16 @@ export const metadata: Metadata = {
   },
 };
 
-const IndustriesPage = () => {
+const AboutPage = () => {
   return (
     <>
       <PageHero
-        breadcrumbs={[{ label: "Home", href: "/" }, { label: "Industries" }]}
-        title="Built for every industry"
+        breadcrumbs={[{ label: "Home", href: "/" }, { label: "About" }]}
+        title="About Go Converto"
       />
-      <IndustriesPageContent />
+      <AboutPageContent />
     </>
   );
 };
 
-export default IndustriesPage;
+export default AboutPage;

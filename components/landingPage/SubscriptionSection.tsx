@@ -26,7 +26,7 @@ const SubscriptionSection = ({
   user,
   redirectAfterCheckout,
 }: SubscriptionSectionProps) => {
-  const [isYearly, setIsYearly] = useState(false);
+  const [isYearly, setIsYearly] = useState(true);
   const [loading, setLoading] = useState<string | null>(null);
   const [currentTier, setCurrentTier] = useState<string | null>(null);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);

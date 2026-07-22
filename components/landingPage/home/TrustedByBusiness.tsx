@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Container from "@/components/shared/Container";
 
 const LOGOS = [
   { file: "Golden-Wealth.png", name: "Golden Wealth" },
@@ -48,7 +49,7 @@ const TrustedByBusiness = () => {
         }
       `}</style>
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <Container>
         <h2 className="mb-6 text-center text-sm font-extrabold uppercase tracking-wide text-thunder-black sm:text-base">
           Trusted by Business Worldwide
         </h2>
@@ -72,7 +73,7 @@ const TrustedByBusiness = () => {
             ))}
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 };

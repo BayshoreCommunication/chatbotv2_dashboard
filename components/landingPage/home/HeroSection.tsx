@@ -463,23 +463,23 @@ const HeroSection = () => {
 
           <motion.div
             variants={fadeInUp}
-            className="mb-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
+            className="mb-9 flex items-center justify-center gap-2 sm:gap-3 lg:justify-start"
           >
             <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
               <Link
                 href="/start-free-trial"
-                className="inline-flex items-center gap-2 rounded-lg bg-thunder-black px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-thunder-black/90"
+                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-thunder-black px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-thunder-black/90 sm:gap-2 sm:px-6 sm:py-3.5 sm:text-sm"
               >
                 Start Free Trial
-                <BsArrowRight className="h-4 w-4" />
+                <BsArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Link>
             </motion.div>
             <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
               <Link
                 href="#"
-                className="inline-flex items-center gap-2 rounded-lg border-[1.5px] border-thunder-black bg-white px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-thunder-black transition-colors hover:bg-gray-50"
+                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border-[1.5px] border-thunder-black bg-white px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-thunder-black transition-colors hover:bg-gray-50 sm:gap-2 sm:px-6 sm:py-3.5 sm:text-sm"
               >
-                <BsPlayFill className="h-4 w-4" />
+                <BsPlayFill className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Watch Demo
               </Link>
             </motion.div>

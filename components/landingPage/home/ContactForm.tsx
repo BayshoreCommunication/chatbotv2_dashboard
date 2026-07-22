@@ -6,6 +6,7 @@ import {
   Clock,
   Globe,
   Mail,
+  MapPin,
   MessageSquare,
   Phone,
   Send,
@@ -13,6 +14,7 @@ import {
   User,
 } from "lucide-react";
 import { useState } from "react";
+import Container from "@/components/shared/Container";
 
 // ============================================================================
 // DATA
@@ -24,9 +26,9 @@ const CONTACT_INFO = [
     value: "hello@bayai.com",
   },
   {
-    icon: Phone,
-    label: "Phone",
-    value: "+1 (800) 555-1234",
+    icon: MapPin,
+    label: "Office",
+    value: "1211 Tech Blvd Suite 120, Tampa, FL 33619, United States",
   },
   {
     icon: Clock,
@@ -76,7 +78,7 @@ const inputClasses =
 // ============================================================================
 // CONTACT FORM SECTION
 // ============================================================================
-const ContactForm = () => {
+const ContactForm = ({ showMap = false }: { showMap?: boolean }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -86,7 +88,7 @@ const ContactForm = () => {
 
   return (
     <section id="contact" className="bg-gray-50 py-10 lg:py-20">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <Container>
         <div className="grid grid-cols-1 items-start gap-6 lg:gap-16 lg:grid-cols-2">
           {/* --- Left: intro + contact info --- */}
           <div className="text-center lg:text-left">
@@ -242,7 +244,26 @@ const ContactForm = () => {
             )}
           </motion.div>
         </div>
-      </div>
+
+        {/* --- Office map --- */}
+        {showMap && (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+            className="mt-10 overflow-hidden rounded-2xl border border-gray-200"
+          >
+            <iframe
+              title="BayAI office location"
+              src="https://www.google.com/maps?q=1211+Tech+Blvd+Suite+120,+Tampa,+FL+33619,+United+States&output=embed"
+              className="h-80 w-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </motion.div>
+        )}
+      </Container>
     </section>
   );
 };

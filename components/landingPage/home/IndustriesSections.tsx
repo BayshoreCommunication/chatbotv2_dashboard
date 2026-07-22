@@ -1,76 +1,22 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { IconType } from "react-icons";
-import {
-  FaBalanceScale,
-  FaGraduationCap,
-  FaHeartbeat,
-  FaHome,
-  FaMicrochip,
-  FaShoppingBag,
-} from "react-icons/fa";
+import Image from "next/image";
+import Link from "next/link";
+import { INDUSTRIES } from "@/lib/industriesData";
 import { HiSparkles } from "react-icons/hi";
-
-// ============================================================================
-// DATA
-// ============================================================================
-interface Industry {
-  icon: IconType;
-  title: string;
-  description: string;
-  gradient: string;
-}
-
-const INDUSTRIES: Industry[] = [
-  {
-    icon: FaMicrochip,
-    title: "Tech Company",
-    description:
-      "Answers product, pricing, and integration questions instantly, triages support tickets, and routes qualified demo requests to your sales team — without adding headcount.",
-    gradient: "from-blue-600 via-blue-500 to-cyan-500",
-  },
-  {
-    icon: FaHeartbeat,
-    title: "Healthcare",
-    description:
-      "Handles appointment scheduling, insurance questions, and clinic hours around the clock — freeing your front desk to focus on patients in the room.",
-    gradient: "from-rose-600 via-red-500 to-orange-400",
-  },
-  {
-    icon: FaHome,
-    title: "Real Estate",
-    description:
-      "Qualifies buyers and renters, shares listing details instantly, and books showings — so no lead goes cold waiting for a callback.",
-    gradient: "from-amber-500 via-orange-500 to-yellow-400",
-  },
-  {
-    icon: FaShoppingBag,
-    title: "E-commerce & Retail",
-    description:
-      "Tracks orders, answers sizing and shipping questions, and recovers abandoned carts with instant, on-brand replies — 24/7, every time zone.",
-    gradient: "from-purple-600 via-fuchsia-500 to-pink-500",
-  },
-  {
-    icon: FaBalanceScale,
-    title: "Legal Services",
-    description:
-      "Screens new inquiries, explains your practice areas, and books consultations — giving your team qualified leads instead of cold intake calls.",
-    gradient: "from-slate-700 via-slate-600 to-slate-400",
-  },
-  {
-    icon: FaGraduationCap,
-    title: "Education",
-    description:
-      "Guides prospective students through programs, admissions, and deadlines, and hands off enrollment-ready leads to your team.",
-    gradient: "from-emerald-600 via-green-500 to-lime-400",
-  },
-];
+import type { Industry } from "@/lib/industriesData";
 
 // ============================================================================
 // INDUSTRY CARD — reveals as it scrolls into view
 // ============================================================================
-const IndustryCard = ({ industry, index }: { industry: Industry; index: number }) => {
+const IndustryCard = ({
+  industry,
+  index,
+}: {
+  industry: Industry;
+  index: number;
+}) => {
   const Icon = industry.icon;
 
   return (
@@ -83,29 +29,39 @@ const IndustryCard = ({ industry, index }: { industry: Industry; index: number }
         ease: [0.4, 0, 0.2, 1],
         delay: Math.min(index, 3) * 0.08,
       }}
-      className="flex flex-col items-center gap-6 rounded-2xl bg-gray-50 p-7 text-center lg:flex-row lg:items-center lg:text-left"
     >
-      <div className="flex-1">
-        <div
-          className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${industry.gradient} text-white shadow-lg shadow-primary/20 lg:mx-0`}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-        <h3 className="mb-2 text-lg font-bold text-thunder-black">
-          {industry.title}
-        </h3>
-        <p className="mx-auto max-w-md text-sm leading-relaxed text-gray-600 lg:mx-0">
-          {industry.description}
-        </p>
-      </div>
-
-      <div
-        className={`relative h-56 w-full shrink-0 overflow-hidden rounded-xl bg-gradient-to-br lg:h-64 lg:w-64 ${industry.gradient}`}
+      <Link
+        href={`/industries/${industry.slug}`}
+        className="flex flex-col items-center gap-6 rounded-2xl bg-gray-50 p-7 text-center transition-shadow hover:shadow-lg lg:flex-row lg:items-center lg:text-left"
       >
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] bg-[length:16px_16px]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-thunder-black/30 via-transparent to-transparent" />
-        <Icon className="absolute bottom-4 right-4 h-16 w-16 text-white/25" />
-      </div>
+        <div className="flex-1">
+          <div
+            className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${industry.gradient} text-white shadow-lg shadow-primary/20 lg:mx-0`}
+          >
+            <Icon className="h-5 w-5" />
+          </div>
+          <h3 className="mb-2 text-lg font-bold text-thunder-black">
+            {industry.title}
+          </h3>
+          <p className="mx-auto max-w-md text-sm leading-relaxed text-gray-600 lg:mx-0">
+            {industry.description}
+          </p>
+        </div>
+
+        <div
+          className={`relative h-56 w-full shrink-0 overflow-hidden rounded-xl bg-gradient-to-br lg:h-64 lg:w-64 ${industry.gradient}`}
+        >
+          <Image
+            src={industry.image}
+            alt={industry.title}
+            fill
+            sizes="(min-width: 1024px) 256px, 100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-thunder-black/50 via-thunder-black/10 to-transparent" />
+          <Icon className="absolute bottom-4 right-4 h-8 w-8 text-white/90 drop-shadow" />
+        </div>
+      </Link>
     </motion.div>
   );
 };
@@ -150,7 +106,7 @@ const IndustriesSections = () => {
             transition={{ duration: 0.6, delay: 0.16 }}
             className="mx-auto max-w-md text-base text-gray-600 sm:text-lg lg:mx-0"
           >
-            Whatever industry you&apos;re in, BayAI trains itself on your
+            Whatever industry you&apos;re in, Go Converto trains itself on your
             content and speaks your customers&apos; language from day one.
           </motion.p>
         </div>
@@ -158,7 +114,11 @@ const IndustriesSections = () => {
         {/* --- Right: industry cards, reveal one by one on scroll --- */}
         <div className="flex flex-col gap-6">
           {INDUSTRIES.map((industry, index) => (
-            <IndustryCard key={industry.title} industry={industry} index={index} />
+            <IndustryCard
+              key={industry.title}
+              industry={industry}
+              index={index}
+            />
           ))}
         </div>
       </div>

@@ -528,7 +528,7 @@ const CTASection = memo(() => {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
-      className="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8"
+      className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8"
     >
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(closest-side,rgba(59,130,246,0.1)_0%,transparent_100%)]" />
 

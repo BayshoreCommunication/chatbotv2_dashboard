@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "./auth";
 import { fetchUserProfile } from "./lib/fetchUserProfile";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. PUBLIC PATHS: Accessible to everyone (Guests + Users)
@@ -18,11 +18,15 @@ export async function middleware(request: NextRequest) {
     "/create-assistent",
     "/chatbot",
     "/pricing",
+    "/about",
     "/industries",
     "/how-it-works",
     "/faq",
     "/blog",
     "/contact",
+    "/privacy-policy",
+    "/terms-of-service",
+    "/cookie-policy",
     "/accept-invite",
     "/verify-team-access",
   ];
@@ -158,4 +162,4 @@ export const config = {
   matcher: ["/((?!_next/|favicon.ico|assets/).*)"],
 };
 
-export default middleware;
+export default proxy;
