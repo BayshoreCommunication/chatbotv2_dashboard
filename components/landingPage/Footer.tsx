@@ -7,17 +7,39 @@ import {
   BiLogoFacebookCircle,
   BiLogoInstagramAlt,
   BiLogoLinkedin,
+  BiLogoYoutube,
 } from "react-icons/bi";
-import { BsTwitterX } from "react-icons/bs";
+import { RiTwitterXLine } from "react-icons/ri";
 
 // ============================================================================
 // DATA
 // ============================================================================
 const SOCIAL_LINKS = [
-  { icon: BsTwitterX, label: "Twitter / X", href: "#" },
-  { icon: BiLogoLinkedin, label: "LinkedIn", href: "#" },
-  { icon: BiLogoFacebookCircle, label: "Facebook", href: "#" },
-  { icon: BiLogoInstagramAlt, label: "Instagram", href: "#" },
+  {
+    icon: BiLogoFacebookCircle,
+    label: "Facebook",
+    href: "https://www.facebook.com/profile.php?id=61592418290646",
+  },
+  {
+    icon: BiLogoInstagramAlt,
+    label: "Instagram",
+    href: "https://www.instagram.com/go_converto",
+  },
+  {
+    icon: RiTwitterXLine,
+    label: "Twitter / X",
+    href: "https://twitter.com/go_converto",
+  },
+  {
+    icon: BiLogoLinkedin,
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/go-converto",
+  },
+  {
+    icon: BiLogoYoutube,
+    label: "Youtube",
+    href: "https://www.youtube.com/channel/UCgsJbqDyb2CNzARfm60at-g",
+  },
 ];
 
 const FOOTER_COLUMNS = [
@@ -65,8 +87,14 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-10 pb-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-10">
           {/* Brand */}
           <div className="flex flex-col items-center lg:items-start">
-            <Link href="/" className="group mb-3.5 flex items-center justify-center lg:justify-start">
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Link
+              href="/"
+              className="group mb-3.5 flex items-center justify-center lg:justify-start"
+            >
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+              >
                 <Image
                   src="/assets/logo/go-converto-logo-white.png"
                   alt="Go Converto"
@@ -77,8 +105,8 @@ const Footer = () => {
               </motion.div>
             </Link>
             <p className="mb-5 max-w-[280px] text-sm leading-relaxed">
-              The AI chatbot that learns your business automatically and
-              turns visitors into customers, 24/7.
+              The AI chatbot that learns your business automatically and turns
+              visitors into customers, 24/7.
             </p>
             <div className="flex justify-center gap-2.5 lg:justify-start">
               {SOCIAL_LINKS.map((social) => {
@@ -122,7 +150,9 @@ const Footer = () => {
 
         {/* --- Bottom: copyright --- */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 text-[13px] lg:flex-row">
-          <span>&copy; {new Date().getFullYear()} BayAI. All rights reserved.</span>
+          <span>
+            &copy; {new Date().getFullYear()} GoConverto. All rights reserved.
+          </span>
           <div className="flex gap-6">
             <a
               href="https://bayshorecommunication.com"
