@@ -281,16 +281,17 @@ const TrainLeftSideForm = ({
     return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
   };
 
-  // Shared field styles — clean modern SaaS input.
+  // Shared field styles — matches the site-wide form look used on the
+  // Contact page (rounded, thunder-black text, primary focus ring).
   const inputClasses =
-    "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-500 dark:focus:border-primary";
+    "w-full rounded-xl border-[1.5px] border-gray-200 bg-white px-4 py-3 text-sm text-thunder-black placeholder-gray-400 transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10";
   // Input with left icon padding
   const inputIconClasses =
-    "w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-500 dark:focus:border-primary";
+    "w-full rounded-xl border-[1.5px] border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-thunder-black placeholder-gray-400 transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10";
   const labelClasses =
-    "mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-400";
+    "mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-gray-700";
   const primaryButtonClasses =
-    "w-full rounded-xl bg-gray-900 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200";
+    "flex w-full items-center justify-center gap-2 rounded-xl bg-thunder-black px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-thunder-black/90 disabled:cursor-not-allowed disabled:opacity-50";
 
   // For logged-in users: fetch profile and pre-fill fields (profile > draft > empty)
   useEffect(() => {
@@ -820,22 +821,22 @@ const TrainLeftSideForm = ({
         >
           {step === "training-form" && !isUserLoggedIn ? (
             <>
-              <h2 className="mb-2.5 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+              <h2 className="mb-2.5 text-3xl font-extrabold tracking-tight text-thunder-black">
                 Tell us about your company
               </h2>
-              <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              <p className="text-sm leading-relaxed text-gray-500">
                 We&apos;ll use these details to train your AI assistant and set
                 up your account. It only takes a minute.
               </p>
             </>
           ) : step === "training" || step === "checking" ? (
             <>
-              <h2 className="mb-2.5 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+              <h2 className="mb-2.5 text-3xl font-extrabold tracking-tight text-thunder-black">
                 {step === "checking"
                   ? "Checking your account"
                   : "Training in progress"}
               </h2>
-              <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              <p className="text-sm leading-relaxed text-gray-500">
                 {step === "checking"
                   ? "One moment — looking up your existing knowledge base."
                   : "Sit tight — your AI is learning your business from the details below."}
@@ -843,10 +844,10 @@ const TrainLeftSideForm = ({
             </>
           ) : (
             <>
-              <h2 className="mb-2.5 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+              <h2 className="mb-2.5 text-3xl font-extrabold tracking-tight text-thunder-black">
                 Train your AI knowledge base
               </h2>
-              <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              <p className="text-sm leading-relaxed text-gray-500">
                 {isUserLoggedIn
                   ? "Check your existing knowledge base or train new data"
                   : "Start by providing your company details"}
@@ -860,20 +861,20 @@ const TrainLeftSideForm = ({
       {step === "form" && (
         <motion.div variants={fadeInUp}>
           <div className="space-y-6">
-            <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-transparent">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-900">
-                <BiBuilding className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+            <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <BiBuilding className="h-6 w-6 text-primary-dark" />
               </div>
-              <h3 className="mb-1.5 text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="mb-1.5 text-lg font-bold text-thunder-black">
                 Check knowledge base
               </h3>
-              <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              <p className="text-sm leading-relaxed text-gray-500">
                 Check if you have existing training data or start fresh
               </p>
             </div>
 
             {error && (
-              <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-900/10 dark:text-red-400">
+              <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-600">
                 {error}
               </div>
             )}
@@ -898,8 +899,8 @@ const TrainLeftSideForm = ({
           className="space-y-6"
         >
           {isUserLoggedIn && (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
-              <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <p className="text-sm leading-relaxed text-gray-600">
                 Please provide your company details to start training your AI
                 chatbot
               </p>
@@ -1006,13 +1007,13 @@ const TrainLeftSideForm = ({
             </div>
 
             {error && (
-              <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-900/10 dark:text-red-400">
+              <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-600">
                 {error}
               </div>
             )}
 
             {success && !showOTPModal && (
-              <div className="rounded-lg border border-green-100 bg-green-50 p-3 text-sm text-green-600 dark:border-green-900/40 dark:bg-green-900/10 dark:text-green-400">
+              <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-600">
                 {success}
               </div>
             )}
@@ -1028,9 +1029,9 @@ const TrainLeftSideForm = ({
 
           {/* Logs */}
           {logs.length > 0 && (
-            <div className="mt-2 max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-left text-sm dark:border-gray-800 dark:bg-gray-900/50">
+            <div className="mt-2 max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-left text-sm">
               {logs.map((log, i) => (
-                <div key={i} className="mb-1 text-gray-600 dark:text-gray-400">
+                <div key={i} className="mb-1 text-gray-600">
                   {log}
                 </div>
               ))}
@@ -1062,7 +1063,7 @@ const TrainLeftSideForm = ({
             <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-gray-400">
               Loaded from your details
             </p>
-            <div className="divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white dark:divide-gray-900 dark:border-gray-800 dark:bg-transparent">
+            <div className="divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white">
               {[
                 { label: "Company name", value: companyName },
                 {
@@ -1080,10 +1081,10 @@ const TrainLeftSideForm = ({
                     className="flex items-center justify-between gap-3 px-4 py-3.5"
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <BiCheckCircle className="h-4 w-4 shrink-0 text-green-500" />
+                      <BiCheckCircle className="h-4 w-4 shrink-0 text-emerald-500" />
                       <div className="min-w-0">
                         <p className="text-xs text-gray-400">{row.label}</p>
-                        <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
+                        <p className="truncate text-sm font-bold text-thunder-black">
                           {row.value}
                         </p>
                       </div>
@@ -1097,16 +1098,16 @@ const TrainLeftSideForm = ({
           </div>
 
           {/* Progress Card */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-transparent">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
             {!hasLiveData ? (
               // Skeleton — shown until the first real poll response arrives,
               // so this never looks like a misleading static "0%".
               <div className="animate-pulse space-y-3">
-                <div className="mx-auto h-4 w-40 rounded bg-gray-100 dark:bg-gray-900" />
-                <div className="h-1.5 w-full rounded-full bg-gray-100 dark:bg-gray-900" />
+                <div className="mx-auto h-4 w-40 rounded bg-gray-100" />
+                <div className="h-1.5 w-full rounded-full bg-gray-100" />
                 <div className="flex justify-between">
-                  <div className="h-3 w-16 rounded bg-gray-100 dark:bg-gray-900" />
-                  <div className="h-3 w-20 rounded bg-gray-100 dark:bg-gray-900" />
+                  <div className="h-3 w-16 rounded bg-gray-100" />
+                  <div className="h-3 w-20 rounded bg-gray-100" />
                 </div>
               </div>
             ) : isComplete ? (
@@ -1121,29 +1122,29 @@ const TrainLeftSideForm = ({
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", delay: 0.1, duration: 0.4 }}
-                  className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20"
+                  className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50"
                 >
-                  <BiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <BiCheckCircle className="h-5 w-5 text-emerald-600" />
                 </motion.div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                <p className="text-sm font-bold text-thunder-black">
                   100% complete
                 </p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-xs text-gray-500">
                   Finalizing your chatbot…
                 </p>
-                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-green-100 dark:bg-green-900/20">
-                  <div className="h-full w-full rounded-full bg-green-500" />
+                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-emerald-100">
+                  <div className="h-full w-full rounded-full bg-emerald-500" />
                 </div>
               </motion.div>
             ) : (
               <>
-                <div className="mb-3 flex items-center justify-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
-                  <BiLoaderAlt className="h-4 w-4 animate-spin text-gray-400" />
+                <div className="mb-3 flex items-center justify-center gap-2 text-sm font-bold text-thunder-black">
+                  <BiLoaderAlt className="h-4 w-4 animate-spin text-primary" />
                   Training… {trainPercent}%
                 </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-900">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
                   <motion.div
-                    className="h-full rounded-full bg-gray-900 dark:bg-white"
+                    className="h-full rounded-full bg-primary"
                     animate={{ width: `${trainPercent}%` }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   />
@@ -1168,15 +1169,15 @@ const TrainLeftSideForm = ({
         >
           {/* Success Header */}
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20">
-              <BiCheckCircle className="h-7 w-7 text-green-600 dark:text-green-400" />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
+              <BiCheckCircle className="h-7 w-7 text-emerald-600" />
             </div>
-            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
+            <h3 className="mb-2 text-2xl font-extrabold tracking-tight text-thunder-black">
               Already trained
             </h3>
-            <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+            <p className="text-sm leading-relaxed text-gray-500">
               Your AI is ready with{" "}
-              <strong className="font-semibold text-gray-900 dark:text-white">
+              <strong className="font-bold text-thunder-black">
                 {existingKB.companyName}
               </strong>{" "}
               knowledge base
@@ -1184,7 +1185,7 @@ const TrainLeftSideForm = ({
           </div>
 
           {/* Training Summary Card */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-transparent">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
             <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
               Knowledge base summary
             </h4>
@@ -1192,22 +1193,22 @@ const TrainLeftSideForm = ({
             <div className="space-y-4">
               {/* Sources */}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="text-sm text-gray-500">
                   Total sources
                 </span>
-                <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                <span className="text-xl font-bold text-thunder-black">
                   {existingKB.totalSources}
                 </span>
               </div>
 
               {/* Quality Score - Prominent Display */}
-              <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  <span className="text-sm font-medium text-gray-600">
                     Quality score
                   </span>
                   <div className="text-right">
-                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    <div className="text-2xl font-bold text-thunder-black">
                       {existingKB.qualityPercentage}%
                     </div>
                     <div className="text-xs font-medium uppercase tracking-wide text-gray-400">
@@ -1216,9 +1217,9 @@ const TrainLeftSideForm = ({
                   </div>
                 </div>
                 {/* Progress Bar */}
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-200">
                   <div
-                    className="h-full rounded-full bg-gray-900 transition-all duration-700 dark:bg-white"
+                    className="h-full rounded-full bg-primary transition-all duration-700"
                     style={{ width: `${existingKB.qualityPercentage}%` }}
                   />
                 </div>
@@ -1227,10 +1228,10 @@ const TrainLeftSideForm = ({
               {/* Last Trained Date */}
               {existingKB.updatedAt && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">
+                  <span className="text-gray-500">
                     Last trained
                   </span>
-                  <span className="font-medium text-gray-900 dark:text-white">
+                  <span className="font-medium text-thunder-black">
                     {new Date(existingKB.updatedAt).toLocaleDateString(
                       "en-US",
                       {
@@ -1248,10 +1249,10 @@ const TrainLeftSideForm = ({
           </div>
 
           {/* Info Card */}
-          <div className="flex items-start gap-2.5 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
-            <div className="mt-1 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-green-500" />
-            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-              <strong className="font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-start gap-2.5 rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <div className="mt-1 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-500" />
+            <p className="text-sm leading-relaxed text-gray-600">
+              <strong className="font-bold text-thunder-black">
                 Your AI is active.
               </strong>{" "}
               You can start chatting with your AI assistant on the right side
@@ -1271,15 +1272,15 @@ const TrainLeftSideForm = ({
         >
           {/* Success Header */}
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20">
-              <BiCheckCircle className="h-7 w-7 text-green-600 dark:text-green-400" />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
+              <BiCheckCircle className="h-7 w-7 text-emerald-600" />
             </div>
-            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
+            <h3 className="mb-2 text-2xl font-extrabold tracking-tight text-thunder-black">
               Training complete
             </h3>
-            <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+            <p className="text-sm leading-relaxed text-gray-500">
               Your chatbot is now powered by{" "}
-              <strong className="font-semibold text-gray-900 dark:text-white">
+              <strong className="font-bold text-thunder-black">
                 {trainingResult.totalSources}
               </strong>{" "}
               {trainingResult.totalSources === 1 ? "source" : "sources"}.
@@ -1287,13 +1288,13 @@ const TrainLeftSideForm = ({
           </div>
 
           {/* Quality Score Card */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-transparent">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              <span className="text-sm font-medium text-gray-600">
                 Quality score
               </span>
               <div className="text-right">
-                <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+                <div className="text-2xl font-bold text-thunder-black">
                   {trainingResult.qualityPercentage}%
                 </div>
                 <div className="text-xs font-medium uppercase tracking-wide text-gray-400">
@@ -1301,12 +1302,12 @@ const TrainLeftSideForm = ({
                 </div>
               </div>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+            <div className="h-1.5 overflow-hidden rounded-full bg-gray-200">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${trainingResult.qualityPercentage}%` }}
                 transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                className="h-full rounded-full bg-gray-900 dark:bg-white"
+                className="h-full rounded-full bg-primary"
               />
             </div>
           </div>
@@ -1314,14 +1315,14 @@ const TrainLeftSideForm = ({
           {/* Missing Info Alerts */}
           {trainingResult.missingInfo &&
             trainingResult.missingInfo.length > 0 && (
-              <div className="rounded-2xl border border-amber-100 bg-amber-50 p-5 dark:border-amber-900/40 dark:bg-amber-900/10">
+              <div className="rounded-2xl border border-amber-100 bg-amber-50 p-5">
                 <div className="mb-3 flex items-center gap-2">
                   <span className="text-base">⚠️</span>
-                  <span className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                  <span className="text-sm font-semibold text-amber-900">
                     Missing important information
                   </span>
                 </div>
-                <p className="mb-3 text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+                <p className="mb-3 text-xs leading-relaxed text-amber-800">
                   The following info was not found on your website. Add it to
                   improve your chatbot&apos;s answers:
                 </p>
@@ -1329,7 +1330,7 @@ const TrainLeftSideForm = ({
                   {trainingResult.missingInfo.map((item) => (
                     <li
                       key={item.key}
-                      className="flex items-start gap-2 rounded-lg border border-amber-100 bg-white px-3 py-2 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200"
+                      className="flex items-start gap-2 rounded-lg border border-amber-100 bg-white px-3 py-2 text-xs text-amber-900"
                     >
                       <span className="mt-0.5 shrink-0 text-amber-500">•</span>
                       <span>{item.label}</span>
@@ -1340,10 +1341,10 @@ const TrainLeftSideForm = ({
             )}
 
           {/* Info Card */}
-          <div className="flex items-start gap-2.5 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
+          <div className="flex items-start gap-2.5 rounded-xl border border-gray-200 bg-gray-50 p-4">
             <div className="mt-1 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-primary" />
-            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-              <strong className="font-semibold text-gray-900 dark:text-white">
+            <p className="text-sm leading-relaxed text-gray-600">
+              <strong className="font-bold text-thunder-black">
                 Your AI is ready.
               </strong>{" "}
               You can now start chatting with your AI assistant on the right
@@ -1372,7 +1373,7 @@ const TrainLeftSideForm = ({
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
               <div
-                className="relative w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-xl"
+                className="relative w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8"
                 style={{ colorScheme: "light" }}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -1385,10 +1386,10 @@ const TrainLeftSideForm = ({
                 </button>
 
                 <div className="mb-6 text-center">
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-                    <BiShield className="h-6 w-6 text-gray-700" />
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <BiShield className="h-6 w-6 text-primary-dark" />
                   </div>
-                  <h2 className="text-xl font-semibold tracking-tight text-gray-900">
+                  <h2 className="text-xl font-extrabold tracking-tight text-thunder-black">
                     {otpMode === "login" ? "Welcome back" : "Verify your email"}
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-gray-500">
@@ -1412,7 +1413,7 @@ const TrainLeftSideForm = ({
                       maxLength={6}
                       required
                       style={{ colorScheme: "light" }}
-                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-2xl font-semibold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-gray-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-gray-100"
+                      className="w-full rounded-lg border-[1.5px] border-gray-200 bg-gray-50 px-4 py-4 text-center text-2xl font-bold tracking-widest text-thunder-black placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10"
                     />
 
                     <div className="flex items-center justify-between text-sm">
@@ -1427,7 +1428,7 @@ const TrainLeftSideForm = ({
                         type="button"
                         onClick={handleResendOtp}
                         disabled={isLoading || otpTimer > 0}
-                        className="font-semibold text-gray-900 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="font-bold text-thunder-black hover:text-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Resend code
                       </button>

@@ -4,9 +4,9 @@ import FreeTrailMainPage from "@/components/trainAi/startFreeTrial/FreeTrailMain
 const page = async () => {
   const session = await auth();
   return (
-    <div>
+    <>
       <FreeTrailMainPage session={session} />
-    </div>
+    </>
   );
 };
 

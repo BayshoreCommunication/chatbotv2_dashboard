@@ -19,7 +19,12 @@ import {
 } from "react-icons/bi";
 import type { LiveProgress } from "./TrainLeftSideForm";
 
-const DEFAULT_COLOR = "#2563eb";
+// Site brand's --color-thunder-black (app/globals.css) — the free-trial
+// preview always shows the site's own brand color regardless of any
+// previously saved widget theme, so it reads as "your new AI assistant"
+// rather than leftover config from an earlier test. Real color customization
+// happens later in the actual widget-settings page.
+const BRAND_COLOR = "#2d2d2d";
 
 // --- Types ---
 interface TrainingData {
@@ -127,7 +132,7 @@ const ChatbotRightSideView = ({
     });
   }, []);
 
-  const primaryColor = widgetSettings?.theme?.primary_color || DEFAULT_COLOR;
+  const primaryColor = BRAND_COLOR;
   const botName = widgetSettings?.bot_name || displayName;
   const welcomeMessage = widgetSettings?.content?.welcome_message || null;
   const inputPlaceholder = widgetSettings?.content?.input_placeholder || "Ask me anything...";
@@ -333,7 +338,11 @@ const ChatbotRightSideView = ({
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="flex w-full justify-center p-4"
       >
-        <div className="w-full max-w-[380px] rounded-3xl bg-gradient-to-br from-primary/5 via-white to-purple-50 p-6">
+        <div className="relative w-full max-w-[380px]">
+          {/* Decorative glow */}
+          <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 via-purple-500/10 to-pink-500/10 blur-3xl" />
+
+          <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-primary/5 via-white to-purple-50 p-6">
           {/* Flow graphic: your site -> your AI -> your customers */}
           <div className="mb-7 flex items-center justify-center gap-3">
             {[
@@ -346,7 +355,7 @@ const ChatbotRightSideView = ({
                   <div
                     className={`flex h-11 w-11 items-center justify-center rounded-full border ${
                       node.filled
-                        ? "border-gray-900 bg-gray-900"
+                        ? "border-thunder-black bg-thunder-black"
                         : "border-gray-200 bg-white"
                     }`}
                   >
@@ -363,12 +372,12 @@ const ChatbotRightSideView = ({
             ))}
           </div>
 
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
-            <span className="text-xs font-medium text-gray-600">Setting up your AI assistant</span>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+            <span className="text-xs font-semibold text-primary-dark">Setting up your AI assistant</span>
           </div>
 
-          <h3 className="mb-6 text-2xl font-semibold leading-snug tracking-tight text-gray-900">
+          <h3 className="mb-6 text-2xl font-extrabold leading-snug tracking-tight text-thunder-black">
             Your AI assistant goes live in minutes.
           </h3>
 
@@ -388,9 +397,9 @@ const ChatbotRightSideView = ({
               },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-3">
-                <BiCheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-gray-400" />
+                <BiCheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{item.title}</p>
+                  <p className="text-sm font-bold text-thunder-black">{item.title}</p>
                   <p className="text-xs leading-relaxed text-gray-500">{item.desc}</p>
                 </div>
               </div>
@@ -405,10 +414,11 @@ const ChatbotRightSideView = ({
               { value: "50+", label: "Languages" },
             ].map((stat) => (
               <div key={stat.label} className="px-2 text-center first:pl-0 last:pr-0">
-                <p className="text-lg font-semibold text-gray-900">{stat.value}</p>
+                <p className="text-lg font-extrabold text-thunder-black">{stat.value}</p>
                 <p className="text-[11px] text-gray-500">{stat.label}</p>
               </div>
             ))}
+          </div>
           </div>
         </div>
       </motion.div>
@@ -427,7 +437,7 @@ const ChatbotRightSideView = ({
         <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 via-purple-500/20 to-pink-500/20 blur-3xl" />
 
         {/* Main Chat Container */}
-        <div className="relative mx-auto flex h-[600px] w-[380px] shrink-0 flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
+        <div className="relative mx-auto flex h-[600px] w-[380px] shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white">
 
           {/* --- Header --- */}
           <div
@@ -542,7 +552,7 @@ const ChatbotRightSideView = ({
                   >
                     {/* Bubble */}
                     <div
-                      className={`max-w-[85%] rounded-2xl p-3 text-sm leading-relaxed shadow-sm ${
+                      className={`max-w-[85%] rounded-2xl p-3 text-sm leading-relaxed ${
                         msg.role === "user"
                           ? "rounded-tr-sm text-white"
                           : "rounded-tl-sm border border-gray-100 bg-white text-gray-800"
@@ -580,7 +590,7 @@ const ChatbotRightSideView = ({
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex gap-2"
               >
-                <div className="rounded-2xl rounded-tl-sm border border-gray-100 bg-white px-4 py-3 shadow-sm">
+                <div className="rounded-2xl rounded-tl-sm border border-gray-100 bg-white px-4 py-3">
                   <div className="flex gap-1">
                     {[0, 0.2, 0.4].map((delay) => (
                       <motion.div
@@ -618,7 +628,7 @@ const ChatbotRightSideView = ({
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim() || isLoading}
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition-all duration-200 ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-all duration-200 ${
                   !inputValue.trim() || isLoading ? "opacity-40 cursor-not-allowed" : "hover:scale-105 active:scale-95"
                 }`}
                 style={{ backgroundColor: primaryColor }}
