@@ -52,7 +52,7 @@ export const defaultSettings: WidgetSettingsForm = {
     show_welcome_message: true,
   },
   content: {
-    welcome_message: "Hello! 👋 Welcome to Bayshore Communication. How can I assist you today?",
+    welcome_message: "Hello! 👋 Welcome to GoConverto. How can I assist you today?",
     welcome_video: "",
     welcome_video_autoplay: true,
     input_placeholder: "Type your question here...",

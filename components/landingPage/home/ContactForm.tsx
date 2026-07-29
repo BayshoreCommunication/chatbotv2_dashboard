@@ -17,7 +17,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";``
 
 // How long the post-submit confirmation modal stays open before it
 // auto-dismisses itself.
@@ -264,7 +264,7 @@ const ContactForm = ({ showMap = false }: { showMap?: boolean }) => {
                 disabled={isSending}
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-thunder-black py-[15px] text-[15px] font-bold text-white transition-colors hover:bg-thunder-black/90 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-thunder-black text-base font-bold text-white transition-colors hover:bg-thunder-black/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSending ? (
                   <>

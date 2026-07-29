@@ -60,7 +60,6 @@ export default async function BlogPostPage({
           { label: post.title },
         ]}
         title={post.title}
-        gradient={post.gradient}
         image={post.image}
       />
 

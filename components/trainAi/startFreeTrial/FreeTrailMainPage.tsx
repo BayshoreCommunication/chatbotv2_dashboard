@@ -4,6 +4,7 @@ import { getSubscriptionAction } from "@/app/actions/subscriptions";
 import { getWidgetSettingsAction } from "@/app/actions/widgetSettings";
 import Container from "@/components/shared/Container";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BiCheckCircle, BiLoaderAlt } from "react-icons/bi";
@@ -150,53 +151,65 @@ const FreeTrailMainPage = ({
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="mx-auto mt-20 max-w-5xl overflow-hidden rounded-3xl border border-gray-200 bg-gray-50"
+          className="mx-auto mt-20 max-w-7xl overflow-hidden rounded-3xl border border-gray-200 bg-[#EAF7FC]"
         >
-          <div className="grid grid-cols-1 items-center gap-6 p-8 sm:grid-cols-[1fr_auto] sm:gap-10 sm:p-10">
-            <div className="text-center sm:text-left">
-              <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-                <BiCheckCircle className="h-3.5 w-3.5" />
-                Training complete
-              </span>
-              <h3 className="mb-2 text-2xl font-extrabold tracking-tight text-thunder-black">
-                One step left — go live on your site
-              </h3>
-              <p className="mb-4 max-w-md text-sm leading-relaxed text-gray-600">
-                Paste a single snippet into your website and your AI assistant
-                starts chatting with real visitors immediately.
-              </p>
-              <ul className="flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-xs font-semibold text-gray-500 sm:justify-start">
-                {[
-                  "No coding required",
-                  "Live in under 5 minutes",
-                  "Works on any website",
-                ].map((label) => (
-                  <li key={label} className="flex items-center gap-1.5">
-                    <BiCheckCircle className="h-3.5 w-3.5 text-primary-dark" />
-                    {label}
-                  </li>
-                ))}
-              </ul>
+          <div className="flex flex-col sm:flex-row sm:items-stretch">
+            <div className="relative h-56 w-full shrink- sm:h-auto sm:w-80">
+              <Image
+                src="/assets/widget-setup.png"
+                alt=""
+                fill
+                sizes="(min-width: 640px) 320px, 100vw"
+                className="object-contain p-4"
+              />
             </div>
 
-            <button
-              type="button"
-              onClick={() => void handleSetupClick()}
-              disabled={navigating}
-              className="group flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-thunder-black px-4 font-semibold text-white transition-colors hover:bg-thunder-black/90 disabled:opacity-60"
-            >
-              {navigating ? (
-                <>
-                  <BiLoaderAlt className="h-4 w-4 animate-spin" />
-                  Please wait…
-                </>
-              ) : (
-                <>
-                  Set up on your website
-                  <BsArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </>
-              )}
-            </button>
+            <div className="grid flex-1 grid-cols-1 items-center gap-6 p-8 sm:grid-cols-[1fr_auto] sm:gap-10 sm:p-10">
+              <div className="text-center sm:text-left">
+                <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                  <BiCheckCircle className="h-3.5 w-3.5" />
+                  Training complete
+                </span>
+                <h3 className="mb-2 text-2xl font-extrabold tracking-tight text-thunder-black">
+                  One step left — go live on your site
+                </h3>
+                <p className="mb-4 max-w-md text-sm leading-relaxed text-gray-600">
+                  Paste a single snippet into your website and your AI assistant
+                  starts chatting with real visitors immediately.
+                </p>
+                <ul className="flex flex-wrap justify-center gap-x-5 gap-y-1.5 text-xs font-semibold text-gray-500 sm:justify-start">
+                  {[
+                    "No coding required",
+                    "Live in under 5 minutes",
+                    "Works on any website",
+                  ].map((label) => (
+                    <li key={label} className="flex items-center gap-1.5">
+                      <BiCheckCircle className="h-3.5 w-3.5 text-primary-dark" />
+                      {label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => void handleSetupClick()}
+                disabled={navigating}
+                className="group flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-thunder-black px-4 font-semibold text-white transition-colors hover:bg-thunder-black/90 disabled:opacity-60"
+              >
+                {navigating ? (
+                  <>
+                    <BiLoaderAlt className="h-4 w-4 animate-spin" />
+                    Please wait…
+                  </>
+                ) : (
+                  <>
+                    Set up on your website
+                    <BsArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </motion.div>
       )}

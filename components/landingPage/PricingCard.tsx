@@ -28,7 +28,7 @@ interface PricingCardProps {
 }
 
 const CONTACT_SALES_HREF =
-  "mailto:sales@bayshorecommunication.com?subject=Enterprise%20Plan%20Inquiry";
+  "mailto:sales@goconverto.com?subject=Enterprise%20Plan%20Inquiry";
 
 // "trial" (this plan's id) and "free" (the backend tier name for it) refer
 // to the same plan — normalize before ranking.
@@ -145,9 +145,9 @@ export const PricingCard = memo(
                   href={CONTACT_SALES_HREF}
                   className={buttonVariants({
                     variant: "outline",
-                    size: "xl",
+                    size: "lg",
                     className:
-                      "w-full rounded-lg border-thunder-black bg-white text-thunder-black hover:bg-gray-50",
+                      "w-full rounded-lg border-thunder-black bg-white text-thunder-black hover:bg-thunder-black hover:text-white",
                   })}
                 >
                   <span className="flex items-center justify-center gap-2">
@@ -158,12 +158,12 @@ export const PricingCard = memo(
               ) : (
                 <Button
                   variant="outline"
-                  size="xl"
+                  size="lg"
                   className={cn(
                     "w-full rounded-lg",
                     plan.recommended
-                      ? "border-thunder-black bg-thunder-black text-white hover:bg-thunder-black/90"
-                      : "border-thunder-black bg-white text-thunder-black hover:bg-gray-50"
+                      ? "border-thunder-black bg-thunder-black text-white hover:bg-thunder-black/90 hover:text-white"
+                      : "border-thunder-black bg-white text-thunder-black hover:bg-thunder-black hover:text-white"
                   )}
                   onClick={() =>
                     isCurrentPlan

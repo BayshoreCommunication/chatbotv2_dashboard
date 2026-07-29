@@ -67,7 +67,6 @@ export default async function IndustryDetailPage({
           { label: industry.title },
         ]}
         title={industry.title}
-        gradient={industry.gradient}
         image={industry.image}
       />
 

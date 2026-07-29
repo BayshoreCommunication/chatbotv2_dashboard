@@ -33,7 +33,6 @@ export default function BlogPage() {
       <PageHero
         breadcrumbs={[{ label: "Home", href: "/" }, { label: "Blog" }]}
         title="Insights to grow your business with AI"
-        gradient={featuredPost.gradient}
       />
       <BlogListContent featuredPost={featuredPost} posts={posts} />
     </>

@@ -291,7 +291,7 @@ const TrainLeftSideForm = ({
   const labelClasses =
     "mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-gray-700";
   const primaryButtonClasses =
-    "flex w-full items-center justify-center gap-2 rounded-xl bg-thunder-black px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-thunder-black/90 disabled:cursor-not-allowed disabled:opacity-50";
+    "flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-thunder-black text-base font-bold text-white transition-colors hover:bg-thunder-black/90 disabled:cursor-not-allowed disabled:opacity-50";
 
   // For logged-in users: fetch profile and pre-fill fields (profile > draft > empty)
   useEffect(() => {
@@ -1253,10 +1253,16 @@ const TrainLeftSideForm = ({
             <div className="mt-1 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-500" />
             <p className="text-sm leading-relaxed text-gray-600">
               <strong className="font-bold text-thunder-black">
-                Your AI is active.
+                Your AI chatbot is ready!
               </strong>{" "}
-              You can start chatting with your AI assistant on the right side
-              or retrain to add more knowledge.
+              Chat with it on the right, or retrain to add more knowledge.{" "}
+              <button
+                type="button"
+                onClick={() => router.push("/widget-settings")}
+                className="animate-pulse font-bold text-primary-dark underline decoration-2 underline-offset-2 transition-colors hover:text-thunder-black"
+              >
+                Set up on your website
+              </button>
             </p>
           </div>
         </motion.div>

@@ -468,7 +468,7 @@ const HeroSection = () => {
             <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
               <Link
                 href="/start-free-trial"
-                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-thunder-black px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-thunder-black/90 sm:gap-2 sm:px-6 sm:py-3.5 sm:text-sm"
+                className="inline-flex h-12 items-center gap-1.5 whitespace-nowrap rounded-lg bg-thunder-black px-8 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-thunder-black/90 sm:gap-2 sm:text-sm"
               >
                 Start Free Trial
                 <BsArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -477,7 +477,7 @@ const HeroSection = () => {
             <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
               <Link
                 href="#"
-                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border-[1.5px] border-thunder-black bg-white px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-thunder-black transition-colors hover:bg-gray-50 sm:gap-2 sm:px-6 sm:py-3.5 sm:text-sm"
+                className="inline-flex h-12 items-center gap-1.5 whitespace-nowrap rounded-lg border-[1.5px] border-thunder-black bg-white px-8 text-xs font-bold uppercase tracking-wide text-thunder-black transition-colors hover:bg-gray-50 sm:gap-2 sm:text-sm"
               >
                 <BsPlayFill className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Watch Demo
@@ -491,15 +491,17 @@ const HeroSection = () => {
           >
             <div className="flex -space-x-3">
               {[
-                "from-blue-400 to-purple-500",
-                "from-emerald-400 to-teal-500",
-                "from-orange-400 to-pink-500",
-                "from-slate-400 to-slate-600",
-              ].map((gradient, i) => (
+                { letter: "A", gradient: "from-blue-400 to-purple-500" },
+                { letter: "D", gradient: "from-emerald-400 to-teal-500" },
+                { letter: "H", gradient: "from-orange-400 to-pink-500" },
+                { letter: "C", gradient: "from-slate-400 to-slate-600" },
+              ].map(({ letter, gradient }) => (
                 <div
-                  key={i}
-                  className={`h-9 w-9 rounded-full bg-gradient-to-br ${gradient} ring-2 ring-white`}
-                />
+                  key={letter}
+                  className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-xs font-bold text-white ring-2 ring-white`}
+                >
+                  {letter}
+                </div>
               ))}
             </div>
             <div>

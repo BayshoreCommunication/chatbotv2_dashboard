@@ -121,7 +121,7 @@ const ChatbotPreview = ({ data, companyId }: ChatbotPreviewProps) => {
               </div>
             </div>
             <div className="mt-2 text-center text-[10px] text-gray-400 flex items-center justify-center gap-1">
-              ⚡ Powered by <strong>Bayshore Communication</strong>
+              ⚡ Powered by <strong>GoConverto</strong>
             </div>
           </div>
         </div>

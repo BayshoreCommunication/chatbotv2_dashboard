@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   BiLogoFacebookCircle,
   BiLogoInstagramAlt,
-  BiLogoLinkedin,
   BiLogoYoutube,
 } from "react-icons/bi";
 import { RiTwitterXLine } from "react-icons/ri";
@@ -30,11 +29,11 @@ const SOCIAL_LINKS = [
     label: "Twitter / X",
     href: "https://twitter.com/go_converto",
   },
-  {
-    icon: BiLogoLinkedin,
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/company/go-converto",
-  },
+  // {
+  //   icon: BiLogoLinkedin,
+  //   label: "LinkedIn",
+  //   href: "https://www.linkedin.com/company/go-converto",
+  // },
   {
     icon: BiLogoYoutube,
     label: "Youtube",
@@ -149,20 +148,10 @@ const Footer = () => {
         </div>
 
         {/* --- Bottom: copyright --- */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 text-[13px] lg:flex-row">
+        <div className="flex flex-col items-center justify-center gap-4 border-t border-white/10 pt-7 text-[13px] lg:flex-row">
           <span>
-            &copy; {new Date().getFullYear()} GoConverto. All rights reserved.
+            &copy; {new Date().getFullYear()} Goconverto. All rights reserved.
           </span>
-          <div className="flex gap-6">
-            <a
-              href="https://bayshorecommunication.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 transition-colors hover:text-white"
-            >
-              Product by Bayshore Communication
-            </a>
-          </div>
         </div>
       </div>
     </motion.footer>

@@ -253,7 +253,7 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
                 </Button>
               </Link>
               <Link
-                href="/sign-up"
+                href="/start-free-trial"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90"
               >
@@ -363,7 +363,7 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
                       </Button>
                     </Link>
                     <Link
-                      href="/sign-up"
+                      href="/start-free-trial"
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90"
                     >
