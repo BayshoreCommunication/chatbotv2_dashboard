@@ -9,6 +9,7 @@ import {
   BiMessage,
   BiUser,
 } from "react-icons/bi";
+import { RiApps2AiLine } from "react-icons/ri";
 
 export interface SubNavItem {
   id: string;
@@ -96,17 +97,18 @@ export const navigationConfig: NavItem[] = [
         href: "/train-ai",
         icon: <BiBulb size={18} />,
       },
-      // {
-      //   id: "apps",
-      //   title: "Apps",
-      //   href: "/apps",
-      //   icon: <BiGridAlt size={18} />,
-      // },
+
       {
         id: "appointments",
         title: "Appointments",
         href: "/appointments",
         icon: <BiCalendar size={18} />,
+      },
+      {
+        id: "apps",
+        title: "Apps Integration ",
+        href: "/apps-integration ",
+        icon: <RiApps2AiLine size={18} />,
       },
       // {
       //   id: "unknown-questions",
