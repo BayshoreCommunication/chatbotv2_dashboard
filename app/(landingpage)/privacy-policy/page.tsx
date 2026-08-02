@@ -43,6 +43,10 @@ const SECTIONS = [
     body: "We do not sell your personal information. We share data only with the service providers that help us operate Go Converto — including Stripe for payment processing, MongoDB Atlas for secure data storage, our AI infrastructure providers for generating chatbot responses, and Calendly where you've connected it for appointment booking. These providers are only permitted to use your data to perform services on our behalf.",
   },
   {
+    heading: "Facebook, Instagram & Meta Platform Data",
+    body: "When you connect your Facebook Page or Instagram Business Account to Go Converto, we access limited data through Meta's Platform (via the Facebook Login and Messenger/Instagram Messaging APIs), including your Page name, Page ID, Instagram Business Account ID, and the content of messages sent to your Page or Instagram account by your customers. We use this data solely to generate and deliver AI-powered responses through your trained assistant on your behalf. We do not use this data for advertising, and we do not sell or share it with third parties other than the service providers listed above that help us operate this feature. You can disconnect your Facebook Page or Instagram account at any time from your dashboard, which revokes our access to this data. Message data associated with a disconnected channel is deleted from our systems within 30 days of disconnection, or upon request.",
+  },
+  {
     heading: "Data Security",
     body: "We use industry-standard safeguards to protect your data, including encryption in transit and at rest, and access controls that limit who within our team can view your information. No method of transmission or storage is completely secure, but we work to protect your data using practices appropriate to its sensitivity.",
   },
@@ -60,7 +64,7 @@ const SECTIONS = [
   },
   {
     heading: "Contact Us",
-    body: "If you have questions about this Privacy Policy or how we handle your data, contact us at hello@bayai.com or 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
+    body: "If you have questions about this Privacy Policy or how we handle your data, contact us at info@goconverto.com or 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
   },
 ];
 
