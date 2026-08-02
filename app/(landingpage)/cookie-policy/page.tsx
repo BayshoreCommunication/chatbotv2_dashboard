@@ -44,7 +44,7 @@ const SECTIONS = [
   },
   {
     heading: "Third-Party Cookies",
-    body: "Some cookies may be set by third-party services we rely on to operate Go Converto, such as our payment processor or analytics provider. These providers have their own privacy and cookie practices, which we encourage you to review.",
+    body: "Some cookies may be set by third-party services we rely on to operate Go Converto, such as our payment processor or analytics provider. If you connect a Facebook Page or Instagram Business Account, Meta's Facebook SDK (loaded when you use the \"Continue with Facebook\" option) may also set its own cookies as part of that login process. These providers have their own privacy and cookie practices, which we encourage you to review.",
   },
   {
     heading: "Changes to This Policy",
@@ -52,7 +52,7 @@ const SECTIONS = [
   },
   {
     heading: "Contact Us",
-    body: "Questions about how we use cookies? Reach us at hello@bayai.com or 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
+    body: "Questions about how we use cookies? Reach us at info@goconverto.com or 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
   },
 ];
 

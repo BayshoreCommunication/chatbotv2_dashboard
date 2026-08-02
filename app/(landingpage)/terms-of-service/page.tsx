@@ -47,6 +47,10 @@ const SECTIONS = [
     body: "You agree not to use Go Converto for any unlawful purpose, to attempt to reverse-engineer or scrape the platform, to overload or disrupt our systems, or to train your assistant on content you don't have the right to use.",
   },
   {
+    heading: "Connecting Facebook, Instagram & Other Third-Party Channels",
+    body: "If you connect a Facebook Page, Instagram Business Account, or other third-party channel to Go Converto, you confirm that you're authorized to connect and grant us access to that account, and that doing so complies with that platform's own terms (including Meta's Platform Terms and Community Standards). You're responsible for the content your customers send to and receive from your connected channels through your assistant. You can disconnect any connected channel at any time from your dashboard, which revokes our access to it going forward.",
+  },
+  {
     heading: "Intellectual Property",
     body: "Go Converto and its underlying technology are our property. You retain all rights to your own website content and data — by using our service, you grant us a limited license to process that content solely to provide and improve the service for you.",
   },
@@ -68,7 +72,7 @@ const SECTIONS = [
   },
   {
     heading: "Contact Us",
-    body: "Questions about these Terms? Reach us at hello@bayai.com or 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
+    body: "Questions about these Terms? Reach us at info@goconverto.com or 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
   },
 ];
 
