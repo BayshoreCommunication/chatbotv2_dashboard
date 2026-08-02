@@ -332,134 +332,6 @@ export async function getCalendlyAvailability(eventTypeUri: string): Promise<{
   return { ok: true, slots: result.snapshot.slots || [] };
 }
 
-// ── WhatsApp ──────────────────────────────────────────────────────────────────
-
-export interface WhatsAppSettings {
-  phone_number_id: string;
-  access_token: string;
-  business_account_id: string;
-  verified_name: string;
-  display_phone_number: string;
-}
-
-export interface WhatsAppSnapshot {
-  settings: WhatsAppSettings;
-  connected: boolean;
-}
-
-function emptyWhatsAppSettings(): WhatsAppSettings {
-  return {
-    phone_number_id: "",
-    access_token: "",
-    business_account_id: "",
-    verified_name: "",
-    display_phone_number: "",
-  };
-}
-
-function emptyWhatsAppSnapshot(): WhatsAppSnapshot {
-  return { settings: emptyWhatsAppSettings(), connected: false };
-}
-
-export async function getWhatsAppSnapshot(): Promise<{
-  ok: boolean;
-  snapshot?: WhatsAppSnapshot;
-  error?: string;
-}> {
-  const result = await apiRequest<WhatsAppSnapshot>(
-    "/api/apps-integration/whatsapp/snapshot",
-    { method: "GET" },
-    "Failed to fetch WhatsApp status",
-  );
-
-  if (!result.ok) {
-    return { ok: false, error: result.error };
-  }
-
-  return { ok: true, snapshot: result.data || emptyWhatsAppSnapshot() };
-}
-
-export async function connectWhatsApp(params: {
-  phoneNumberId: string;
-  accessToken: string;
-  businessAccountId: string;
-}): Promise<{
-  ok: boolean;
-  snapshot?: WhatsAppSnapshot;
-  error?: string;
-}> {
-  const result = await apiRequest<WhatsAppSnapshot>(
-    "/api/apps-integration/whatsapp/connect",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        phone_number_id: params.phoneNumberId,
-        access_token: params.accessToken,
-        business_account_id: params.businessAccountId,
-      }),
-    },
-    "Failed to connect WhatsApp",
-  );
-
-  if (!result.ok) {
-    return { ok: false, error: result.error };
-  }
-
-  return { ok: true, snapshot: result.data || emptyWhatsAppSnapshot() };
-}
-
-export async function connectWhatsAppEmbedded(params: {
-  code: string;
-  phoneNumberId: string;
-  businessAccountId: string;
-}): Promise<{
-  ok: boolean;
-  snapshot?: WhatsAppSnapshot;
-  error?: string;
-}> {
-  const result = await apiRequest<WhatsAppSnapshot>(
-    "/api/apps-integration/whatsapp/connect-embedded",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code: params.code,
-        phone_number_id: params.phoneNumberId,
-        business_account_id: params.businessAccountId,
-      }),
-    },
-    "Failed to connect WhatsApp via Facebook",
-  );
-
-  if (!result.ok) {
-    return { ok: false, error: result.error };
-  }
-
-  return { ok: true, snapshot: result.data || emptyWhatsAppSnapshot() };
-}
-
-export async function disconnectWhatsApp(): Promise<{
-  ok: boolean;
-  error?: string;
-}> {
-  const result = await apiRequest<{ ok: boolean }>(
-    "/api/apps-integration/whatsapp/settings",
-    { method: "DELETE" },
-    "Failed to disconnect WhatsApp",
-  );
-
-  if (!result.ok) {
-    return { ok: false, error: result.error };
-  }
-
-  return { ok: true };
-}
-
 // ── Messenger ─────────────────────────────────────────────────────────────────
 
 export interface MessengerSettings {
@@ -571,6 +443,127 @@ export async function disconnectMessenger(): Promise<{
     "/api/apps-integration/messenger/settings",
     { method: "DELETE" },
     "Failed to disconnect Messenger",
+  );
+
+  if (!result.ok) {
+    return { ok: false, error: result.error };
+  }
+
+  return { ok: true };
+}
+
+// ── Channel connections (multi-Page OAuth flow: Messenger + Instagram) ────────
+// Server-redirect OAuth, distinct from the JS-SDK popup Messenger actions
+// above — initiate returns a URL the browser navigates to directly, Meta
+// redirects back to the backend's own /oauth/callback (not here), which
+// then redirects to this dashboard with a `selection_id` query param.
+
+export type ChannelType = "messenger" | "instagram";
+export type ConnectionStatus = "active" | "disconnected" | "token_expired";
+
+export interface ChannelConnectionSummary {
+  id: string;
+  channel: ChannelType;
+  external_id: string;
+  page_name: string;
+  status: ConnectionStatus;
+  connected_at: string;
+}
+
+export interface OAuthCandidatePage {
+  external_id: string;
+  page_name: string;
+  linked_instagram_id: string | null;
+  linked_instagram_name: string | null;
+}
+
+export async function initiateChannelOAuth(): Promise<{
+  ok: boolean;
+  authorizeUrl?: string;
+  error?: string;
+}> {
+  const result = await apiRequest<{ authorize_url: string }>(
+    "/api/apps-integration/oauth/initiate",
+    { method: "GET" },
+    "Failed to start Facebook connection",
+  );
+
+  if (!result.ok) {
+    return { ok: false, error: result.error };
+  }
+
+  return { ok: true, authorizeUrl: result.data?.authorize_url };
+}
+
+export async function getOAuthPendingSelection(selectionId: string): Promise<{
+  ok: boolean;
+  pages?: OAuthCandidatePage[];
+  error?: string;
+}> {
+  const result = await apiRequest<{ selection_id: string; pages: OAuthCandidatePage[] }>(
+    `/api/apps-integration/oauth/pending/${encodeURIComponent(selectionId)}`,
+    { method: "GET" },
+    "Failed to load your Facebook Pages",
+  );
+
+  if (!result.ok) {
+    return { ok: false, error: result.error };
+  }
+
+  return { ok: true, pages: result.data?.pages || [] };
+}
+
+export async function confirmChannelConnections(
+  selectionId: string,
+  externalIds: string[],
+): Promise<{
+  ok: boolean;
+  connections?: ChannelConnectionSummary[];
+  error?: string;
+}> {
+  const result = await apiRequest<{ connections: ChannelConnectionSummary[] }>(
+    "/api/apps-integration/oauth/confirm",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ selection_id: selectionId, external_ids: externalIds }),
+    },
+    "Failed to connect the selected Page(s)",
+  );
+
+  if (!result.ok) {
+    return { ok: false, error: result.error };
+  }
+
+  return { ok: true, connections: result.data?.connections || [] };
+}
+
+export async function listChannelConnections(): Promise<{
+  ok: boolean;
+  connections?: ChannelConnectionSummary[];
+  error?: string;
+}> {
+  const result = await apiRequest<{ connections: ChannelConnectionSummary[] }>(
+    "/api/apps-integration/oauth/connections",
+    { method: "GET" },
+    "Failed to load connected channels",
+  );
+
+  if (!result.ok) {
+    return { ok: false, error: result.error };
+  }
+
+  return { ok: true, connections: result.data?.connections || [] };
+}
+
+export async function disconnectChannelConnection(
+  channel: ChannelType,
+  externalId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const result = await apiRequest<{ ok: boolean }>(
+    `/api/apps-integration/oauth/connections/${channel}/${encodeURIComponent(externalId)}`,
+    { method: "DELETE" },
+    "Failed to disconnect channel",
   );
 
   if (!result.ok) {
