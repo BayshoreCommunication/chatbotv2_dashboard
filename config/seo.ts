@@ -1,5 +1,11 @@
 export const SITE_URL = "https://www.goconverto.com";
 
+// The marketing site is still being built out in production, so we keep it
+// out of Google's index until it's actually ready to launch. Flip
+// NEXT_PUBLIC_SITE_LIVE=true in the environment when it's ready to go live —
+// no code change needed.
+export const SITE_IS_LIVE = process.env.NEXT_PUBLIC_SITE_LIVE === "true";
+
 // Declared explicitly rather than relying on Next's file-convention
 // auto-detection of app/opengraph-image.png — that convention reliably
 // serves the image itself (confirmed 200 in both dev and a production

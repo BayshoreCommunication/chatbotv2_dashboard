@@ -4,7 +4,7 @@ import Footer from "@/components/landingPage/Footer";
 import Navbar from "@/components/landingPage/Navbar";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { OG_IMAGE } from "@/config/seo";
+import { OG_IMAGE, SITE_IS_LIVE } from "@/config/seo";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -27,6 +27,11 @@ export const metadata: Metadata = {
   // append "· Go Converto" a second time onto the end of it.
   title: { absolute: LANDING_TITLE },
   description: LANDING_DESCRIPTION,
+  // Site isn't publicly launched yet — keep it out of search results until
+  // SITE_IS_LIVE is flipped on.
+  robots: SITE_IS_LIVE
+    ? { index: true, follow: true }
+    : { index: false, follow: true },
   openGraph: {
     title: LANDING_TITLE,
     description: LANDING_DESCRIPTION,
