@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   // SITE_IS_LIVE is flipped on.
   robots: SITE_IS_LIVE
     ? { index: true, follow: true }
-    : { index: false, follow: true },
+    : { index: false, follow: false },
   openGraph: {
     title: LANDING_TITLE,
     description: LANDING_DESCRIPTION,
