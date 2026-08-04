@@ -2,6 +2,7 @@
 
 import {
   confirmChannelConnections,
+  connectWhatsAppEmbedded,
   disconnectChannelConnection,
   getOAuthPendingSelection,
   initiateChannelOAuth,
@@ -13,17 +14,78 @@ import {
 import { useEffect, useState } from "react";
 import type { IconType } from "react-icons";
 import { BiCheckCircle, BiErrorCircle, BiLoaderAlt, BiX } from "react-icons/bi";
-import { FaFacebookMessenger, FaFacebookF, FaInstagram } from "react-icons/fa";
+import { FaFacebookMessenger, FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { toast } from "react-hot-toast";
+
+// ── Facebook JS SDK (shared by every Meta Login for Business flow —
+// currently just WhatsApp Embedded Signup) ─────────────────────────────────
+interface FacebookLoginResponse {
+  authResponse?: { code?: string };
+  status?: string;
+}
+declare global {
+  interface Window {
+    fbAsyncInit?: () => void;
+    FB?: {
+      init: (options: {
+        appId: string;
+        autoLogAppEvents?: boolean;
+        xfbml?: boolean;
+        version: string;
+      }) => void;
+      login: (
+        callback: (response: FacebookLoginResponse) => void,
+        options: {
+          config_id: string;
+          response_type: "code";
+          override_default_response_type: true;
+          extras: { setup: object; featureType: string; sessionInfoVersion: string };
+        },
+      ) => void;
+    };
+  }
+}
+
+const META_APP_ID = process.env.NEXT_PUBLIC_META_APP_ID || "";
+const META_WHATSAPP_CONFIG_ID = process.env.NEXT_PUBLIC_META_WHATSAPP_CONFIG_ID || "";
+
+function loadFacebookSdk() {
+  if (document.getElementById("facebook-jssdk") || !META_APP_ID) return;
+  window.fbAsyncInit = () => {
+    window.FB?.init({
+      appId: META_APP_ID,
+      autoLogAppEvents: true,
+      xfbml: true,
+      version: "v21.0",
+    });
+  };
+  const script = document.createElement("script");
+  script.id = "facebook-jssdk";
+  script.src = "https://connect.facebook.net/en_US/sdk.js";
+  script.async = true;
+  document.body.appendChild(script);
+}
+
+// WhatsApp Embedded Signup posts a window "message" event partway through
+// the popup flow (event "WA_EMBEDDED_SIGNUP", data.event "FINISH") carrying
+// the phone_number_id/waba_id Meta's own wizard just created or picked —
+// this is Meta's documented way to hand those back, there's no API call to
+// look them up afterward.
+interface WhatsAppSignupFinishData {
+  phone_number_id: string;
+  waba_id: string;
+}
 
 const CHANNEL_ICON: Record<ChannelType, IconType> = {
   messenger: FaFacebookMessenger,
   instagram: FaInstagram,
+  whatsapp: FaWhatsapp,
 };
 
 const CHANNEL_LABEL: Record<ChannelType, string> = {
   messenger: "Messenger",
   instagram: "Instagram",
+  whatsapp: "WhatsApp",
 };
 
 const AppsIntegrationDetials = () => {
@@ -31,6 +93,7 @@ const AppsIntegrationDetials = () => {
   const [loadingConnections, setLoadingConnections] = useState(true);
   const [connectionsError, setConnectionsError] = useState<string | null>(null);
   const [startingOAuth, setStartingOAuth] = useState(false);
+  const [connectingWhatsApp, setConnectingWhatsApp] = useState(false);
 
   // Page-picker modal — populated once Meta redirects back with a
   // ?selection_id=... query param (see the mount effect below).
@@ -59,6 +122,10 @@ const AppsIntegrationDetials = () => {
     }
     setLoadingConnections(false);
   };
+
+  useEffect(() => {
+    loadFacebookSdk();
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -125,6 +192,73 @@ const AppsIntegrationDetials = () => {
       return;
     }
     window.location.href = result.authorizeUrl;
+  };
+
+  const handleConnectWhatsApp = () => {
+    if (!META_WHATSAPP_CONFIG_ID) {
+      toast.error("WhatsApp connect isn't configured yet.");
+      return;
+    }
+    if (!window.FB) {
+      toast.error("Facebook SDK is still loading — try again in a moment.");
+      return;
+    }
+
+    let phoneNumberId = "";
+    let wabaId = "";
+
+    // The popup flow's IDs (via postMessage) and its authorization code (via
+    // the FB.login callback) arrive independently and in no guaranteed
+    // order — submit only once both are in hand.
+    const trySubmit = async (code: string) => {
+      if (!phoneNumberId || !wabaId) return;
+      setConnectingWhatsApp(true);
+      const result = await connectWhatsAppEmbedded({ code, phoneNumberId, wabaId });
+      setConnectingWhatsApp(false);
+      window.removeEventListener("message", onMessage);
+
+      if (!result.ok) {
+        toast.error(result.error || "Failed to connect WhatsApp");
+        return;
+      }
+      toast.success("WhatsApp connected");
+      loadConnections();
+    };
+
+    let pendingCode = "";
+
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
+      let data: { type?: string; event?: string; data?: WhatsAppSignupFinishData };
+      try {
+        data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+      } catch {
+        return;
+      }
+      if (data?.type !== "WA_EMBEDDED_SIGNUP" || data.event !== "FINISH" || !data.data) return;
+      phoneNumberId = data.data.phone_number_id;
+      wabaId = data.data.waba_id;
+      if (pendingCode) trySubmit(pendingCode);
+    };
+    window.addEventListener("message", onMessage);
+
+    window.FB.login(
+      (response) => {
+        if (!response.authResponse?.code) {
+          window.removeEventListener("message", onMessage);
+          toast.error("WhatsApp signup was cancelled or failed.");
+          return;
+        }
+        pendingCode = response.authResponse.code;
+        trySubmit(pendingCode);
+      },
+      {
+        config_id: META_WHATSAPP_CONFIG_ID,
+        response_type: "code",
+        override_default_response_type: true,
+        extras: { setup: {}, featureType: "whatsapp_business_app_onboarding", sessionInfoVersion: "3" },
+      },
+    );
   };
 
   const toggleSelectedPage = (externalId: string) => {
@@ -215,30 +349,47 @@ const AppsIntegrationDetials = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-gray-900">
-                  Facebook &amp; Instagram
+                  Connected Channels
                 </h2>
                 <FaFacebookMessenger size={16} className="text-gray-400" />
                 <FaInstagram size={16} className="text-gray-400" />
+                <FaWhatsapp size={16} className="text-gray-400" />
               </div>
               <p className="text-xs text-gray-500 mt-0.5">
                 Connect a Facebook Page to bring your AI assistant to
                 Messenger — any Instagram account linked to that Page
-                connects automatically alongside it.
+                connects automatically alongside it. Connect WhatsApp
+                separately below.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleConnectFacebookPage}
-              disabled={startingOAuth}
-              className="flex items-center justify-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1877F2]/90 disabled:opacity-50"
-            >
-              {startingOAuth ? (
-                <BiLoaderAlt className="animate-spin" size={16} />
-              ) : (
-                <FaFacebookF size={14} />
-              )}
-              {startingOAuth ? "Redirecting…" : "Connect Facebook"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleConnectFacebookPage}
+                disabled={startingOAuth}
+                className="flex items-center justify-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1877F2]/90 disabled:opacity-50"
+              >
+                {startingOAuth ? (
+                  <BiLoaderAlt className="animate-spin" size={16} />
+                ) : (
+                  <FaFacebookF size={14} />
+                )}
+                {startingOAuth ? "Redirecting…" : "Connect Facebook"}
+              </button>
+              <button
+                type="button"
+                onClick={handleConnectWhatsApp}
+                disabled={connectingWhatsApp}
+                className="flex items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#25D366]/90 disabled:opacity-50"
+              >
+                {connectingWhatsApp ? (
+                  <BiLoaderAlt className="animate-spin" size={16} />
+                ) : (
+                  <FaWhatsapp size={14} />
+                )}
+                {connectingWhatsApp ? "Connecting…" : "Connect WhatsApp"}
+              </button>
+            </div>
           </div>
 
           {loadingConnections ? (
@@ -259,7 +410,8 @@ const AppsIntegrationDetials = () => {
             </div>
           ) : connections.length === 0 ? (
             <p className="py-8 text-center text-sm text-gray-400">
-              No channels connected yet — click Connect Facebook to add one.
+              No channels connected yet — click Connect Facebook or Connect
+              WhatsApp to add one.
             </p>
           ) : (
             <div className="divide-y divide-gray-100">
@@ -316,8 +468,12 @@ const AppsIntegrationDetials = () => {
                       {connection.status === "token_expired" && (
                         <button
                           type="button"
-                          onClick={handleConnectFacebookPage}
-                          disabled={startingOAuth}
+                          onClick={
+                            connection.channel === "whatsapp"
+                              ? handleConnectWhatsApp
+                              : handleConnectFacebookPage
+                          }
+                          disabled={startingOAuth || connectingWhatsApp}
                           className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
                         >
                           Reconnect
@@ -326,8 +482,12 @@ const AppsIntegrationDetials = () => {
                       {connection.status === "disconnected" && (
                         <button
                           type="button"
-                          onClick={handleConnectFacebookPage}
-                          disabled={startingOAuth}
+                          onClick={
+                            connection.channel === "whatsapp"
+                              ? handleConnectWhatsApp
+                              : handleConnectFacebookPage
+                          }
+                          disabled={startingOAuth || connectingWhatsApp}
                           className="rounded-lg bg-thunder-black px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-thunder-black/90 disabled:opacity-50"
                         >
                           Connect

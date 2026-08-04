@@ -338,7 +338,7 @@ export async function getCalendlyAvailability(eventTypeUri: string): Promise<{
 // here), which then redirects to this dashboard with a `selection_id`
 // query param.
 
-export type ChannelType = "messenger" | "instagram";
+export type ChannelType = "messenger" | "instagram" | "whatsapp";
 export type ConnectionStatus = "active" | "disconnected" | "token_expired";
 
 export interface ChannelConnectionSummary {
@@ -451,4 +451,38 @@ export async function disconnectChannelConnection(
   }
 
   return { ok: true };
+}
+
+// ── WhatsApp (Embedded Signup) ────────────────────────────────────────────
+// One-click connect: Meta's own signup wizard handles WABA/phone number
+// creation, the frontend just relays the resulting code + IDs here.
+
+export async function connectWhatsAppEmbedded(params: {
+  code: string;
+  phoneNumberId: string;
+  wabaId: string;
+}): Promise<{
+  ok: boolean;
+  connection?: ChannelConnectionSummary;
+  error?: string;
+}> {
+  const result = await apiRequest<ChannelConnectionSummary>(
+    "/api/apps-integration/whatsapp/connect-embedded",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code: params.code,
+        phone_number_id: params.phoneNumberId,
+        waba_id: params.wabaId,
+      }),
+    },
+    "Failed to connect WhatsApp",
+  );
+
+  if (!result.ok) {
+    return { ok: false, error: result.error };
+  }
+
+  return { ok: true, connection: result.data };
 }
