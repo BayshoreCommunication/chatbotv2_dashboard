@@ -144,7 +144,7 @@ export function SignupPaymentForm({
           >
             Terms of Service
           </a>{" "}
-          and authorize BayAI to charge this card
+          and authorize Go Converto to charge this card
           {chargeText ? ` ${chargeText}` : ""}.
         </span>
       </label>
