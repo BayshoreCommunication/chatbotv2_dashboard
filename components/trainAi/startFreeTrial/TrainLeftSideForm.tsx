@@ -16,6 +16,7 @@ import {
   type TrainResult,
   type TrainStatus,
 } from "@/app/actions/knowledgeBase";
+import { getIsSubscribedAction } from "@/app/actions/subscriptions";
 import { getUserData } from "@/app/actions/user";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -214,6 +215,7 @@ const TrainLeftSideForm = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [existingKB, setExistingKB] = useState<any>(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   // Live training progress — polled from a separate connection while the
   // training POST request is in flight (see startTraining below). Only
@@ -317,6 +319,22 @@ const TrainLeftSideForm = ({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Drives the "Set up on your website" link on the success/already-trained
+  // steps: subscribed accounts go straight to widget settings, everyone else
+  // gets routed to pricing first. Re-checked whenever the logged-in id
+  // changes (e.g. right after the mid-training signup/OTP flow signs a new
+  // user in) so it isn't stuck at the stale default of `false`.
+  useEffect(() => {
+    const cid = session?.user?.id;
+    if (!cid) {
+      setIsSubscribed(false);
+      return;
+    }
+    getIsSubscribedAction().then((res) => {
+      setIsSubscribed(res.ok ? !!res.data : false);
+    });
+  }, [session?.user?.id]);
 
   // Auto-save draft whenever fields change (used for non-logged-in users)
   useEffect(() => {
@@ -1258,7 +1276,9 @@ const TrainLeftSideForm = ({
               Chat with it on the right, or retrain to add more knowledge.{" "}
               <button
                 type="button"
-                onClick={() => router.push("/widget-settings")}
+                onClick={() =>
+                  router.push(isSubscribed ? "/widget-settings" : "/pricing")
+                }
                 className="animate-pulse font-bold text-primary-dark underline decoration-2 underline-offset-2 transition-colors hover:text-thunder-black"
               >
                 Set up on your website
@@ -1356,7 +1376,9 @@ const TrainLeftSideForm = ({
               Chat with it on the right, or retrain to add more knowledge.{" "}
               <button
                 type="button"
-                onClick={() => router.push("/widget-settings")}
+                onClick={() =>
+                  router.push(isSubscribed ? "/widget-settings" : "/pricing")
+                }
                 className="animate-pulse font-bold text-primary-dark underline decoration-2 underline-offset-2 transition-colors hover:text-thunder-black"
               >
                 Set up on your website
