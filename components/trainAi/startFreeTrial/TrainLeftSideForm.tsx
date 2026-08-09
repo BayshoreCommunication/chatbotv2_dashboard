@@ -1018,7 +1018,11 @@ const TrainLeftSideForm = ({
               </div>
             )}
 
-            <button type="submit" disabled={isLoading} className={primaryButtonClasses}>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={primaryButtonClasses}
+            >
               {isLoading
                 ? isUserLoggedIn
                   ? "Starting training…"
@@ -1193,9 +1197,7 @@ const TrainLeftSideForm = ({
             <div className="space-y-4">
               {/* Sources */}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">
-                  Total sources
-                </span>
+                <span className="text-sm text-gray-500">Total sources</span>
                 <span className="text-xl font-bold text-thunder-black">
                   {existingKB.totalSources}
                 </span>
@@ -1228,9 +1230,7 @@ const TrainLeftSideForm = ({
               {/* Last Trained Date */}
               {existingKB.updatedAt && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">
-                    Last trained
-                  </span>
+                  <span className="text-gray-500">Last trained</span>
                   <span className="font-medium text-thunder-black">
                     {new Date(existingKB.updatedAt).toLocaleDateString(
                       "en-US",
@@ -1351,10 +1351,16 @@ const TrainLeftSideForm = ({
             <div className="mt-1 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-primary" />
             <p className="text-sm leading-relaxed text-gray-600">
               <strong className="font-bold text-thunder-black">
-                Your AI is ready.
+                Your AI chatbot is ready!
               </strong>{" "}
-              You can now start chatting with your AI assistant on the right
-              side. Try asking questions about {companyName}!
+              Chat with it on the right, or retrain to add more knowledge.{" "}
+              <button
+                type="button"
+                onClick={() => router.push("/widget-settings")}
+                className="animate-pulse font-bold text-primary-dark underline decoration-2 underline-offset-2 transition-colors hover:text-thunder-black"
+              >
+                Set up on your website
+              </button>
             </p>
           </div>
         </motion.div>
@@ -1403,7 +1409,9 @@ const TrainLeftSideForm = ({
                       ? "This email already has an account — "
                       : ""}
                     We&apos;ve sent a 6-digit code to{" "}
-                    <strong className="font-medium text-gray-700">{email}</strong>
+                    <strong className="font-medium text-gray-700">
+                      {email}
+                    </strong>
                   </p>
                 </div>
 

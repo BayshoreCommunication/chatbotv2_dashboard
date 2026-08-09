@@ -19,6 +19,7 @@ interface NavbarProps {
     name?: string;
     [key: string]: any;
   } | null;
+  isSubscribed?: boolean;
   glowAnimation: any;
 }
 
@@ -52,8 +53,12 @@ function scrollToIdWhenReady(id: string, attemptsLeft = 30) {
   requestAnimationFrame(() => scrollToIdWhenReady(id, attemptsLeft - 1));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
+const Navbar = ({
+  isAuthenticated,
+  user,
+  isSubscribed,
+  glowAnimation,
+}: NavbarProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const { scrollY } = useScroll();
@@ -216,16 +221,27 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
                 </div>
               )} */}
 
-              {/* Dashboard Button */}
-              <Button
-                variant="outline"
-                onClick={() => router.push("/dashboard")}
-                className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90 hover:text-white"
-                title="Dashboard"
-              >
-                <LuLayoutDashboard className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Button>
+              {/* Dashboard Button — only once the account is subscribed;
+                  otherwise nudge signed-in-but-unsubscribed users to the
+                  pricing page to pick a plan. */}
+              {isSubscribed ? (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/dashboard")}
+                  className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90 hover:text-white"
+                  title="Dashboard"
+                >
+                  <LuLayoutDashboard className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </Button>
+              ) : (
+                <Link
+                  href="/pricing"
+                  className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90"
+                >
+                  Try Free
+                </Link>
+              )}
 
               {/* Sign Out */}
               <Button
@@ -326,17 +342,27 @@ const Navbar = ({ isAuthenticated, user, glowAnimation }: NavbarProps) => {
                         </span>
                       </div>
                     )} */}
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        router.push("/dashboard");
-                      }}
-                      className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90"
-                    >
-                      <LuLayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Button>
+                    {isSubscribed ? (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          router.push("/dashboard");
+                        }}
+                        className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90"
+                      >
+                        <LuLayoutDashboard className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Button>
+                    ) : (
+                      <Link
+                        href="/pricing"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex h-10 w-full items-center !rounded-lg justify-center bg-thunder-black px-6 font-semibold text-white transition-colors hover:bg-thunder-black/90"
+                      >
+                        Try Free
+                      </Link>
+                    )}
                     <Button
                       variant="ghost"
                       onClick={() => {

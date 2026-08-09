@@ -42,16 +42,16 @@ type SearchPage = {
 };
 
 const SEARCH_PAGES: SearchPage[] = [
-  { label: "Dashboard",        href: "/dashboard",       icon: BiGridAlt },
-  { label: "Leads",            href: "/leads",            icon: BiUserPin },
-  { label: "Chats",            href: "/chats",            icon: BiChat },
-  { label: "AI",               href: "/ai",               icon: BiBot },
-  { label: "Train AI",         href: "/train-ai",         icon: BiBot },
-  { label: "Appointments",     href: "/appointments",     icon: BiCalendar },
-  { label: "Settings",         href: "/settings",         icon: BiCog },
-  { label: "Account Settings", href: "/user-settings",    icon: BiUser },
-  { label: "Widget Settings",  href: "/widget-settings",  icon: BiCog },
-  { label: "Billing",          href: "/billing",          icon: BiWallet },
+  { label: "Dashboard", href: "/dashboard", icon: BiGridAlt },
+  { label: "Leads", href: "/leads", icon: BiUserPin },
+  { label: "Chats", href: "/chats", icon: BiChat },
+  { label: "AI", href: "/ai", icon: BiBot },
+  { label: "Train AI", href: "/train-ai", icon: BiBot },
+  { label: "Appointments", href: "/appointments", icon: BiCalendar },
+  { label: "Settings", href: "/settings", icon: BiCog },
+  { label: "Account Settings", href: "/user-settings", icon: BiUser },
+  { label: "Widget Settings", href: "/widget-settings", icon: BiCog },
+  { label: "Billing", href: "/billing", icon: BiWallet },
 ];
 
 const Topbar = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
@@ -376,7 +376,9 @@ const Topbar = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
                     </button>
                   ))
                 ) : (
-                  <p className="px-3 py-2 text-sm text-gray-400">No leads found</p>
+                  <p className="px-3 py-2 text-sm text-gray-400">
+                    No leads found
+                  </p>
                 )}
               </div>
 

@@ -78,6 +78,7 @@ export default async function LandingPageLayout({
       <Navbar
         isAuthenticated={!!session}
         user={safeUser}
+        isSubscribed={!!freshUser?.is_subscribed}
         glowAnimation={null}
       />
       <main>{children}</main>
