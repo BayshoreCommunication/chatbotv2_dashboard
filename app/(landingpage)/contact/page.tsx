@@ -31,7 +31,7 @@ const ContactPage = () => {
         breadcrumbs={[{ label: "Home", href: "/" }, { label: "Contact" }]}
         title="Get in touch"
       />
-      <ContactForm showMap />
+      <ContactForm />
     </>
   );
 };

@@ -149,9 +149,20 @@ const Footer = () => {
         </div>
 
         {/* --- Bottom: copyright --- */}
-        <div className="flex flex-col items-center justify-center gap-4 border-t border-white/10 pt-7 text-[13px] lg:flex-row">
+        <div className="flex flex-col items-center justify-center gap-4 border-t border-white/10 pt-7 text-[13px] lg:flex-row lg:justify-between">
           <span>
             &copy; {new Date().getFullYear()} Goconverto. All rights reserved.
+          </span>
+          <span className="text-gray-400">
+            Product by{" "}
+            <a
+              href="https://www.bayshorecommunication.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-gray-400 underline-offset-2 transition-colors hover:text-white hover:underline"
+            >
+              Bayshore Communication
+            </a>
           </span>
         </div>
       </div>

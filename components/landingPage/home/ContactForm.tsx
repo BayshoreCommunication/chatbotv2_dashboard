@@ -10,7 +10,6 @@ import {
   Globe,
   Loader2,
   Mail,
-  MapPin,
   MessageSquare,
   Phone,
   Send,
@@ -30,17 +29,17 @@ const CONTACT_INFO = [
   {
     icon: Mail,
     label: "Email",
-    value: "hello@goconverto.com",
-  },
-  {
-    icon: MapPin,
-    label: "Office",
-    value: "1211 Tech Blvd Suite 120, Tampa, FL 33619, United States",
+    value: "info@goconverto.com",
   },
   {
     icon: Clock,
     label: "Support Hours",
     value: "24/7 live support",
+  },
+  {
+    icon: MessageSquare,
+    label: "Live Chat",
+    value: "Chat with our AI assistant right on this site",
   },
 ];
 
@@ -92,7 +91,7 @@ const EMAILJS_PUBLIC_KEY = "uqCvs6SmNWF9z7Fny";
 // ============================================================================
 // CONTACT FORM SECTION
 // ============================================================================
-const ContactForm = ({ showMap = false }: { showMap?: boolean }) => {
+const ContactForm = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -286,25 +285,6 @@ const ContactForm = ({ showMap = false }: { showMap?: boolean }) => {
             </form>
           </motion.div>
         </div>
-
-        {/* --- Office map --- */}
-        {showMap && (
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            className="mt-10 overflow-hidden rounded-2xl border border-gray-200"
-          >
-            <iframe
-              title="BayAI office location"
-              src="https://www.google.com/maps?q=1211+Tech+Blvd+Suite+120,+Tampa,+FL+33619,+United+States&output=embed"
-              className="h-80 w-full border-0"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </motion.div>
-        )}
       </Container>
 
       {/* Post-submit confirmation modal — auto-dismisses after
