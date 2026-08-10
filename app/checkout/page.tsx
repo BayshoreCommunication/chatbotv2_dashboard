@@ -70,31 +70,31 @@ function CheckoutContent() {
   // After payment, land the user on the most useful page in one hop instead
   // of bouncing through an intermediate page that re-derives the same
   // decision (avoids a duplicate subscription/widget fetch + extra page load).
+  //
+  // Decided by actual widget-configuration state, not by how the user reached
+  // checkout — a plain visit to /pricing (no ?redirect=... param) is just as
+  // much a first-time signup as the onboarding CTAs, and previously skipped
+  // this check entirely, always landing first-time payers on /dashboard with
+  // no widget set up.
   const handlePaymentSuccess = async () => {
     setConfirming(true);
     // Cache-bust is fire-and-forget — nothing downstream needs to wait on it,
     // it only has to land before some *later* page reads the cached profile.
     invalidateUserProfileCacheAction();
 
-    if (redirectParam === "start-free-trial" || redirectParam === "widget-settings") {
-      const widget = await getWidgetSettingsAction();
-      if (widget.ok && widget.data) {
-        // Already has a configured widget — this is a returning subscriber
-        // upgrading, not a first-time trial signup. /dashboard is gated, so
-        // wait for is_subscribed before heading there.
-        await waitForSubscriptionActive();
-        router.push("/dashboard?subscription=success");
-      } else {
-        // /widget-settings is middleware-exempt and has its own webhook-wait
-        // polling ("activating" view state) built in — no need to duplicate
-        // that wait here, just get the user there immediately.
-        router.push("/widget-settings?subscription=success");
-      }
-      return;
+    const widget = await getWidgetSettingsAction();
+    if (widget.ok && widget.data) {
+      // Already has a configured widget — this is a returning subscriber
+      // upgrading, not a first-time signup. /dashboard is gated, so wait for
+      // is_subscribed before heading there.
+      await waitForSubscriptionActive();
+      router.push("/dashboard?subscription=success");
+    } else {
+      // First-time subscriber with no widget yet — /widget-settings is
+      // middleware-exempt and has its own webhook-wait polling ("activating"
+      // view state) built in, so get the user there immediately.
+      router.push("/widget-settings?subscription=success");
     }
-
-    await waitForSubscriptionActive();
-    router.push("/dashboard?subscription=success");
   };
 
   // Handles the case where Stripe redirected the browser away for 3D Secure /
