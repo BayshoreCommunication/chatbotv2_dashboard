@@ -92,17 +92,16 @@ const SigninPage = () => {
   // Shared styles
   const inputWrapperClass = "relative flex items-center";
   const inputClass =
-    "w-full rounded-xl border border-gray-200 bg-gray-50/50 py-3 pl-11 pr-4 text-sm text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:bg-black/40";
-  const iconClass =
-    "absolute left-3.5 h-5 w-5 text-gray-400 dark:text-gray-500";
+    "w-full rounded-xl border border-gray-200 bg-gray-50/50 py-3 pl-11 pr-4 text-sm text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10";
+  const iconClass = "absolute left-3.5 h-5 w-5 text-gray-400";
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-50 dark:bg-[#050505]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-50">
       {/* --- Ambient Background --- */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute left-[20%] top-[20%] h-[400px] w-[400px] rounded-full bg-primary/20 blur-[120px] dark:bg-primary/10" />
-        <div className="absolute right-[20%] bottom-[20%] h-[400px] w-[400px] rounded-full bg-thunder-black/10 blur-[120px] dark:bg-thunder-black/20" />
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] dark:invert" />
+        <div className="absolute left-[20%] top-[20%] h-[400px] w-[400px] rounded-full bg-primary/20 blur-[120px]" />
+        <div className="absolute right-[20%] bottom-[20%] h-[400px] w-[400px] rounded-full bg-thunder-black/10 blur-[120px]" />
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
       </div>
 
       <div className="container relative z-10 mx-auto flex w-full max-w-[520px] flex-col justify-center space-y-8 px-4">
@@ -115,7 +114,7 @@ const SigninPage = () => {
               transition={{ delay: 0.2 }}
               className="text-4xl font-bold tracking-tight"
             >
-              <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-white dark:to-gray-400">
+              <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
                 Welcome Back
               </span>
             </motion.h1>
@@ -123,7 +122,7 @@ const SigninPage = () => {
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-base text-gray-500 dark:text-gray-400"
+              className="text-base text-gray-500"
             >
               Enter your email and we&apos;ll send you a sign-in code
             </motion.p>
@@ -135,13 +134,13 @@ const SigninPage = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 p-12 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/40"
+          className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 p-12 shadow-2xl backdrop-blur-xl"
         >
           <form onSubmit={handleRequestOtp} className="space-y-5">
             {/* Email Field */}
             <div className="space-y-1.5">
               <label
-                className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                className="text-xs font-semibold uppercase tracking-wider text-gray-500"
                 htmlFor="email"
               >
                 Email
@@ -166,7 +165,7 @@ const SigninPage = () => {
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
-                className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400"
+                className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
               >
                 {requestError}
               </motion.div>
@@ -208,10 +207,10 @@ const SigninPage = () => {
 
           {/* Footer Link */}
           <div className="mt-8 text-center text-sm">
-            <span className="text-gray-500 dark:text-gray-400">New here? </span>
+            <span className="text-gray-500">New here? </span>
             <Link
               href={`/sign-up${callbackUrl !== "/dashboard" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
-              className="font-semibold text-primary-dark hover:text-primary dark:text-primary"
+              className="font-semibold text-primary-dark hover:text-primary"
             >
               Create an account
             </Link>
@@ -276,7 +275,7 @@ const SigninPage = () => {
                       maxLength={6}
                       required
                       style={{ colorScheme: "light" }}
-                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-3xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10"
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10"
                     />
 
                     <div className="flex items-center justify-between text-sm">

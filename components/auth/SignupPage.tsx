@@ -177,9 +177,9 @@ const SignupPage = () => {
 
   // Reusable styles
   const inputClasses =
-    "w-full rounded-lg border border-gray-200 bg-gray-50/50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500 dark:focus:bg-black/40";
+    "w-full rounded-lg border border-gray-200 bg-gray-50/50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10";
   const labelClasses =
-    "mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400";
+    "mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500";
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -188,12 +188,12 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-50 dark:bg-[#050505] pt-8">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gray-50 pt-8">
       {/* Ambient Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -left-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px] dark:bg-primary/10" />
-        <div className="absolute -right-[10%] bottom-[20%] h-[500px] w-[500px] rounded-full bg-thunder-black/10 blur-[120px] dark:bg-thunder-black/20" />
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] dark:invert" />
+        <div className="absolute -left-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]" />
+        <div className="absolute -right-[10%] bottom-[20%] h-[500px] w-[500px] rounded-full bg-thunder-black/10 blur-[120px]" />
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
       </div>
 
       <div className="container relative z-10 mx-auto flex w-full max-w-2xl flex-col justify-center space-y-8 px-4 py-12">
@@ -204,7 +204,7 @@ const SignupPage = () => {
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
+              className="text-3xl font-bold tracking-tight text-gray-900"
             >
               Create Company Account
             </motion.h1>
@@ -212,7 +212,7 @@ const SignupPage = () => {
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-gray-500 dark:text-gray-400"
+              className="text-gray-500"
             >
               Join us to manage your AI integration effortlessly
             </motion.p>
@@ -224,7 +224,7 @@ const SignupPage = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/40"
+          className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl"
         >
           {/* Registration Form */}
           <form onSubmit={handleSubmitForm} className="space-y-5">
@@ -329,7 +329,7 @@ const SignupPage = () => {
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
-                className="rounded-lg px-4 py-3 text-sm font-medium bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400"
+                className="rounded-lg px-4 py-3 text-sm font-medium bg-red-50 text-red-600"
               >
                 {error}
               </motion.div>
@@ -373,12 +373,12 @@ const SignupPage = () => {
 
           {/* Footer Link */}
           <div className="mt-8 text-center text-sm">
-            <span className="text-gray-500 dark:text-gray-400">
+            <span className="text-gray-500">
               Already registered?{" "}
             </span>
             <Link
               href="/sign-in"
-              className="font-semibold text-primary-dark hover:text-primary dark:text-primary"
+              className="font-semibold text-primary-dark hover:text-primary"
             >
               Sign In to dashboard
             </Link>
@@ -448,7 +448,7 @@ const SignupPage = () => {
                       maxLength={6}
                       required
                       style={{ colorScheme: "light" }}
-                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-3xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10"
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center text-xl font-bold tracking-widest text-gray-900 placeholder-gray-400 transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10"
                     />
 
                     {/* Timer and Resend */}
