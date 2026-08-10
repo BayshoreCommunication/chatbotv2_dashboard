@@ -187,13 +187,13 @@ function CheckoutContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50">
       {/* Top nav */}
-      <div className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-black">
+      <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center px-4 py-4 sm:px-6">
           <Link
             href="/#pricing"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
           >
             <BiArrowBack size={16} />
             Back to plans
@@ -205,32 +205,32 @@ function CheckoutContent() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
           {/* ── Left: Payment form ─────────────────────────────────────── */}
           <div className="lg:col-span-3">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
               {isTrial
                 ? `Start your ${plan.name} trial`
                 : `Subscribe to ${plan.name}`}
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+            <p className="mt-2 text-sm leading-relaxed text-gray-500">
               {isTrial
                 ? `Add a payment method to activate your AI assistant. You won't be charged during your ${plan.trialDays}-day free trial — cancel anytime before it ends.`
                 : "Your subscription begins immediately upon payment."}
             </p>
 
             {/* Form card */}
-            <div className="mt-7 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+            <div className="mt-7 rounded-2xl border border-gray-200 bg-white p-6">
               {/* Billing email */}
               <div className="mb-6">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
                   Billing Details
                 </p>
                 <div className="mt-3 space-y-1.5">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="block text-sm font-medium text-gray-700">
                     Billing email
                   </label>
-                  <div className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                  <div className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
                     <BiEnvelope className="shrink-0 text-gray-400" size={16} />
                     {userEmail || (
-                      <span className="h-4 w-40 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                      <span className="h-4 w-40 animate-pulse rounded bg-gray-200" />
                     )}
                   </div>
                 </div>
@@ -256,14 +256,14 @@ function CheckoutContent() {
               </StripeElementsProvider>
 
               {confirming && (
-                <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-gray-500 dark:text-gray-400">
+                <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-gray-500">
                   <BiLoaderAlt className="animate-spin" size={14} />
                   Payment received — confirming your subscription…
                 </p>
               )}
 
               {redirectError && (
-                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {redirectError}
                 </div>
               )}
@@ -272,8 +272,8 @@ function CheckoutContent() {
 
           {/* ── Right: Order summary ───────────────────────────────────── */}
           <div className="lg:col-span-2 lg:self-start lg:sticky lg:top-8">
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
                 Order Summary
               </p>
 
@@ -281,7 +281,7 @@ function CheckoutContent() {
               <div className="mt-4 flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    <span className="text-lg font-bold text-gray-900">
                       {plan.name}
                     </span>
                     {plan.recommended && (
@@ -290,16 +290,16 @@ function CheckoutContent() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="mt-0.5 text-sm text-gray-500">
                     {plan.description}
                   </p>
                 </div>
                 {!plan.isCustomPricing && (
                   <div className="shrink-0 text-right">
-                    <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <span className="text-2xl font-bold text-gray-900">
                       ${price}
                     </span>
-                    <span className="text-sm text-gray-400 dark:text-gray-500">
+                    <span className="text-sm text-gray-400">
                       /{cycleLabel}
                     </span>
                   </div>
@@ -308,17 +308,17 @@ function CheckoutContent() {
 
               {/* Trial box */}
               {isTrial && trialEndDate && (
-                <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 dark:border-green-900 dark:bg-green-950">
+                <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
                   <div className="flex items-center gap-2">
                     <BiCheckCircle
-                      className="shrink-0 text-green-600 dark:text-green-400"
+                      className="shrink-0 text-green-600"
                       size={16}
                     />
-                    <span className="text-sm font-semibold text-green-800 dark:text-green-300">
+                    <span className="text-sm font-semibold text-green-800">
                       {plan.trialDays}-day free trial
                     </span>
                   </div>
-                  <p className="mt-0.5 pl-6 text-xs text-green-700 dark:text-green-400">
+                  <p className="mt-0.5 pl-6 text-xs text-green-700">
                     Free until {trialEndDate}
                   </p>
                 </div>
@@ -326,30 +326,30 @@ function CheckoutContent() {
 
               {/* Line items */}
               {!plan.isCustomPricing && (
-                <div className="mt-5 space-y-2.5 border-t border-gray-100 pt-4 dark:border-gray-800">
+                <div className="mt-5 space-y-2.5 border-t border-gray-100 pt-4">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">
+                    <span className="text-gray-600">
                       {plan.name} ({billingCycle === "annual" ? "yearly" : "monthly"})
                     </span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="font-medium text-gray-900">
                       ${price}.00
                     </span>
                   </div>
                   {isTrial && (
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">
+                      <span className="text-gray-600">
                         {plan.trialDays}-day free trial
                       </span>
-                      <span className="font-semibold text-green-600 dark:text-green-400">
+                      <span className="font-semibold text-green-600">
                         -${price}.00
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between border-t border-gray-100 pt-2.5 dark:border-gray-800">
-                    <span className="font-semibold text-gray-900 dark:text-white">
+                  <div className="flex items-center justify-between border-t border-gray-100 pt-2.5">
+                    <span className="font-semibold text-gray-900">
                       Due today
                     </span>
-                    <span className="text-xl font-bold text-gray-900 dark:text-white">
+                    <span className="text-xl font-bold text-gray-900">
                       ${isTrial ? "0.00" : `${price}.00`}
                     </span>
                   </div>
@@ -358,7 +358,7 @@ function CheckoutContent() {
 
               {/* After-trial note */}
               {isTrial && trialEndDate && (
-                <p className="mt-3 text-xs leading-relaxed text-gray-400 dark:text-gray-500">
+                <p className="mt-3 text-xs leading-relaxed text-gray-400">
                   After your trial, you&apos;ll be charged ${price}/{cycleLabel}{" "}
                   starting {trialEndDate}. Cancel anytime before then and you
                   won&apos;t be charged.
@@ -366,15 +366,15 @@ function CheckoutContent() {
               )}
 
               {/* Features */}
-              <div className="mt-5 border-t border-gray-100 pt-4 dark:border-gray-800">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+              <div className="mt-5 border-t border-gray-100 pt-4">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
                   Included in {plan.name}
                 </p>
                 <ul className="mt-3 space-y-2">
                   {plan.features.slice(0, 4).map((feature) => (
                     <li
                       key={feature}
-                      className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
+                      className="flex items-start gap-2 text-sm text-gray-600"
                     >
                       <BiCheckCircle
                         className="mt-0.5 shrink-0 text-primary-dark"
@@ -387,14 +387,14 @@ function CheckoutContent() {
               </div>
 
               {/* Guarantee + Change plan */}
-              <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800">
-                <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+              <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4">
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
                   <BsShieldCheck className="shrink-0 text-green-500" size={13} />
                   14-day money-back guarantee
                 </div>
                 <Link
                   href="/#pricing"
-                  className="text-xs font-medium text-primary-dark hover:text-primary dark:text-primary dark:hover:text-primary/80"
+                  className="text-xs font-medium text-primary-dark hover:text-primary"
                 >
                   Change plan
                 </Link>
@@ -410,7 +410,7 @@ function CheckoutContent() {
 export default function CheckoutPage() {
   return (
     <Suspense
-      fallback={<div className="min-h-screen bg-gray-50 dark:bg-gray-950" />}
+      fallback={<div className="min-h-screen bg-gray-50" />}
     >
       <CheckoutContent />
     </Suspense>

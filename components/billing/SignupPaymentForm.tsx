@@ -134,13 +134,13 @@ export function SignupPaymentForm({
           onChange={(e) => setAgreed(e.target.checked)}
           className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary-dark"
         />
-        <span className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+        <span className="text-xs leading-relaxed text-gray-500">
           I agree to the{" "}
           <a
             href="/terms"
             target="_blank"
             rel="noreferrer"
-            className="font-medium text-primary-dark hover:underline dark:text-primary"
+            className="font-medium text-primary-dark hover:underline"
           >
             Terms of Service
           </a>{" "}
@@ -150,7 +150,7 @@ export function SignupPaymentForm({
       </label>
 
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -168,7 +168,7 @@ export function SignupPaymentForm({
         {submitting ? "Processing…" : buttonLabel}
       </button>
 
-      <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+      <p className="text-center text-xs text-gray-400">
         Payments are secure and encrypted
         {isTrial ? " · $0.00 due today" : price ? ` · $${price} due today` : ""}
       </p>
