@@ -5,13 +5,9 @@ import {
   updateWidgetSettingsAction,
   type WidgetSettingsResponse,
 } from "@/app/actions/widgetSettings";
-import {
-  getSubscriptionAction,
-  type SubscriptionData,
-} from "@/app/actions/subscriptions";
+import { getSubscriptionAction } from "@/app/actions/subscriptions";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { BiPencil, BiRefresh, BiSave, BiX } from "react-icons/bi";
 import { BsArrowRight, BsExclamationTriangle } from "react-icons/bs";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -29,28 +25,21 @@ function toFormData(data: WidgetSettingsResponse): WidgetSettingsForm {
     behavior: data.behavior,
     content: data.content,
     launcher: data.launcher,
+    embed_type: data.embed_type,
   };
-}
-
-function trialDaysLeft(trialEnd: string | null): number {
-  if (!trialEnd) return 0;
-  const ms = new Date(trialEnd).getTime() - Date.now();
-  return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
 }
 
 type ViewState = "loading" | "activating" | "paywall" | "setup" | "editor";
 
 const WidgetSettingView = () => {
   const searchParams = useSearchParams();
+  const subscriptionStatus = searchParams.get("subscription");
   const successToastFired = useRef(false);
-  const initRan = useRef(false);
 
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [companyId, setCompanyId] = useState<string>("");
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [settings, setSettings] = useState<WidgetSettingsForm>(defaultSettings);
   const [form, setForm] = useState<WidgetSettingsForm>(defaultSettings);
-  const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const hasChanges = JSON.stringify(form) !== JSON.stringify(settings);
 
@@ -59,100 +48,110 @@ const WidgetSettingView = () => {
   // not have written to MongoDB yet — poll up to 5 times (2 s apart) so
   // trial users aren't incorrectly shown the paywall.
   useEffect(() => {
-    if (initRan.current) return;
-    initRan.current = true;
-
-    const justSubscribed =
-      searchParams.get("subscription") === "success";
+    let cancelled = false;
+    const justSubscribed = subscriptionStatus === "success";
 
     const init = async () => {
-      const [subRes, widgetRes] = await Promise.all([
-        getSubscriptionAction(),
-        getWidgetSettingsAction(),
-      ]);
+      try {
+        const [subRes, widgetRes] = await Promise.all([
+          getSubscriptionAction(),
+          getWidgetSettingsAction(),
+        ]);
+        if (cancelled) return;
 
-      let sub = subRes.ok && subRes.data ? subRes.data : null;
+        let sub = subRes.ok && subRes.data ? subRes.data : null;
 
-      // If arriving from checkout and the subscription isn't active yet
-      // (Stripe webhook may still be in flight), poll briefly before giving up.
-      if (justSubscribed && (!sub || !sub.is_active)) {
-        setViewState("activating");
-        for (let i = 0; i < 5; i++) {
-          await new Promise((r) => setTimeout(r, 2000));
-          const retry = await getSubscriptionAction();
-          if (retry.ok && retry.data?.is_active) {
-            sub = retry.data;
-            break;
+        // If arriving from checkout and the subscription isn't active yet
+        // (Stripe webhook may still be in flight), poll briefly before giving up.
+        if (justSubscribed && (!sub || !sub.is_active)) {
+          setViewState("activating");
+          for (let i = 0; i < 5; i++) {
+            await new Promise((r) => setTimeout(r, 2000));
+            if (cancelled) return;
+            const retry = await getSubscriptionAction();
+            if (cancelled) return;
+            if (retry.ok && retry.data?.is_active) {
+              sub = retry.data;
+              break;
+            }
           }
         }
-      }
 
-      setSubscription(sub);
+        // Only hard-block on statuses that are definitively inactive.
+        // A missing subscription doc (null) means the user is new or the webhook
+        // hasn't synced yet — do NOT block them, just proceed.
+        // "trialing" and "active" pass through automatically.
+        const BLOCKED: string[] = [
+          "canceled",
+          "unpaid",
+          "incomplete_expired",
+          "paused",
+        ];
+        const isBlocked =
+          sub !== null && BLOCKED.includes(sub.subscription_status);
 
-      // Only hard-block on statuses that are definitively inactive.
-      // A missing subscription doc (null) means the user is new or the webhook
-      // hasn't synced yet — do NOT block them, just proceed.
-      // "trialing" and "active" pass through automatically.
-      const BLOCKED: string[] = [
-        "canceled",
-        "unpaid",
-        "incomplete_expired",
-        "paused",
-      ];
-      const isBlocked =
-        sub !== null && BLOCKED.includes(sub.subscription_status);
+        if (isBlocked) {
+          setViewState("paywall");
+          return;
+        }
 
-      if (isBlocked) {
-        setViewState("paywall");
-        return;
-      }
-
-      if (widgetRes.ok && widgetRes.data) {
-        const formData = toFormData(widgetRes.data);
-        setSettings(formData);
-        setForm(formData);
-        setCompanyId(widgetRes.data.company_id);
-        setViewState("editor");
-      } else {
-        setViewState("setup");
+        if (widgetRes.ok && widgetRes.data) {
+          const formData = toFormData(widgetRes.data);
+          setSettings(formData);
+          setForm(formData);
+          setCompanyId(widgetRes.data.company_id);
+          setViewState("editor");
+        } else {
+          setViewState("setup");
+        }
+      } catch {
+        if (!cancelled) {
+          toast.error("Failed to load widget settings. Please try again.");
+          setViewState("setup");
+        }
       }
     };
 
     init();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+    };
+  }, [subscriptionStatus]);
 
   // Show success toast once after checkout redirect
   useEffect(() => {
     if (successToastFired.current) return;
-    if (searchParams.get("subscription") === "success") {
+    if (subscriptionStatus === "success") {
       successToastFired.current = true;
       toast.success("You're all set! Your subscription is now active.", {
         duration: 5000,
       });
     }
-  }, [searchParams]);
+  }, [subscriptionStatus]);
 
   const handleSetupComplete = async () => {
-    // Re-fetch after setup so state matches DB
-    const res = await getWidgetSettingsAction();
-    if (res.ok && res.data) {
-      const formData = toFormData(res.data);
-      setSettings(formData);
-      setForm(formData);
-      setCompanyId(res.data.company_id);
+    setViewState("loading");
+    try {
+      // Re-fetch after setup so state matches DB
+      const res = await getWidgetSettingsAction();
+      if (res.ok && res.data) {
+        const formData = toFormData(res.data);
+        setSettings(formData);
+        setForm(formData);
+        setCompanyId(res.data.company_id);
+        setViewState("editor");
+      } else {
+        toast.error(res.error || "Failed to load widget settings.");
+        setViewState("setup");
+      }
+    } catch {
+      toast.error("Failed to load widget settings. Please try again.");
+      setViewState("setup");
     }
-    setViewState("editor");
-  };
-
-  const handleEdit = () => {
-    setEditing(true);
   };
 
   const handleSave = async () => {
-    if (!hasChanges) {
-      setEditing(false);
-      return;
-    }
+    if (!hasChanges) return;
 
     setSaving(true);
     try {
@@ -162,7 +161,6 @@ const WidgetSettingView = () => {
         setSettings(saved);
         setForm(saved);
         toast.success("Settings successfully saved and live.");
-        setEditing(false);
       } else {
         toast.error(res.error || "Failed to save settings.");
       }
@@ -171,11 +169,6 @@ const WidgetSettingView = () => {
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleCancel = () => {
-    setEditing(false);
-    setForm(settings);
   };
 
   // ── Loading skeleton ───────────────────────────────────────────────────────
@@ -292,10 +285,10 @@ const WidgetSettingView = () => {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4 text-center">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-200 border-t-primary" />
-        <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+        <p className="text-sm font-semibold text-gray-700">
           Setting up your subscription…
         </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500">
+        <p className="text-xs text-gray-400">
           This usually takes just a few seconds.
         </p>
       </div>
@@ -310,17 +303,17 @@ const WidgetSettingView = () => {
           <BsExclamationTriangle className="h-7 w-7 text-gray-500" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-gray-900">
             Subscription required
           </h2>
-          <p className="max-w-md text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+          <p className="max-w-md text-sm leading-relaxed text-gray-500">
             Widget settings are available on the Professional and Advanced plans.
             Start your 14-day free trial — your card won&apos;t be charged until the trial ends.
           </p>
         </div>
         <Link
           href="/pricing"
-          className="group inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+          className="group inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700"
         >
           View plans
           <BsArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -334,74 +327,16 @@ const WidgetSettingView = () => {
     return <WidgetSetup onSetupComplete={handleSetupComplete} />;
   }
 
-  // Trial banner (shown above the editor when user is in the free trial)
-  const daysLeft = trialDaysLeft(subscription?.trial_end ?? null);
-  const trialBanner = subscription?.is_in_trial ? (
-    <div className="mb-5 flex flex-col gap-1 rounded-xl border border-primary/20 bg-primary/10 px-5 py-3.5 dark:border-primary/40 dark:bg-primary/20 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <p className="text-sm font-semibold text-primary-dark dark:text-primary">
-          Free trial — {daysLeft} day{daysLeft !== 1 ? "s" : ""} remaining
-        </p>
-        <p className="text-xs text-primary-dark/80 dark:text-primary">
-          Your card will be charged automatically when the trial ends. Cancel anytime before then.
-        </p>
-      </div>
-      <Link
-        href="/pricing"
-        className="mt-2 shrink-0 text-xs font-semibold text-primary-dark underline underline-offset-2 hover:text-primary dark:text-primary sm:mt-0"
-      >
-        Manage subscription
-      </Link>
-    </div>
-  ) : null;
-
   // ── Editor ─────────────────────────────────────────────────────────────────
   return (
     <div>
-      {trialBanner}
-      <div className="z-20 mb-6 flex flex-col gap-4 rounded border border-gray-200 bg-white/90 p-5 shadow-sm backdrop-blur-md md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            Widget Personalization
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Design how the AI assistant looks and behaves on your website.
-          </p>
-        </div>
-        <div>
-          {!editing ? (
-            <button
-              type="button"
-              onClick={handleEdit}
-              className="flex items-center gap-2 rounded-md bg-thunder-black px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-thunder-black/20 transition-all hover:bg-thunder-black/90 hover:shadow-thunder-black/30"
-            >
-              <BiPencil size={18} /> Edit Widget
-            </button>
-          ) : (
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-              >
-                <BiX size={18} /> Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving || !hasChanges}
-                className="flex items-center gap-2 rounded-md bg-thunder-black px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-thunder-black/20 transition-all hover:bg-thunder-black/90 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {saving ? (
-                  <BiRefresh className="animate-spin" size={18} />
-                ) : (
-                  <BiSave size={18} />
-                )}
-                {saving ? "Saving..." : "Save Configuration"}
-              </button>
-            </div>
-          )}
-        </div>
+      <div className="z-20 mb-6 rounded border border-gray-200 bg-white/90 p-5 shadow-sm backdrop-blur-md">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          Widget Personalization
+        </h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Design how the AI assistant looks and behaves on your website.
+        </p>
       </div>
 
       <div className="flex gap-6">
@@ -410,13 +345,16 @@ const WidgetSettingView = () => {
             form={form}
             setForm={setForm}
             settings={settings}
-            editing={editing}
+            editing
+            onSave={handleSave}
+            saving={saving}
+            companyId={companyId}
           />
         </div>
 
         {/* Right Side: Live Chatbot Preview (Sticky) */}
         <div className="hidden w-[420px] lg:block xl:w-[480px] sticky top-0 self-start h-screen">
-          <ChatbotPreview data={form} companyId={companyId} />
+          <ChatbotPreview data={form} />
         </div>
       </div>
     </div>

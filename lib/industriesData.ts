@@ -32,7 +32,7 @@ export const INDUSTRIES: Industry[] = [
     icon: FaMicrochip,
     title: "Tech Company",
     description:
-      "Answers product, pricing, and integration questions instantly, triages support tickets, and routes qualified demo requests to your sales team — without adding headcount.",
+      "Answers pricing and integration questions the moment someone lands on your pricing page. It sorts support tickets by urgency and sends your sales team only the demo requests worth a callback.",
     intro:
       "Tech buyers expect an instant, accurate answer the moment they land on your site — not a contact form and a two-day wait. Go Converto trains itself on your docs, pricing, and product pages so it can hold its own in a technical conversation, freeing your team to focus on the demos and deals that actually need a human.",
     gradient: "from-blue-600 via-blue-500 to-cyan-500",

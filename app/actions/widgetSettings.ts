@@ -29,12 +29,15 @@ export interface LauncherSettings {
   brand_image_url: string;
 }
 
+export type EmbedType = "custom" | "wordpress";
+
 export interface WidgetSettings {
   bot_name: string;
   theme: ThemeSettings;
   behavior: BehaviorSettings;
   content: ContentSettings;
   launcher: LauncherSettings;
+  embed_type: EmbedType;
 }
 
 export interface WidgetSettingsResponse {
@@ -45,6 +48,7 @@ export interface WidgetSettingsResponse {
   behavior: BehaviorSettings;
   content: ContentSettings;
   launcher: LauncherSettings;
+  embed_type: EmbedType;
 }
 
 interface ActionResponse<T = unknown> {

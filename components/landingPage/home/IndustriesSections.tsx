@@ -1,11 +1,11 @@
 "use client";
 
+import type { Industry } from "@/lib/industriesData";
+import { INDUSTRIES } from "@/lib/industriesData";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { INDUSTRIES } from "@/lib/industriesData";
 import { HiSparkles } from "react-icons/hi";
-import type { Industry } from "@/lib/industriesData";
 
 // ============================================================================
 // INDUSTRY CARD — reveals as it scrolls into view

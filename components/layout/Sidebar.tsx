@@ -1,30 +1,74 @@
 "use client";
 
+import { getSubscriptionAction } from "@/app/actions/subscriptions";
 import { navigationConfig, NavItem } from "@/config/navigation";
 import { useSidebarContext } from "@/lib/SidebarContext";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BiChevronDown,
   BiChevronsLeft,
   BiChevronsRight,
   BiChevronUp,
+  BiErrorCircle,
+  BiTime,
 } from "react-icons/bi";
+
+function daysUntil(dateString: string | null): number {
+  if (!dateString) return 0;
+  const ms = new Date(dateString).getTime() - Date.now();
+  return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+}
+
+// How close to the period end before a canceled-but-still-active
+// subscription starts showing the "access ending" reminder.
+const ENDING_SOON_THRESHOLD_DAYS = 3;
+
+type BillingReminder =
+  | { kind: "trial"; days: number }
+  | { kind: "ending"; days: number };
 
 const Sidebar = () => {
   const pathname = usePathname();
   const { isExpanded, toggleSidebar } = useSidebarContext();
   const [openMenus, setOpenMenus] = useState<string[]>([]);
+  const [reminder, setReminder] = useState<BillingReminder | null>(null);
+
+  // Billing reminder — global to the sidebar so it's visible from every
+  // dashboard page, not just widget-settings. Two cases: still in the free
+  // trial, or a paid plan that's canceled and about to lapse.
+  useEffect(() => {
+    let active = true;
+    getSubscriptionAction().then((res) => {
+      if (!active || !res.ok || !res.data) return;
+      const sub = res.data;
+
+      if (sub.is_in_trial) {
+        setReminder({ kind: "trial", days: daysUntil(sub.trial_end) });
+        return;
+      }
+
+      if (sub.cancel_at_period_end && sub.current_period_end) {
+        const days = daysUntil(sub.current_period_end);
+        if (days <= ENDING_SOON_THRESHOLD_DAYS) {
+          setReminder({ kind: "ending", days });
+        }
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Toggle sub-menu
   const toggleSubMenu = (itemId: string) => {
     setOpenMenus((prev) =>
       prev.includes(itemId)
         ? prev.filter((id) => id !== itemId)
-        : [...prev, itemId]
+        : [...prev, itemId],
     );
   };
 
@@ -44,7 +88,7 @@ const Sidebar = () => {
     <div
       className={cn(
         "fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-gray-200 bg-white transition-all duration-300",
-        isExpanded ? "w-64" : "w-20"
+        isExpanded ? "w-64" : "w-20",
       )}
     >
       {/* Logo */}
@@ -93,7 +137,7 @@ const Sidebar = () => {
                     isExpanded ? "px-4 py-3" : "justify-center p-3",
                     isActive
                       ? "bg-gray-100 text-gray-900"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                   )}
                 >
                   <span className="flex-shrink-0">{item.icon}</span>
@@ -141,7 +185,7 @@ const Sidebar = () => {
                     isExpanded ? "px-4 py-3" : "justify-center p-3",
                     isActive
                       ? "bg-gray-100 text-gray-900"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                   )}
                 >
                   <span className="flex-shrink-0">{item.icon}</span>
@@ -189,7 +233,7 @@ const Sidebar = () => {
                         "flex items-center gap-3 rounded px-3 py-2 text-sm transition-all",
                         isSubItemActive(subItem.href)
                           ? "bg-gray-100 text-gray-900 font-medium"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                       )}
                     >
                       <span className="flex-shrink-0">{subItem.icon}</span>
@@ -202,6 +246,83 @@ const Sidebar = () => {
           );
         })}
       </nav>
+
+      {/* Billing reminder — pinned to the bottom of the sidebar. Shown for
+          the free trial, or for a canceled paid plan about to lapse. */}
+      {reminder && (
+        <div className={cn(isExpanded ? "p-3" : "p-2")}>
+          {isExpanded ? (
+            <div
+              className={cn(
+                "rounded-lg border px-3 py-2.5",
+                reminder.kind === "trial"
+                  ? "border-primary/20 bg-primary/10"
+                  : "border-amber-200 bg-amber-50",
+              )}
+            >
+              <div className="flex items-center gap-1.5">
+                {reminder.kind === "trial" ? (
+                  <BiTime size={14} className="shrink-0 text-primary-dark" />
+                ) : (
+                  <BiErrorCircle size={14} className="shrink-0 text-amber-600" />
+                )}
+                <p
+                  className={cn(
+                    "text-xs font-semibold",
+                    reminder.kind === "trial" ? "text-primary-dark" : "text-amber-700",
+                  )}
+                >
+                  {reminder.kind === "trial"
+                    ? `Free trial — ${reminder.days} day${reminder.days !== 1 ? "s" : ""} left`
+                    : `Access ending — ${reminder.days} day${reminder.days !== 1 ? "s" : ""} left`}
+                </p>
+              </div>
+              <p
+                className={cn(
+                  "mt-1 text-[11px] leading-relaxed",
+                  reminder.kind === "trial" ? "text-primary-dark/80" : "text-amber-700/80",
+                )}
+              >
+                {reminder.kind === "trial"
+                  ? "Your card will be charged automatically when the trial ends."
+                  : "Your subscription is set to cancel. Resubscribe to keep your AI assistant live."}
+              </p>
+              <Link
+                href="/pricing"
+                className={cn(
+                  "mt-1.5 block text-[11px] font-semibold underline underline-offset-2",
+                  reminder.kind === "trial"
+                    ? "text-primary-dark hover:text-primary"
+                    : "text-amber-700 hover:text-amber-800",
+                )}
+              >
+                {reminder.kind === "trial" ? "Manage subscription" : "Resubscribe"}
+              </Link>
+            </div>
+          ) : (
+            <Link
+              href="/pricing"
+              title={
+                reminder.kind === "trial"
+                  ? `Free trial — ${reminder.days} day${reminder.days !== 1 ? "s" : ""} left`
+                  : `Access ending — ${reminder.days} day${reminder.days !== 1 ? "s" : ""} left`
+              }
+              className={cn(
+                "flex items-center justify-center rounded-lg border p-2.5",
+                reminder.kind === "trial"
+                  ? "border-primary/20 bg-primary/10 text-primary-dark hover:bg-primary/20"
+                  : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
+              )}
+            >
+              {reminder.kind === "trial" ? (
+                <BiTime size={18} />
+              ) : (
+                <BiErrorCircle size={18} />
+              )}
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* Toggle Button - Centered vertically on right edge */}
       <button

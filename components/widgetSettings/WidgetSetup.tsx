@@ -6,7 +6,7 @@ import { updateWidgetSettingsAction } from "@/app/actions/widgetSettings";
 import { defaultSettings } from "./WidgetSettingUpdate";
 
 interface WidgetSetupProps {
-  onSetupComplete: () => void;
+  onSetupComplete: () => void | Promise<void>;
 }
 
 const STEPS = [
@@ -28,8 +28,8 @@ const STEPS = [
 ];
 
 const DEFAULTS = [
-  "Bot name: BayAI Assistant",
-  "Theme color: #807045",
+  "Bot name: Go Converto",
+  "Theme color: #474747",
   "Launcher: Bottom right",
   "Welcome message enabled",
   "Auto-open: Disabled",
@@ -45,7 +45,7 @@ const WidgetSetup = ({ onSetupComplete }: WidgetSetupProps) => {
     try {
       const res = await updateWidgetSettingsAction(defaultSettings);
       if (res.ok) {
-        onSetupComplete();
+        await onSetupComplete();
       } else {
         setError(res.error || "Setup failed. Please try again.");
       }
@@ -76,17 +76,14 @@ const WidgetSetup = ({ onSetupComplete }: WidgetSetupProps) => {
         {/* Steps row */}
         <div className="mb-8 grid grid-cols-3 gap-4">
           {STEPS.map((step, i) => (
-            <div
-              key={step.title}
-              className="flex flex-col items-center gap-3 rounded-xl border border-gray-200 bg-white p-5 text-center shadow-sm"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary-dark">
-                {step.icon}
-              </div>
-              <div>
+            <div key={step.title} className="flex flex-col items-center gap-1.5 text-center">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary-dark">
+                  {step.icon}
+                </div>
                 <p className="text-sm font-semibold text-gray-800">{step.title}</p>
-                <p className="mt-0.5 text-xs text-gray-400">{step.desc}</p>
               </div>
+              <p className="text-xs text-gray-400">{step.desc}</p>
               <span className="text-[10px] font-bold uppercase tracking-widest text-primary-dark">
                 Step {i + 1}
               </span>

@@ -1,18 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BiCheck, BiCode, BiCopy, BiImage, BiSend, BiX } from "react-icons/bi";
+import { useEffect } from "react";
+import { BiImage, BiSend, BiX } from "react-icons/bi";
 import { WidgetSettingsForm } from "./WidgetSettingUpdate";
 
 interface ChatbotPreviewProps {
   data: WidgetSettingsForm;
-  companyId?: string;
 }
 
-const ChatbotPreview = ({ data, companyId }: ChatbotPreviewProps) => {
-  const primaryColor = data.theme.primary_color || "#2563eb";
+const ChatbotPreview = ({ data }: ChatbotPreviewProps) => {
+  const primaryColor = data.theme.primary_color || "#474747";
   const fontFamily = data.theme.font_family || "Inter";
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!fontFamily || fontFamily === "Inter") return;
@@ -25,16 +23,6 @@ const ChatbotPreview = ({ data, companyId }: ChatbotPreviewProps) => {
       document.head.appendChild(link);
     }
   }, [fontFamily]);
-
-  const widgetUrl = process.env.NEXT_PUBLIC_WIDGET_URL || "https://chat.your-domain.com";
-  const apiKey = companyId ? `org-${companyId}` : "YOUR_API_KEY_HERE";
-  const embedCode = `<script\n  src="${widgetUrl}/widget.js"\n  data-api-key="${apiKey}">\n</script>`;
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(embedCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-y-auto" style={{ fontFamily }}>
@@ -120,45 +108,7 @@ const ChatbotPreview = ({ data, companyId }: ChatbotPreviewProps) => {
                 <BiSend size={14} className="ml-0.5" />
               </div>
             </div>
-            <div className="mt-2 text-center text-[10px] text-gray-400 flex items-center justify-center gap-1">
-              ⚡ Powered by <strong>GoConverto</strong>
-            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Embed Code Card */}
-      <div className="mx-2 mb-4 rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-          <div className="flex items-center gap-2 text-gray-700">
-            <BiCode size={16} />
-            <span className="text-xs font-bold uppercase tracking-wider">Embed on your website</span>
-          </div>
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-100"
-          >
-            {copied ? (
-              <>
-                <BiCheck size={14} className="text-green-500" />
-                <span className="text-green-600">Copied!</span>
-              </>
-            ) : (
-              <>
-                <BiCopy size={14} />
-                Copy
-              </>
-            )}
-          </button>
-        </div>
-        <pre className="overflow-x-auto bg-gray-950 px-4 py-3 text-[11px] leading-relaxed text-gray-300">
-          <code>{embedCode}</code>
-        </pre>
-        <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100">
-          <p className="text-[10px] text-gray-400">
-            Paste this snippet before the closing <code className="rounded bg-gray-200 px-1 text-gray-600">&lt;/body&gt;</code> tag on your website.
-          </p>
         </div>
       </div>
 

@@ -125,21 +125,21 @@ const HOW_IT_WORKS_STEPS = [
     title: "1. Connect Data",
     desc: "Upload documents or link your website URL to train your assistant.",
     color: "text-blue-500",
-    bg: "bg-blue-50 dark:bg-blue-900/20",
+    bg: "bg-blue-50",
   },
   {
     icon: BiCog,
     title: "2. Customize",
     desc: "Adjust the tone, personality, and branding to match your company.",
     color: "text-purple-500",
-    bg: "bg-purple-50 dark:bg-purple-900/20",
+    bg: "bg-purple-50",
   },
   {
     icon: BiRocket,
     title: "3. Deploy",
     desc: "Embed the chat widget on your site with a single line of code.",
     color: "text-pink-500",
-    bg: "bg-pink-50 dark:bg-pink-900/20",
+    bg: "bg-pink-50",
   },
 ];
 
@@ -182,16 +182,16 @@ const SpotlightBackground = ({
   className?: string;
 }) => (
   <div className={`relative overflow-hidden ${className}`}>
-    <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black">
-      <div className="absolute h-[40rem] w-[40rem] rounded-full bg-blue-500/10 blur-[100px] dark:bg-blue-500/20" />
-      <div className="absolute right-0 top-0 h-[30rem] w-[30rem] rounded-full bg-purple-500/10 blur-[100px] dark:bg-purple-500/20" />
+    <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]">
+      <div className="absolute h-[40rem] w-[40rem] rounded-full bg-blue-500/10 blur-[100px]" />
+      <div className="absolute right-0 top-0 h-[30rem] w-[30rem] rounded-full bg-purple-500/10 blur-[100px]" />
     </div>
     <div className="relative z-10">{children}</div>
   </div>
 );
 
 const GlobalBackgroundGradient = () => (
-  <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-100 via-white to-gray-50 opacity-80 dark:from-gray-900 dark:via-black dark:to-black" />
+  <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-100 via-white to-gray-50 opacity-80" />
 );
 
 // ============================================================================
@@ -210,7 +210,7 @@ const HeroSection = () => (
           animate="animate"
           className="absolute -left-4 top-0 hidden lg:block"
         >
-          <div className="rounded-2xl bg-white/50 p-3 shadow-xl backdrop-blur-sm dark:bg-gray-800/50 lg:p-4">
+          <div className="rounded-2xl bg-white/50 p-3 shadow-xl backdrop-blur-sm lg:p-4">
             <BiBot className="h-6 w-6 text-blue-500 lg:h-8 lg:w-8" />
           </div>
         </motion.div>
@@ -221,7 +221,7 @@ const HeroSection = () => (
           transition={{ delay: 1 }}
           className="absolute right-0 top-20 hidden lg:block"
         >
-          <div className="rounded-2xl bg-white/50 p-3 shadow-xl backdrop-blur-sm dark:bg-gray-800/50 lg:p-4">
+          <div className="rounded-2xl bg-white/50 p-3 shadow-xl backdrop-blur-sm lg:p-4">
             <BiBarChart className="h-6 w-6 text-purple-500 lg:h-8 lg:w-8" />
           </div>
         </motion.div>
@@ -246,7 +246,7 @@ const HeroSection = () => (
 
           {/* Hero Title */}
           <h1 className="mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
-            <span className="block text-gray-900 dark:text-white">
+            <span className="block text-gray-900">
               Transform Your
             </span>
             <span className="relative inline-block">
@@ -269,9 +269,9 @@ const HeroSection = () => (
           </h1>
 
           {/* Hero Description */}
-          <p className="mx-auto mb-8 max-w-2xl text-base text-gray-600 dark:text-gray-300 sm:text-lg md:mb-10 md:text-xl lg:text-2xl">
+          <p className="mx-auto mb-8 max-w-2xl text-base text-gray-600 sm:text-lg md:mb-10 md:text-xl lg:text-2xl">
             Revolutionize customer engagement with our{" "}
-            <span className="font-semibold text-blue-600 dark:text-blue-400">
+            <span className="font-semibold text-blue-600">
               AI-powered assistant
             </span>
             . Automate support, capture leads, and boost sales 24/7.
@@ -295,7 +295,7 @@ const HeroSection = () => (
               <Button
                 variant="outline"
                 size="xl"
-                className="h-12 w-full rounded-full border-gray-200 bg-white/50 px-6 text-base font-semibold text-gray-900 backdrop-blur-sm hover:bg-gray-100 dark:border-gray-800 dark:bg-black/50 dark:text-white dark:hover:bg-gray-800 sm:h-14 sm:w-auto sm:px-8 sm:text-lg"
+                className="h-12 w-full rounded-full border-gray-200 bg-white/50 px-6 text-base font-semibold text-gray-900 backdrop-blur-sm hover:bg-gray-100 sm:h-14 sm:w-auto sm:px-8 sm:text-lg"
               >
                 Watch Demo
               </Button>
@@ -310,14 +310,14 @@ const HeroSection = () => (
 // Trusted By Section
 // ----------------------------------------------------------------------------
 const TrustedBySection = () => (
-  <section className="relative border-y border-gray-100 bg-gray-50/50 backdrop-blur-sm dark:border-gray-800 dark:bg-white/5 py-4 md:py-8 lg:py-10 xl:py-16">
+  <section className="relative border-y border-gray-100 bg-gray-50/50 backdrop-blur-sm py-4 md:py-8 lg:py-10 xl:py-16">
     <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
       <motion.p
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 sm:mb-8"
+        className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 sm:mb-8"
       >
         Trusted by innovative teams at
       </motion.p>
@@ -332,7 +332,7 @@ const TrustedBySection = () => (
           <motion.span
             key={name}
             variants={fadeInUp}
-            className="flex items-center text-base font-bold text-gray-500 transition-all duration-300 hover:text-gray-900 dark:text-gray-600 dark:hover:text-gray-300 sm:text-lg md:text-xl"
+            className="flex items-center text-base font-bold text-gray-500 transition-all duration-300 hover:text-gray-900 sm:text-lg md:text-xl"
           >
             {name}
           </motion.span>
@@ -366,14 +366,14 @@ const FeaturesSection = () => {
             variants={fadeInUp}
             className="mb-3 text-2xl font-bold sm:text-3xl md:mb-4 lg:text-4xl xl:text-5xl"
           >
-            <span className="text-gray-900 dark:text-white">
+            <span className="text-gray-900">
               Everything you need to{" "}
             </span>
-            <span className="text-blue-600 dark:text-blue-400">succeed</span>
+            <span className="text-blue-600">succeed</span>
           </motion.h2>
           <motion.p
             variants={fadeInUp}
-            className="mx-auto mb-10 max-w-2xl text-base text-gray-600 dark:text-gray-400 sm:mb-12 sm:text-lg lg:mb-16"
+            className="mx-auto mb-10 max-w-2xl text-base text-gray-600 sm:mb-12 sm:text-lg lg:mb-16"
           >
             Our AI assistant comes packed with powerful features designed to
             automate and accelerate your business growth.
@@ -388,7 +388,7 @@ const FeaturesSection = () => {
                 whileHover={{ y: -5 }}
                 className="h-full"
               >
-                <Card className="group relative h-full overflow-hidden border-gray-200 bg-white/60 backdrop-blur-sm transition-colors hover:border-blue-500/50 dark:border-gray-800 dark:bg-gray-900/60 dark:hover:border-blue-500/50">
+                <Card className="group relative h-full overflow-hidden border-gray-200 bg-white/60 backdrop-blur-sm transition-colors hover:border-blue-500/50">
                   <CardHeader className="pb-3 sm:pb-4">
                     <div
                       className={`mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl ${feature.color.replace(
@@ -403,12 +403,12 @@ const FeaturesSection = () => {
                         )} sm:h-7 sm:w-7`}
                       />
                     </div>
-                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
+                    <CardTitle className="text-lg font-semibold text-gray-900 sm:text-xl">
                       {feature.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400 sm:text-base">
+                    <p className="text-sm leading-relaxed text-gray-600 sm:text-base">
                       {feature.desc}
                     </p>
                   </CardContent>
@@ -429,15 +429,15 @@ const FeaturesSection = () => {
 const HowItWorksSection = () => (
   <section
     id="how-it-works"
-    className="relative overflow-hidden bg-white  dark:bg-black pb-20 scroll-mt-24"
+    className="relative overflow-hidden bg-white pb-20 scroll-mt-24"
   >
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {/* Section Header */}
       <div className="mb-12 text-center sm:mb-16">
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl lg:text-4xl">
+        <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
           How it works
         </h2>
-        <p className="mt-3 text-base text-gray-600 dark:text-gray-400 sm:mt-4 sm:text-lg">
+        <p className="mt-3 text-base text-gray-600 sm:mt-4 sm:text-lg">
           Get your AI assistant up and running in minutes, not days.
         </p>
       </div>
@@ -445,7 +445,7 @@ const HowItWorksSection = () => (
       {/* Steps Grid */}
       <div className="relative grid gap-8 sm:gap-10 md:grid-cols-3 lg:gap-12">
         {/* Connecting Line (Desktop) */}
-        <div className="absolute left-[16%] right-[16%] top-12 hidden h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-blue-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 md:block" />
+        <div className="absolute left-[16%] right-[16%] top-12 hidden h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-blue-200 md:block" />
 
         {HOW_IT_WORKS_STEPS.map((step, idx) => (
           <motion.div
@@ -461,10 +461,10 @@ const HowItWorksSection = () => (
             >
               <step.icon className={`h-8 w-8 ${step.color} sm:h-10 sm:w-10`} />
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white sm:text-xl">
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 sm:text-xl">
               {step.title}
             </h3>
-            <p className="max-w-xs text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+            <p className="max-w-xs text-sm text-gray-600 sm:text-base">
               {step.desc}
             </p>
           </motion.div>
@@ -477,9 +477,9 @@ const HowItWorksSection = () => (
 // Testimonials Section
 // ----------------------------------------------------------------------------
 const TestimonialsSection = () => (
-  <section className="bg-gray-50 dark:bg-gray-900/30 py-10 lg:py-20">
+  <section className="bg-gray-50 py-10 lg:py-20">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 className="mb-10 text-center text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:mb-12 sm:text-3xl lg:mb-16 lg:text-4xl">
+      <h2 className="mb-10 text-center text-2xl font-bold tracking-tight text-gray-900 sm:mb-12 sm:text-3xl lg:mb-16 lg:text-4xl">
         Loved by businesses everywhere
       </h2>
       <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -491,16 +491,16 @@ const TestimonialsSection = () => (
             viewport={{ once: true }}
             transition={{ delay: idx * 0.1 }}
           >
-            <Card className="h-full border-none bg-white shadow-lg dark:bg-gray-800">
+            <Card className="h-full border-none bg-white shadow-lg">
               <CardContent className="pt-6 sm:pt-8">
-                <BiSolidQuoteAltLeft className="mb-3 h-6 w-6 text-blue-200 dark:text-blue-900 sm:mb-4 sm:h-8 sm:w-8" />
-                <p className="mb-4 text-base italic text-gray-700 dark:text-gray-300 sm:mb-6 sm:text-lg">
+                <BiSolidQuoteAltLeft className="mb-3 h-6 w-6 text-blue-200 sm:mb-4 sm:h-8 sm:w-8" />
+                <p className="mb-4 text-base italic text-gray-700 sm:mb-6 sm:text-lg">
                   &ldquo;{item.quote}&rdquo;
                 </p>
                 <div className="flex items-center">
                   <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 sm:h-10 sm:w-10" />
                   <div className="ml-3">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white sm:text-base">
+                    <p className="text-sm font-semibold text-gray-900 sm:text-base">
                       {item.author}
                     </p>
                     <p className="text-xs text-gray-500 sm:text-sm">
@@ -533,7 +533,7 @@ const CTASection = memo(() => {
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(closest-side,rgba(59,130,246,0.1)_0%,transparent_100%)]" />
 
       <h2 className="mb-4 text-3xl font-bold tracking-tight sm:mb-6 sm:text-4xl lg:text-5xl">
-        <span className="block text-gray-900 dark:text-white">
+        <span className="block text-gray-900">
           Ready to transform
         </span>
         <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
@@ -541,7 +541,7 @@ const CTASection = memo(() => {
         </span>
       </h2>
 
-      <p className="mx-auto mb-8 max-w-3xl text-base leading-relaxed text-gray-600 dark:text-gray-300 sm:mb-10 sm:text-lg lg:text-xl">
+      <p className="mx-auto mb-8 max-w-3xl text-base leading-relaxed text-gray-600 sm:mb-10 sm:text-lg lg:text-xl">
         Join thousands of businesses already using our AI assistant to automate
         customer interactions and boost revenue.
       </p>
@@ -578,19 +578,19 @@ const SubscriptionAlert = ({ onClose }: { onClose: () => void }) => (
     exit={{ opacity: 0, y: -50 }}
     className="fixed left-0 right-0 top-20 z-50 mx-auto w-full max-w-md px-4 sm:top-24"
   >
-    <div className="flex items-start rounded-xl border border-yellow-200 bg-yellow-50/90 p-4 shadow-2xl backdrop-blur-md dark:border-yellow-900/50 dark:bg-yellow-900/40">
-      <BiShield className="mr-3 mt-0.5 h-5 w-5 text-yellow-600 dark:text-yellow-400 sm:h-6 sm:w-6" />
+    <div className="flex items-start rounded-xl border border-yellow-200 bg-yellow-50/90 p-4 shadow-2xl backdrop-blur-md">
+      <BiShield className="mr-3 mt-0.5 h-5 w-5 text-yellow-600 sm:h-6 sm:w-6" />
       <div className="flex-1">
-        <h3 className="text-sm font-semibold text-yellow-900 dark:text-yellow-100 sm:text-base">
+        <h3 className="text-sm font-semibold text-yellow-900 sm:text-base">
           Subscription Required
         </h3>
-        <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300 sm:text-sm">
+        <p className="mt-1 text-xs text-yellow-700 sm:text-sm">
           Please choose a plan below to access the dashboard.
         </p>
       </div>
       <button
         onClick={onClose}
-        className="ml-3 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400"
+        className="ml-3 text-yellow-600 hover:text-yellow-800"
         aria-label="Close alert"
       >
         ✕
@@ -646,9 +646,9 @@ export default function LandingPage({ session }: LandingPageProps) {
 
   return (
     <Suspense
-      fallback={<div className="min-h-screen bg-white dark:bg-black" />}
+      fallback={<div className="min-h-screen bg-white" />}
     >
-      <div className="relative min-h-screen overflow-hidden bg-white selection:bg-blue-500/30 dark:bg-black">
+      <div className="relative min-h-screen overflow-hidden bg-white selection:bg-blue-500/30">
         {/* Global Background Gradient */}
         <GlobalBackgroundGradient />
 
@@ -680,7 +680,7 @@ export default function LandingPage({ session }: LandingPageProps) {
         </section>
 
         {/* CTA Section */}
-        <section className="relative z-10 overflow-hidden bg-gray-50/50 dark:bg-black/50 pb-20 pt-6">
+        <section className="relative z-10 overflow-hidden bg-gray-50/50 pb-20 pt-6">
           <CTASection />
         </section>
       </div>

@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { FaStar, FaStarHalfAlt } from "react-icons/fa";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { BsArrowRight, BsPlayFill } from "react-icons/bs";
+import { FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi";
 
 // ============================================================================
@@ -51,7 +51,7 @@ function useCountUp(
     delay = 0,
     format,
     suffix = "",
-  }: { duration?: number; delay?: number; format?: "comma"; suffix?: string }
+  }: { duration?: number; delay?: number; format?: "comma"; suffix?: string },
 ) {
   const [display, setDisplay] = useState(() => `0${suffix}`);
 
@@ -87,7 +87,7 @@ function useCountUp(
 const GrowthVisualCard = () => {
   const [typedChars, setTypedChars] = useState(0);
   const [trainStage, setTrainStage] = useState<"scanning" | "ready">(
-    "scanning"
+    "scanning",
   );
 
   const revenuePct = useCountUp(38, { delay: 250, suffix: "%" });
@@ -271,9 +271,7 @@ const GrowthVisualCard = () => {
       {/* Header */}
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <div className="text-sm font-bold text-gray-900">
-            Revenue Impact
-          </div>
+          <div className="text-sm font-bold text-gray-900">Revenue Impact</div>
           <div className="mt-0.5 text-xs text-gray-400">Since adding BayAI</div>
         </div>
         <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">
@@ -302,9 +300,30 @@ const GrowthVisualCard = () => {
           </linearGradient>
         </defs>
 
-        <line x1="0" y1="40" x2="400" y2="40" stroke="#e5e7eb" strokeDasharray="4 5" />
-        <line x1="0" y1="90" x2="400" y2="90" stroke="#e5e7eb" strokeDasharray="4 5" />
-        <line x1="0" y1="140" x2="400" y2="140" stroke="#e5e7eb" strokeDasharray="4 5" />
+        <line
+          x1="0"
+          y1="40"
+          x2="400"
+          y2="40"
+          stroke="#e5e7eb"
+          strokeDasharray="4 5"
+        />
+        <line
+          x1="0"
+          y1="90"
+          x2="400"
+          y2="90"
+          stroke="#e5e7eb"
+          strokeDasharray="4 5"
+        />
+        <line
+          x1="0"
+          y1="140"
+          x2="400"
+          y2="140"
+          stroke="#e5e7eb"
+          strokeDasharray="4 5"
+        />
 
         <motion.path
           d="M0,140 C40,135 60,120 90,118 C130,115 150,95 190,88 C230,80 250,60 290,48 C330,38 360,25 400,10 L400,160 L0,160 Z"
@@ -356,7 +375,9 @@ const GrowthVisualCard = () => {
           widths, and this info is already echoed by the floating badges. */}
       <div className="mt-4 hidden max-w-[65%] flex-col gap-1.5 sm:flex">
         <div className="flex flex-row items-baseline gap-1.5 whitespace-nowrap text-left">
-          <span className="text-sm font-extrabold text-thunder-black">+{leads}</span>
+          <span className="text-sm font-extrabold text-thunder-black">
+            +{leads}
+          </span>
           <span className="text-[11px] text-gray-600">Leads captured</span>
         </div>
         <div className="flex flex-row items-baseline gap-1.5 whitespace-nowrap text-left">
@@ -399,8 +420,6 @@ const GrowthVisualCard = () => {
     </motion.div>
   );
 };
-
-
 
 // ============================================================================
 // HERO SECTION
@@ -457,8 +476,9 @@ const HeroSection = () => {
             variants={fadeInUp}
             className="mx-auto mb-8 max-w-[480px] text-base text-gray-600 sm:text-lg lg:mx-0"
           >
-            Instant replies, more leads, and happier customers—all powered by
-            AI.
+            Go Converto answers every visitor in 2 seconds, day or night.
+            Without coding and setup hassles. Start your 14 day free trial
+            today.
           </motion.p>
 
           <motion.div
@@ -515,7 +535,9 @@ const HeroSection = () => {
                   ))}
                   <FaStarHalfAlt className="h-3.5 w-3.5" />
                 </div>
-                <span className="text-sm font-bold text-primary-dark">4.9/5</span>
+                <span className="text-sm font-bold text-primary-dark">
+                  4.9/5
+                </span>
               </div>
             </div>
           </motion.div>
@@ -533,8 +555,6 @@ const HeroSection = () => {
 
           <GrowthVisualCard />
         </div>
-
-      
       </div>
     </section>
   );

@@ -12,9 +12,10 @@ import { cn } from "@/lib/utils";
 import { PricingPlan } from "@/config/pricing";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { BiCheckCircle } from "react-icons/bi";
 import { BsArrowRight } from "react-icons/bs";
+import { EnterpriseContactModal } from "./EnterpriseContactModal";
 
 interface PricingCardProps {
   plan: PricingPlan;
@@ -26,9 +27,6 @@ interface PricingCardProps {
   hasActiveSubscription?: boolean;
   currentTier?: string | null;
 }
-
-const CONTACT_SALES_HREF =
-  "mailto:sales@goconverto.com?subject=Enterprise%20Plan%20Inquiry";
 
 // "trial" (this plan's id) and "free" (the backend tier name for it) refer
 // to the same plan — normalize before ranking.
@@ -51,6 +49,7 @@ export const PricingCard = memo(
     currentTier = null,
   }: PricingCardProps) => {
     const router = useRouter();
+    const [showEnterpriseModal, setShowEnterpriseModal] = useState(false);
     const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
     const displayPrice = isYearly && plan.id !== "trial" ? price / 12 : price;
 
@@ -141,8 +140,9 @@ export const PricingCard = memo(
 
             <div className="mt-auto">
               {plan.isCustomPricing ? (
-                <a
-                  href={CONTACT_SALES_HREF}
+                <button
+                  type="button"
+                  onClick={() => setShowEnterpriseModal(true)}
                   className={buttonVariants({
                     variant: "outline",
                     size: "lg",
@@ -154,7 +154,7 @@ export const PricingCard = memo(
                     Contact Sales
                     <BsArrowRight className="h-5 w-5" />
                   </span>
-                </a>
+                </button>
               ) : (
                 <Button
                   variant="outline"
@@ -195,6 +195,13 @@ export const PricingCard = memo(
             </div>
           </CardContent>
         </Card>
+
+        {plan.isCustomPricing && (
+          <EnterpriseContactModal
+            open={showEnterpriseModal}
+            onClose={() => setShowEnterpriseModal(false)}
+          />
+        )}
       </motion.div>
     );
   }

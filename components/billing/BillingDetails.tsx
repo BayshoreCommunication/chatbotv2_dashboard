@@ -237,8 +237,8 @@ const BillingDetails = () => {
             subscription.billing_cycle === "annual" ? "year" : "month"
           }`,
           icon: <BiWallet size={20} />,
-          bg: "bg-primary/10 dark:bg-primary/20",
-          iconColor: "text-primary-dark dark:text-primary",
+          bg: "bg-primary/10",
+          iconColor: "text-primary-dark",
         },
         {
           title: "Status",
@@ -254,15 +254,15 @@ const BillingDetails = () => {
               : "Action may be needed",
           icon: <BiCheckCircle size={20} />,
           bg: subscription.is_in_trial
-            ? "bg-purple-50 dark:bg-purple-950"
+            ? "bg-purple-50"
             : subscription.is_active
-              ? "bg-green-50 dark:bg-green-950"
-              : "bg-yellow-50 dark:bg-yellow-950",
+              ? "bg-green-50"
+              : "bg-yellow-50",
           iconColor: subscription.is_in_trial
-            ? "text-purple-600 dark:text-purple-400"
+            ? "text-purple-600"
             : subscription.is_active
-              ? "text-green-600 dark:text-green-400"
-              : "text-yellow-600 dark:text-yellow-400",
+              ? "text-green-600"
+              : "text-yellow-600",
         },
         {
           title: "Billing Cycle",
@@ -272,8 +272,8 @@ const BillingDetails = () => {
             ? "Will not renew"
             : "Renews automatically",
           icon: <BiCalendar size={20} />,
-          bg: "bg-indigo-50 dark:bg-indigo-950",
-          iconColor: "text-indigo-600 dark:text-indigo-400",
+          bg: "bg-indigo-50",
+          iconColor: "text-indigo-600",
         },
         {
           title: "Total Paid",
@@ -283,8 +283,8 @@ const BillingDetails = () => {
               ? "No payment history yet"
               : `Across ${invoices.filter((i) => i.kind !== "trial").length} invoice(s)`,
           icon: <BiCreditCard size={20} />,
-          bg: "bg-emerald-50 dark:bg-emerald-950",
-          iconColor: "text-emerald-600 dark:text-emerald-400",
+          bg: "bg-emerald-50",
+          iconColor: "text-emerald-600",
         },
       ]
     : [];
@@ -294,17 +294,17 @@ const BillingDetails = () => {
   if (loading) {
     return (
       <div className="flex flex-col gap-6">
-        <div className="h-20 animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" />
+        <div className="h-20 animate-pulse rounded-xl border border-gray-200 bg-white" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="h-28 animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
+              className="h-28 animate-pulse rounded-xl border border-gray-200 bg-white"
             />
           ))}
         </div>
-        <div className="h-40 animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" />
-        <div className="h-64 animate-pulse rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" />
+        <div className="h-40 animate-pulse rounded-xl border border-gray-200 bg-white" />
+        <div className="h-64 animate-pulse rounded-xl border border-gray-200 bg-white" />
       </div>
     );
   }
@@ -314,12 +314,12 @@ const BillingDetails = () => {
   if (error) {
     return (
       <div className="flex flex-col gap-4 p-6">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </div>
         <button
           onClick={() => void loadAll()}
-          className="inline-flex w-fit items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+          className="inline-flex w-fit items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white"
         >
           <BiRefresh size={16} />
           Retry
@@ -333,19 +333,19 @@ const BillingDetails = () => {
   return (
     <div className="flex flex-col gap-6">
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-900">
+      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-6 py-4">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl font-bold text-gray-900">
             Billing &amp; Subscription
           </h1>
-          <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-0.5 text-sm text-gray-500">
             Manage your plan, payment method, and invoice history
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => void loadAll()}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
           >
             <BiRefresh size={16} />
             Refresh
@@ -375,7 +375,7 @@ const BillingDetails = () => {
         {stats.map((stat) => (
           <div
             key={stat.title}
-            className="rounded-xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-sm dark:border-gray-800 dark:bg-gray-900"
+            className="rounded-xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-sm"
           >
             <div className="flex items-center gap-3">
               <div
@@ -383,14 +383,14 @@ const BillingDetails = () => {
               >
                 <span className={stat.iconColor}>{stat.icon}</span>
               </div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
                 {stat.title}
               </p>
             </div>
-            <p className="mt-3 text-xl font-bold text-gray-900 dark:text-white">
+            <p className="mt-3 text-xl font-bold text-gray-900">
               {stat.value}
             </p>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-0.5 text-xs text-gray-500">
               {stat.subtitle}
             </p>
           </div>
@@ -399,16 +399,16 @@ const BillingDetails = () => {
 
       {/* ── Trial banner ───────────────────────────────────────────────── */}
       {subscription?.is_in_trial && (
-        <div className="flex items-start gap-3 rounded-xl border border-purple-200 bg-purple-50 px-5 py-4 dark:border-purple-900 dark:bg-purple-950">
+        <div className="flex items-start gap-3 rounded-xl border border-purple-200 bg-purple-50 px-5 py-4">
           <BiGift
             size={20}
-            className="mt-0.5 shrink-0 text-purple-600 dark:text-purple-400"
+            className="mt-0.5 shrink-0 text-purple-600"
           />
           <div className="min-w-0">
-            <p className="font-semibold text-purple-800 dark:text-purple-200">
+            <p className="font-semibold text-purple-800">
               You&apos;re on a free trial
             </p>
-            <p className="mt-0.5 text-sm text-purple-700 dark:text-purple-300">
+            <p className="mt-0.5 text-sm text-purple-700">
               Your trial ends on{" "}
               <strong>{formatIsoDate(subscription.trial_end)}</strong>. Your
               saved card will be charged automatically when it ends — cancel any
@@ -419,15 +419,15 @@ const BillingDetails = () => {
       )}
 
       {/* ── Payment method ─────────────────────────────────────────────── */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-3 dark:border-gray-800 dark:bg-gray-900/60">
-          <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
             <BiCreditCard size={15} className="text-gray-400" />
             Payment Method
           </div>
           <button
             onClick={() => setIsPaymentModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-white dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-white"
           >
             <BiPlus size={14} />
             Add Card
@@ -435,31 +435,31 @@ const BillingDetails = () => {
         </div>
         <div className="p-5">
           {defaultCard ? (
-            <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/50">
+            <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-4">
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-14 items-center justify-center rounded-md bg-gray-900 dark:bg-gray-700">
+                <div className="flex h-10 w-14 items-center justify-center rounded-md bg-gray-900">
                   <span className="text-[11px] font-bold text-white">
                     {defaultCard.brand}
                   </span>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm font-semibold text-gray-900">
                     •••• •••• •••• {defaultCard.last4}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500">
                     Expires {defaultCard.expiry}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsPaymentModalOpen(true)}
-                className="text-sm font-medium text-primary-dark hover:text-primary dark:text-primary"
+                className="text-sm font-medium text-primary-dark hover:text-primary"
               >
                 Update
               </button>
             </div>
           ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500">
               No payment method on file.
             </p>
           )}
@@ -479,14 +479,14 @@ const BillingDetails = () => {
       )}
 
       {/* ── Payment history ────────────────────────────────────────────── */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-5 py-3 dark:border-gray-800 dark:bg-gray-900/60">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-5 py-3">
           <BiWallet size={15} className="text-gray-400" />
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <h2 className="text-sm font-semibold text-gray-700">
             Payment History
           </h2>
           {invoices.length > 0 && (
-            <span className="ml-auto rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+            <span className="ml-auto rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-600">
               {invoices.length}
             </span>
           )}
@@ -494,21 +494,21 @@ const BillingDetails = () => {
 
         {invoices.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
               <BsFileEarmarkText
                 size={22}
-                className="text-gray-400 dark:text-gray-500"
+                className="text-gray-400"
               />
             </div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p className="text-sm font-medium text-gray-600">
               No payment history yet
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-xs text-gray-400">
               Invoices will appear here once your subscription is billed.
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+          <ul className="divide-y divide-gray-100">
             {invoices.map((invoice, idx) => {
               const meta = KIND_META[invoice.kind];
               const isFree = invoice.kind === "trial";
@@ -516,7 +516,7 @@ const BillingDetails = () => {
               return (
                 <li
                   key={invoice.id}
-                  className="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-800/40"
+                  className="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-gray-50/60"
                 >
                   {/* Timeline indicator */}
                   <div className="relative flex flex-col items-center">
@@ -526,31 +526,31 @@ const BillingDetails = () => {
                       {meta.icon}
                     </div>
                     {idx < invoices.length - 1 && (
-                      <div className="mt-1 w-px flex-1 bg-gray-200 dark:bg-gray-700" style={{ minHeight: 24 }} />
+                      <div className="mt-1 w-px flex-1 bg-gray-200" style={{ minHeight: 24 }} />
                     )}
                   </div>
 
                   {/* Body */}
                   <div className="min-w-0 flex-1 pt-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      <span className="text-sm font-semibold text-gray-900">
                         {meta.label}
                       </span>
                       {/* Plan badge */}
-                      <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                      <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
                         {invoice.plan}
                       </span>
                       {/* Status badge */}
                       <StatusBadge status={invoice.status} />
                       {/* Trial label */}
                       {isFree && (
-                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-semibold text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
+                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-semibold text-purple-700">
                           Card saved · No charge
                         </span>
                       )}
                     </div>
 
-                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-0.5 text-xs text-gray-500">
                       {invoice.period
                         ? `${invoice.date} · ${invoice.period}`
                         : invoice.date}
@@ -562,10 +562,10 @@ const BillingDetails = () => {
                     <span
                       className={`text-lg font-bold ${
                         isFree
-                          ? "text-purple-600 dark:text-purple-400"
+                          ? "text-purple-600"
                           : invoice.status === "paid"
-                            ? "text-gray-900 dark:text-white"
-                            : "text-yellow-600 dark:text-yellow-400"
+                            ? "text-gray-900"
+                            : "text-yellow-600"
                       }`}
                     >
                       {invoice.amount}
@@ -586,13 +586,13 @@ const BillingDetails = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         title="Download PDF"
-                        className="flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700 dark:border-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        className="flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700"
                       >
                         <BiDownload size={13} />
                         PDF
                       </a>
                     ) : (
-                      <span className="text-[11px] text-gray-300 dark:text-gray-600">
+                      <span className="text-[11px] text-gray-300">
                         —
                       </span>
                     )}
