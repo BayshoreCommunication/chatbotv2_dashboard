@@ -21,9 +21,10 @@ import {
   BiUser,
 } from "react-icons/bi";
 import {
-  Area,
-  AreaChart,
   CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -108,15 +109,13 @@ const DashboardDetailsView = ({
   const [selectedPeriod, setSelectedPeriod] = useState<"year" | "last-year">(
     "year",
   );
-  const [selectedTab, setSelectedTab] = useState<
-    "total-chat" | "total-visitors"
-  >("total-chat");
 
   const chartData = (
     selectedPeriod === "year" ? chartThisYear : chartLastYear
   ).map((b) => ({
     month: b.label,
     chats: b.sessions,
+    leads: b.leads,
     visitors: b.visitors,
   }));
 
@@ -396,34 +395,7 @@ const DashboardDetailsView = ({
         <div className="rounded border border-gray-200 bg-white p-6">
           {/* Chart Header */}
           <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
-            <div className="flex gap-6 border-b border-gray-200">
-              <button
-                onClick={() => setSelectedTab("total-chat")}
-                className={`pb-3 text-sm font-semibold transition-all relative ${
-                  selectedTab === "total-chat"
-                    ? "text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                Total Chat
-                {selectedTab === "total-chat" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
-                )}
-              </button>
-              <button
-                onClick={() => setSelectedTab("total-visitors")}
-                className={`pb-3 text-sm font-semibold transition-all relative ${
-                  selectedTab === "total-visitors"
-                    ? "text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                Total Visitors
-                {selectedTab === "total-visitors" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
-                )}
-              </button>
-            </div>
+            <h2 className="text-base font-bold text-gray-900">Overview</h2>
 
             <div className="flex items-center gap-4">
               <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer hover:text-gray-900 transition-colors">
@@ -458,22 +430,10 @@ const DashboardDetailsView = ({
           {/* Chart */}
           <div className="h-80 @7xl:h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
+              <LineChart
                 data={chartData}
                 margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
               >
-                <defs>
-                  <linearGradient
-                    id="colorGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#00e0da" stopOpacity={0.12} />
-                    <stop offset="95%" stopColor="#00e0da" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
                 <CartesianGrid
                   strokeDasharray="5 5"
                   stroke="#e5e7eb"
@@ -503,21 +463,38 @@ const DashboardDetailsView = ({
                   }}
                   cursor={{ stroke: "#e5e7eb", strokeWidth: 1 }}
                 />
-                <Area
-                  type="monotone"
-                  dataKey={selectedTab === "total-chat" ? "chats" : "visitors"}
-                  stroke="#00e0da"
-                  strokeWidth={3}
-                  fill="url(#colorGradient)"
-                  dot={false}
-                  activeDot={{
-                    r: 6,
-                    fill: "#00e0da",
-                    strokeWidth: 2,
-                    stroke: "#fff",
-                  }}
+                <Legend
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: "13px", paddingTop: "12px" }}
                 />
-              </AreaChart>
+                <Line
+                  type="monotone"
+                  dataKey="chats"
+                  name="Total Chat"
+                  stroke="#9333ea"
+                  strokeWidth={3}
+                  dot={false}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="leads"
+                  name="Total Leads"
+                  stroke="#16a34a"
+                  strokeWidth={3}
+                  dot={false}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="visitors"
+                  name="Total Visitors"
+                  stroke="#00b2ad"
+                  strokeWidth={3}
+                  dot={false}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                />
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </div>

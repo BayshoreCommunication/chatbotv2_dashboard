@@ -9,18 +9,14 @@ import {
   type Notification,
 } from "@/app/actions/notifications";
 import { getUserData } from "@/app/actions/user";
+import { navigationConfig } from "@/config/navigation";
 import { useSidebarContext } from "@/lib/SidebarContext";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   BiBell,
-  BiBot,
-  BiCalendar,
-  BiChat,
   BiChevronDown,
-  BiCog,
-  BiGridAlt,
   BiLogOut,
   BiSearch,
   BiUser,
@@ -38,20 +34,26 @@ interface User {
 type SearchPage = {
   label: string;
   href: string;
-  icon: typeof BiGridAlt;
+  icon: React.ReactNode;
 };
 
+// Built from the sidebar's navigationConfig (config/navigation.tsx) instead of
+// a hand-maintained list, so a route added/renamed there shows up in search
+// automatically. Parent items with sub-menus (Settings, AI) contribute their
+// sub-items rather than themselves, since those are what the sidebar actually
+// links to. Billing is appended on top — it's reachable from the user menu
+// below but isn't part of the sidebar itself.
 const SEARCH_PAGES: SearchPage[] = [
-  { label: "Dashboard", href: "/dashboard", icon: BiGridAlt },
-  { label: "Leads", href: "/leads", icon: BiUserPin },
-  { label: "Chats", href: "/chats", icon: BiChat },
-  { label: "AI", href: "/ai", icon: BiBot },
-  { label: "Train AI", href: "/train-ai", icon: BiBot },
-  { label: "Appointments", href: "/appointments", icon: BiCalendar },
-  { label: "Settings", href: "/settings", icon: BiCog },
-  { label: "Account Settings", href: "/user-settings", icon: BiUser },
-  { label: "Widget Settings", href: "/widget-settings", icon: BiCog },
-  { label: "Billing", href: "/billing", icon: BiWallet },
+  ...navigationConfig.flatMap((item) =>
+    item.sub && item.sub.length > 0
+      ? item.sub.map((sub) => ({
+          label: sub.title,
+          href: sub.href,
+          icon: sub.icon,
+        }))
+      : [{ label: item.title, href: item.href, icon: item.icon }],
+  ),
+  { label: "Billing", href: "/billing", icon: <BiWallet size={18} /> },
 ];
 
 const Topbar = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
@@ -335,19 +337,18 @@ const Topbar = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
                   <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
                     Pages
                   </p>
-                  {matchedPages.map((page) => {
-                    const Icon = page.icon;
-                    return (
-                      <button
-                        key={page.href}
-                        onClick={() => goToPage(page.href)}
-                        className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <Icon className="h-4 w-4 text-gray-400" />
-                        {page.label}
-                      </button>
-                    );
-                  })}
+                  {matchedPages.map((page) => (
+                    <button
+                      key={page.href}
+                      onClick={() => goToPage(page.href)}
+                      className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center text-gray-400 [&>svg]:h-4 [&>svg]:w-4">
+                        {page.icon}
+                      </span>
+                      {page.label}
+                    </button>
+                  ))}
                 </div>
               )}
 

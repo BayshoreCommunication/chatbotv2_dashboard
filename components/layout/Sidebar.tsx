@@ -252,49 +252,27 @@ const Sidebar = () => {
       {reminder && (
         <div className={cn(isExpanded ? "p-3" : "p-2")}>
           {isExpanded ? (
-            <div
-              className={cn(
-                "rounded-lg border px-3 py-2.5",
-                reminder.kind === "trial"
-                  ? "border-primary/20 bg-primary/10"
-                  : "border-amber-200 bg-amber-50",
-              )}
-            >
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
               <div className="flex items-center gap-1.5">
                 {reminder.kind === "trial" ? (
-                  <BiTime size={14} className="shrink-0 text-primary-dark" />
+                  <BiTime size={14} className="shrink-0 text-amber-600" />
                 ) : (
                   <BiErrorCircle size={14} className="shrink-0 text-amber-600" />
                 )}
-                <p
-                  className={cn(
-                    "text-xs font-semibold",
-                    reminder.kind === "trial" ? "text-primary-dark" : "text-amber-700",
-                  )}
-                >
+                <p className="text-xs font-semibold text-amber-700">
                   {reminder.kind === "trial"
                     ? `Free trial — ${reminder.days} day${reminder.days !== 1 ? "s" : ""} left`
                     : `Access ending — ${reminder.days} day${reminder.days !== 1 ? "s" : ""} left`}
                 </p>
               </div>
-              <p
-                className={cn(
-                  "mt-1 text-[11px] leading-relaxed",
-                  reminder.kind === "trial" ? "text-primary-dark/80" : "text-amber-700/80",
-                )}
-              >
+              <p className="mt-1 text-[11px] leading-relaxed text-amber-700/80">
                 {reminder.kind === "trial"
                   ? "Your card will be charged automatically when the trial ends."
                   : "Your subscription is set to cancel. Resubscribe to keep your AI assistant live."}
               </p>
               <Link
                 href="/pricing"
-                className={cn(
-                  "mt-1.5 block text-[11px] font-semibold underline underline-offset-2",
-                  reminder.kind === "trial"
-                    ? "text-primary-dark hover:text-primary"
-                    : "text-amber-700 hover:text-amber-800",
-                )}
+                className="mt-1.5 block text-[11px] font-semibold text-amber-700 underline underline-offset-2 hover:text-amber-800"
               >
                 {reminder.kind === "trial" ? "Manage subscription" : "Resubscribe"}
               </Link>
@@ -307,12 +285,7 @@ const Sidebar = () => {
                   ? `Free trial — ${reminder.days} day${reminder.days !== 1 ? "s" : ""} left`
                   : `Access ending — ${reminder.days} day${reminder.days !== 1 ? "s" : ""} left`
               }
-              className={cn(
-                "flex items-center justify-center rounded-lg border p-2.5",
-                reminder.kind === "trial"
-                  ? "border-primary/20 bg-primary/10 text-primary-dark hover:bg-primary/20"
-                  : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
-              )}
+              className="flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-amber-700 hover:bg-amber-100"
             >
               {reminder.kind === "trial" ? (
                 <BiTime size={18} />

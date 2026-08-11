@@ -106,8 +106,8 @@ export const navigationConfig: NavItem[] = [
       },
       {
         id: "apps",
-        title: "Apps Integration ",
-        href: "/apps-integration ",
+        title: "Apps Integration",
+        href: "/apps-integration",
         icon: <RiApps2AiLine size={18} />,
       },
       // {
