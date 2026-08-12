@@ -29,7 +29,7 @@ const IndustriesPage = () => {
     <>
       <PageHero
         breadcrumbs={[{ label: "Home", href: "/" }, { label: "Industries" }]}
-        title="Built for every industry"
+        title="Go Converto AI Chatbot for Every Business Type"
       />
       <IndustriesPageContent />
     </>

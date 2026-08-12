@@ -11,10 +11,10 @@ interface CTABannerProps {
 // Reused at the bottom of inner pages (blog, faq, etc.) to nudge visitors
 // toward starting a free trial.
 const CTABanner = ({
-  title = "Ready to turn visitors into customers?",
-  description = "Set up your own AI assistant in minutes — no coding required.",
+  title = "Ready to Turn Visitors Into Customers?",
+  description = "Set up your own AI assistant in minutes without any coding.",
   href = "/start-free-trial",
-  linkLabel = "Start your free trial",
+  linkLabel = "Start Your Free Trial",
 }: CTABannerProps) => {
   return (
     <div className="rounded-2xl bg-thunder-black px-8 py-10 text-center">
