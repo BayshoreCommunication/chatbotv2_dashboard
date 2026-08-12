@@ -52,7 +52,7 @@ const SubscriptionSection = ({
 
   const handleSubscribe = (
     plan: PricingPlan,
-    billingCycle: "monthly" | "yearly"
+    billingCycle: "monthly" | "yearly",
   ) => {
     const redirectParam = redirectAfterCheckout
       ? `&redirect=${encodeURIComponent(redirectAfterCheckout)}`
@@ -65,7 +65,9 @@ const SubscriptionSection = ({
     }
 
     setLoading(plan.id);
-    router.push(`/checkout?plan=${plan.id}&billing=${billingCycle}${redirectParam}`);
+    router.push(
+      `/checkout?plan=${plan.id}&billing=${billingCycle}${redirectParam}`,
+    );
   };
 
   return (
@@ -87,10 +89,14 @@ const SubscriptionSection = ({
           </span>
 
           <h2 className="mb-4 mt-4 text-4xl font-extrabold tracking-tight text-thunder-black sm:text-5xl lg:mb-6">
-            Simple plans that scale with your business
+            Pick a Plan to Expand Your Business. <br />
+            <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text italic text-transparent">
+              Cancel Whenever You Want.
+            </span>
           </h2>
           <p className="mx-auto mb-10 max-w-xl text-lg text-gray-600">
-            Start free for 14 days. Upgrade, downgrade, or cancel anytime.
+            Every plan starts with a 14 day free trial. No long-term contract
+            required.
           </p>
 
           {/* Billing Cycle Toggle */}
