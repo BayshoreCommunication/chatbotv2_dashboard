@@ -44,7 +44,8 @@ const STEPS: TimelineStep[] = [
     id: "step-1",
     number: "01",
     title: "Scan",
-    description: "BayAI crawls your pages automatically.",
+    description:
+      "Go Converto crawls every page, service, and FAQ on your site.",
     icon: <Search className="h-7 w-7 text-primary" strokeWidth={2.5} />,
     translateX: "translate-x-[20px]",
     hasBorder: true,
@@ -53,7 +54,7 @@ const STEPS: TimelineStep[] = [
     id: "step-2",
     number: "02",
     title: "Train",
-    description: "Your chatbot is trained — live in minutes.",
+    description: "Your chatbot learns your content and goes live in minutes.",
     icon: <GraduationCap className="h-7 w-7 text-primary" strokeWidth={2.5} />,
     translateX: "translate-x-[36px]",
     hasBorder: true,
@@ -62,7 +63,8 @@ const STEPS: TimelineStep[] = [
     id: "step-3",
     number: "03",
     title: "Respond",
-    description: "Answers questions instantly & accurately.",
+    description:
+      "It answers new visitors accurately, anytime, without any script.",
     icon: <ChatFilledIcon />,
     translateX: "translate-x-[12px]",
     hasBorder: false,
@@ -73,17 +75,17 @@ const STATS = [
   {
     icon: Zap,
     title: "Setup in Minutes",
-    description: "No coding. No complexity. Just results.",
+    description: "Skip complex coding and go live with real-time results.",
   },
   {
     icon: TrendingUp,
     title: "More Conversations",
-    description: "Engage every visitor instantly.",
+    description: "Give every visitor an instant answer, any day, anytime.",
   },
   {
     icon: User,
     title: "More Leads & Sales",
-    description: "Capture leads and convert more customers.",
+    description: "Turn casual browsers into booked calls and paying customers.",
   },
 ];
 
@@ -296,8 +298,11 @@ const HowItsWork = () => {
               transition={{ duration: 0.6, delay: 0.08 }}
               className="mb-4 text-3xl font-extrabold leading-[1.15] tracking-tight text-thunder-black sm:text-4xl lg:text-[42px]"
             >
-              From website URL to Real{" "}
-              <span className="text-primary">Business Results</span>
+              Conversational <br />
+              <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text italic text-transparent">
+                AI Chatbot Solution
+              </span>{" "}
+              <br /> for Websites
             </motion.h2>
 
             <motion.p
@@ -307,8 +312,8 @@ const HowItsWork = () => {
               transition={{ duration: 0.6, delay: 0.16 }}
               className="mx-auto mb-10 max-w-md text-base text-gray-600 sm:text-lg lg:mx-0"
             >
-              Eight steps, fully automatic — from setup, to training, to
-              responding, to growing your business.
+              Paste your website URL. Watch Go Converto learn your whole
+              business with only three steps. Get real business results.
             </motion.p>
 
             <RobotIllustration />

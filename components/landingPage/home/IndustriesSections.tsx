@@ -93,9 +93,9 @@ const IndustriesSections = () => {
             transition={{ duration: 0.6, delay: 0.08 }}
             className="mb-5 text-3xl font-extrabold leading-[1.15] tracking-tight text-thunder-black sm:text-4xl lg:text-[42px]"
           >
-            Built to Scale With Your Business One Platform.{" "}
+            AI Chatbot for Lead Generation. One Platform That Learns{" "}
             <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text italic text-transparent">
-              Endless Possibilities
+              Your Business & Offers Endless Possibilities.
             </span>
           </motion.h2>
 
@@ -106,8 +106,9 @@ const IndustriesSections = () => {
             transition={{ duration: 0.6, delay: 0.16 }}
             className="mx-auto max-w-md text-base text-gray-600 sm:text-lg lg:mx-0"
           >
-            Whatever industry you&apos;re in, Go Converto trains itself on your
-            content and speaks your customers&apos; language from day one.
+            Introduce Go Converto to your website, and it starts talking like
+            your team already does. Law firm, software or any company, it picks
+            up your language on day one.
           </motion.p>
         </div>
 

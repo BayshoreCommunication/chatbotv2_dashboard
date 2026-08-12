@@ -72,7 +72,7 @@ export const INDUSTRIES: Industry[] = [
     icon: FaBalanceScale,
     title: "Law Firm",
     description:
-      "Screens incoming case inquiries, collects key case details up front, and books free consultations 24/7 — so your team only spends time on leads worth pursuing.",
+      "Fields new case inquiries anytime, midnight or weekend. It collects the details your intake team needs and locks in a free consultation before the caller tries a competitor.",
     intro:
       "Every case inquiry that comes in after hours is a potential client talking to your competitor by morning. Go Converto answers immediately, asks the right intake questions for your practice areas, and books a free consultation directly into your calendar — so your team walks into every call already knowing the details.",
     gradient: "from-purple-600 via-fuchsia-500 to-pink-500",
@@ -112,7 +112,7 @@ export const INDUSTRIES: Industry[] = [
     icon: FaHeartbeat,
     title: "Healthcare",
     description:
-      "Books and reschedules patient appointments, answers common questions about services, hours, and insurance, and hands off to staff for anything clinical.",
+      "Books and reschedules patient appointments without a single phone call. It handles the insurance and hours questions your front desk answers fifty times a day, then hands off anything clinical to your staff.",
     intro:
       "Patients calling about hours, insurance, or an appointment shouldn't have to wait on hold. Go Converto handles the everyday front-desk questions and scheduling around the clock, and knows exactly when to step aside and route a patient to your staff for anything clinical.",
     gradient: "from-rose-600 via-red-500 to-orange-400",
@@ -152,7 +152,7 @@ export const INDUSTRIES: Industry[] = [
     icon: FaHome,
     title: "Real Estate",
     description:
-      "Captures buyer and renter leads the moment they land on a listing, answers property questions, and schedules tours — so no inquiry sits unanswered overnight.",
+      "Catches a buyer's questions the moment they're staring at your listing. It answers, then books the showing before they scroll to a competitor's listing instead.",
     intro:
       "A listing gets most of its interest in the first few hours it's live — exactly when agents are usually unavailable. Go Converto answers property questions instantly, captures buyer and renter contact details, and schedules a tour on the spot, so no inquiry sits unanswered until morning.",
     gradient: "from-amber-500 via-orange-500 to-yellow-400",
@@ -192,7 +192,7 @@ export const INDUSTRIES: Industry[] = [
     icon: FaHandshake,
     title: "Consultancy",
     description:
-      "Pre-qualifies prospects by asking the right discovery questions up front, so every call that lands on your calendar is already a fit.",
+      "Runs your discovery questions before the call even happens. Every meeting on your calendar is already a prospect worth having.",
     intro:
       "Not every discovery call is worth taking. Go Converto asks the same qualifying questions you would on a first call — budget, timeline, scope — so the calls that make it onto your calendar are already a good fit, and prospects who aren't get pointed to the right resources instead.",
     gradient: "from-slate-700 via-slate-600 to-slate-400",
@@ -232,7 +232,7 @@ export const INDUSTRIES: Industry[] = [
     icon: FaBullhorn,
     title: "Agency",
     description:
-      "Handles inbound project inquiries, shares your service packages and pricing, and books intro calls — freeing your team to focus on existing clients.",
+      "Handles inbound project inquiries. It shares your packages, books the intro call, and keeps your team focused on the clients you already have.",
     intro:
       "New project inquiries shouldn't have to compete with the client work already on your plate. Go Converto fields inbound questions about your services and pricing, shares the right details for the type of project being asked about, and books an intro call — so your team can stay focused on the clients you already have.",
     gradient: "from-emerald-600 via-green-500 to-lime-400",

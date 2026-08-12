@@ -57,6 +57,7 @@ const FOOTER_COLUMNS = [
       { label: "About", href: "/about" },
       { label: "Contact", href: "/contact" },
       { label: "Blog", href: "/blog" },
+      { label: "User Guide", href: "/user-guide" },
     ],
   },
   {
