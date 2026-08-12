@@ -56,7 +56,10 @@ function loadFacebookSdk() {
       appId: META_APP_ID,
       autoLogAppEvents: true,
       xfbml: true,
-      version: "v21.0",
+      // WhatsApp Embedded Signup's docs call for pinning this to the
+      // latest Graph API version specifically — a stale version here is a
+      // documented cause of the signup popup loading blank.
+      version: "v25.0",
     });
   };
   const script = document.createElement("script");
