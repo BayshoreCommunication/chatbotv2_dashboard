@@ -212,6 +212,8 @@ const AppsIntegrationDetials = () => {
       return;
     }
 
+    console.info("[WhatsApp connect] starting, config_id=", META_WHATSAPP_CONFIG_ID);
+
     let phoneNumberId = "";
     let wabaId = "";
     let pendingCode = "";
@@ -252,6 +254,14 @@ const AppsIntegrationDetials = () => {
     }, 120_000);
 
     const onMessage = (event: MessageEvent) => {
+      // Temporary — logs every window message received while a WhatsApp
+      // connect is in flight, so a stuck connection can be diagnosed from
+      // the browser console instead of guessing blind.
+      console.info("[WhatsApp connect] message event", {
+        origin: event.origin,
+        data: event.data,
+      });
+
       // Matches Meta's own documented pattern for this event: any
       // facebook.com subdomain, not one hardcoded origin — the popup can
       // legitimately post from several.
@@ -323,6 +333,8 @@ const AppsIntegrationDetials = () => {
 
     window.FB.login(
       (response) => {
+        // Temporary — same reasoning as the message-event log above.
+        console.info("[WhatsApp connect] FB.login callback fired", response);
         if (!response.authResponse?.code) {
           cleanup();
           toast.error("WhatsApp signup was cancelled or failed.");
