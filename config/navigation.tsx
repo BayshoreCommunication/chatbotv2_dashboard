@@ -70,12 +70,6 @@ export const navigationConfig: NavItem[] = [
         href: "/user-settings",
         icon: <BiUser size={18} />,
       },
-      // {
-      //   id: "widget-appearance",
-      //   title: "Widget Appearance",
-      //   href: "/chat-widget-update",
-      //   icon: <BiPalette size={18} />,
-      // },
       {
         id: "widget-installation",
         title: "Widget Settings",
