@@ -281,7 +281,20 @@ const AppsIntegrationDetials = () => {
         toast.error("WhatsApp signup failed — please try again.");
         return;
       }
-      if (data.event !== "FINISH" || !data.data) return;
+      // Meta documents several finish variants (FINISH, FINISH_ONLY_WABA,
+      // FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING, ...) depending on which
+      // path the customer took inside the wizard — matching only the exact
+      // string "FINISH" silently dropped every other variant, leaving the
+      // button stuck on "Connecting…" forever with no error shown.
+      if (!data.event?.startsWith("FINISH") || !data.data) return;
+
+      if (!data.data.phone_number_id || !data.data.waba_id) {
+        cleanup();
+        toast.error(
+          "WhatsApp signup finished without a phone number selected — please try again and complete every step.",
+        );
+        return;
+      }
 
       phoneNumberId = data.data.phone_number_id;
       wabaId = data.data.waba_id;
