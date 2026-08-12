@@ -39,7 +39,7 @@ declare global {
           config_id: string;
           response_type: "code";
           override_default_response_type: true;
-          extras: { setup: object };
+          extras: { setup: object; featureType?: string; sessionInfoVersion?: string };
         },
       ) => void;
     };
@@ -302,6 +302,25 @@ const AppsIntegrationDetials = () => {
     };
     window.addEventListener("message", onMessage);
 
+    // FB.login() opens its popup via a plain window.open() call internally
+    // — if the browser (or an ad-blocker/privacy extension) silently blocks
+    // it, window.open returns null and neither of our callbacks ever fires,
+    // leaving the button stuck on "Connecting…" for the full timeout with
+    // no explanation. Wrapping window.open for the duration of this one
+    // call lets us detect that immediately instead.
+    const originalOpen = window.open;
+    window.open = (...args) => {
+      const popup = originalOpen.apply(window, args);
+      window.open = originalOpen;
+      if (!popup || popup.closed) {
+        cleanup();
+        toast.error(
+          "The Facebook popup was blocked by your browser — please allow popups for this site (check your address bar or ad-blocker) and try again.",
+        );
+      }
+      return popup;
+    };
+
     window.FB.login(
       (response) => {
         if (!response.authResponse?.code) {
@@ -316,9 +335,19 @@ const AppsIntegrationDetials = () => {
         config_id: META_WHATSAPP_CONFIG_ID,
         response_type: "code",
         override_default_response_type: true,
-        extras: { setup: {} },
+        // sessionInfoVersion opts into the newer WA_EMBEDDED_SIGNUP event
+        // schema that actually carries phone_number_id/waba_id — without it
+        // Meta's wizard can complete normally but send back a bare FINISH
+        // event with no data, which looks identical to this flow just
+        // hanging forever.
+        extras: { setup: {}, featureType: "whatsapp_business_app_onboarding", sessionInfoVersion: "3" },
       },
     );
+    // Safety net in case FB.login() never calls window.open synchronously
+    // (e.g. it defers a tick) — don't leave the real window.open patched.
+    setTimeout(() => {
+      window.open = originalOpen;
+    }, 3000);
   };
 
   const toggleSelectedPage = (externalId: string) => {
@@ -426,7 +455,7 @@ const AppsIntegrationDetials = () => {
               <button
                 type="button"
                 onClick={handleConnectFacebookPage}
-                disabled={startingOAuth}
+                disabled={startingOAuth || connectingWhatsApp}
                 className="flex items-center justify-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1877F2]/90 disabled:opacity-50"
               >
                 {startingOAuth ? (
@@ -439,7 +468,7 @@ const AppsIntegrationDetials = () => {
               <button
                 type="button"
                 onClick={handleConnectWhatsApp}
-                disabled={connectingWhatsApp}
+                disabled={connectingWhatsApp || startingOAuth}
                 className="flex items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#25D366]/90 disabled:opacity-50"
               >
                 {connectingWhatsApp ? (
