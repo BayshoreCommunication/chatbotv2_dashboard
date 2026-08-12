@@ -39,7 +39,7 @@ declare global {
           config_id: string;
           response_type: "code";
           override_default_response_type: true;
-          extras: { setup: object; featureType: string; sessionInfoVersion: string };
+          extras: { setup: object };
         },
       ) => void;
     };
@@ -206,16 +206,25 @@ const AppsIntegrationDetials = () => {
 
     let phoneNumberId = "";
     let wabaId = "";
+    let pendingCode = "";
+    let settled = false;
+
+    setConnectingWhatsApp(true);
+
+    const cleanup = () => {
+      settled = true;
+      window.removeEventListener("message", onMessage);
+      clearTimeout(timeoutId);
+      setConnectingWhatsApp(false);
+    };
 
     // The popup flow's IDs (via postMessage) and its authorization code (via
     // the FB.login callback) arrive independently and in no guaranteed
     // order — submit only once both are in hand.
     const trySubmit = async (code: string) => {
-      if (!phoneNumberId || !wabaId) return;
-      setConnectingWhatsApp(true);
+      if (settled || !phoneNumberId || !wabaId) return;
       const result = await connectWhatsAppEmbedded({ code, phoneNumberId, wabaId });
-      setConnectingWhatsApp(false);
-      window.removeEventListener("message", onMessage);
+      cleanup();
 
       if (!result.ok) {
         toast.error(result.error || "Failed to connect WhatsApp");
@@ -225,17 +234,47 @@ const AppsIntegrationDetials = () => {
       loadConnections();
     };
 
-    let pendingCode = "";
+    // Meta's popup can be closed without either callback firing (e.g. the
+    // customer just closes the window) — without a timeout, connectingWhatsApp
+    // would spin forever and no one would ever fine out.
+    const timeoutId = setTimeout(() => {
+      if (settled) return;
+      cleanup();
+      toast.error("WhatsApp signup timed out — please try again.");
+    }, 120_000);
 
     const onMessage = (event: MessageEvent) => {
-      if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
+      // Matches Meta's own documented pattern for this event: any
+      // facebook.com subdomain, not one hardcoded origin — the popup can
+      // legitimately post from several.
+      let hostname = "";
+      try {
+        hostname = new URL(event.origin).hostname;
+      } catch {
+        return;
+      }
+      if (hostname !== "facebook.com" && !hostname.endsWith(".facebook.com")) return;
+
       let data: { type?: string; event?: string; data?: WhatsAppSignupFinishData };
       try {
         data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
       } catch {
         return;
       }
-      if (data?.type !== "WA_EMBEDDED_SIGNUP" || data.event !== "FINISH" || !data.data) return;
+      if (data?.type !== "WA_EMBEDDED_SIGNUP") return;
+
+      if (data.event === "CANCEL") {
+        cleanup();
+        toast.error("WhatsApp signup was cancelled.");
+        return;
+      }
+      if (data.event === "ERROR") {
+        cleanup();
+        toast.error("WhatsApp signup failed — please try again.");
+        return;
+      }
+      if (data.event !== "FINISH" || !data.data) return;
+
       phoneNumberId = data.data.phone_number_id;
       wabaId = data.data.waba_id;
       if (pendingCode) trySubmit(pendingCode);
@@ -245,7 +284,7 @@ const AppsIntegrationDetials = () => {
     window.FB.login(
       (response) => {
         if (!response.authResponse?.code) {
-          window.removeEventListener("message", onMessage);
+          cleanup();
           toast.error("WhatsApp signup was cancelled or failed.");
           return;
         }
@@ -256,7 +295,7 @@ const AppsIntegrationDetials = () => {
         config_id: META_WHATSAPP_CONFIG_ID,
         response_type: "code",
         override_default_response_type: true,
-        extras: { setup: {}, featureType: "whatsapp_business_app_onboarding", sessionInfoVersion: "3" },
+        extras: { setup: {} },
       },
     );
   };
