@@ -102,6 +102,13 @@ const AppsIntegrationDetials = () => {
   const [connectionsError, setConnectionsError] = useState<string | null>(null);
   const [startingOAuth, setStartingOAuth] = useState(false);
   const [connectingWhatsApp, setConnectingWhatsApp] = useState(false);
+  // Temporary on-page debug trail for the WhatsApp signup flow — visible
+  // directly on the page (no DevTools needed) so a stuck connection can be
+  // diagnosed from a screenshot instead of guessing blind.
+  const [whatsappDebugLog, setWhatsappDebugLog] = useState<string[]>([]);
+  const logWhatsappDebug = (line: string) => {
+    setWhatsappDebugLog((prev) => [...prev, `${new Date().toLocaleTimeString()} ${line}`]);
+  };
 
   // Page-picker modal — populated once Meta redirects back with a
   // ?selection_id=... query param (see the mount effect below).
@@ -218,6 +225,8 @@ const AppsIntegrationDetials = () => {
     let settled = false;
 
     setConnectingWhatsApp(true);
+    setWhatsappDebugLog([]);
+    logWhatsappDebug(`starting, config_id=${META_WHATSAPP_CONFIG_ID}`);
 
     const cleanup = () => {
       settled = true;
@@ -231,13 +240,16 @@ const AppsIntegrationDetials = () => {
     // order — submit only once both are in hand.
     const trySubmit = async (code: string) => {
       if (settled || !phoneNumberId || !wabaId) return;
+      logWhatsappDebug("submitting to backend…");
       const result = await connectWhatsAppEmbedded({ code, phoneNumberId, wabaId });
       cleanup();
 
       if (!result.ok) {
+        logWhatsappDebug(`backend rejected: ${result.error || "unknown error"}`);
         toast.error(result.error || "Failed to connect WhatsApp");
         return;
       }
+      logWhatsappDebug("backend confirmed connected");
       toast.success("WhatsApp connected");
       loadConnections();
     };
@@ -261,15 +273,23 @@ const AppsIntegrationDetials = () => {
       } catch {
         return;
       }
-      if (hostname !== "facebook.com" && !hostname.endsWith(".facebook.com")) return;
+      if (hostname !== "facebook.com" && !hostname.endsWith(".facebook.com")) {
+        return;
+      }
 
       let data: { type?: string; event?: string; data?: WhatsAppSignupFinishData };
       try {
         data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
       } catch {
+        logWhatsappDebug(`message from ${hostname}, not JSON: ${String(event.data).slice(0, 80)}`);
         return;
       }
-      if (data?.type !== "WA_EMBEDDED_SIGNUP") return;
+      if (data?.type !== "WA_EMBEDDED_SIGNUP") {
+        logWhatsappDebug(`message from ${hostname}, type=${data?.type ?? "?"} (ignored)`);
+        return;
+      }
+
+      logWhatsappDebug(`WA_EMBEDDED_SIGNUP event=${data.event}`);
 
       if (data.event === "CANCEL") {
         cleanup();
@@ -296,6 +316,7 @@ const AppsIntegrationDetials = () => {
         return;
       }
 
+      logWhatsappDebug(`got phone_number_id=${data.data.phone_number_id} waba_id=${data.data.waba_id}`);
       phoneNumberId = data.data.phone_number_id;
       wabaId = data.data.waba_id;
       if (pendingCode) trySubmit(pendingCode);
@@ -323,6 +344,7 @@ const AppsIntegrationDetials = () => {
 
     window.FB.login(
       (response) => {
+        logWhatsappDebug(`FB.login callback: status=${response.status} hasCode=${!!response.authResponse?.code}`);
         if (!response.authResponse?.code) {
           cleanup();
           toast.error("WhatsApp signup was cancelled or failed.");
@@ -487,6 +509,16 @@ const AppsIntegrationDetials = () => {
               your browser likely blocked it — look for a blocked-popup icon
               in the address bar, allow popups for this site, then try again.
             </p>
+          )}
+
+          {/* Temporary — visible debug trail for the WhatsApp signup flow,
+              so a stuck connection can be diagnosed from a screenshot. */}
+          {whatsappDebugLog.length > 0 && (
+            <div className="mb-3 rounded-lg bg-gray-900 px-3 py-2 font-mono text-[11px] leading-relaxed text-gray-200">
+              {whatsappDebugLog.map((line, i) => (
+                <div key={i}>{line}</div>
+              ))}
+            </div>
           )}
 
           {loadingConnections ? (
