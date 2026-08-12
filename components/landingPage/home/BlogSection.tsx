@@ -37,7 +37,7 @@ const BlogSection = () => {
           transition={{ duration: 0.6, delay: 0.08 }}
           className="mb-3 text-center text-3xl font-extrabold tracking-tight text-thunder-black sm:text-4xl"
         >
-          Insights to grow your business with AI
+          Guides on Converting Website Traffic Into Customers
         </motion.h2>
 
         <motion.p
@@ -45,11 +45,11 @@ const BlogSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.16 }}
-          className="mx-auto mb-14 max-w-xl text-center text-base text-gray-600 sm:text-lg"
+          className="mx-auto mb-14 max-w-2xl text-center text-base text-gray-600 sm:text-lg"
         >
-          Guides, playbooks, and product tips on automating support,
-          capturing more leads, and getting the most out of your AI
-          assistant.
+          Real guides, playbooks, and product tips on automating support for
+          turning your website traffic into paying customers rather than just
+          page views.
         </motion.p>
 
         {/* --- Featured post --- */}

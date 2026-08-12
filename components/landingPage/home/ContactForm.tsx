@@ -16,7 +16,8 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";``
+import { useEffect, useState } from "react";
+``;
 
 // How long the post-submit confirmation modal stays open before it
 // auto-dismisses itself.
@@ -153,9 +154,10 @@ const ContactForm = () => {
               transition={{ duration: 0.6, delay: 0.08 }}
               className="mb-4 text-4xl font-extrabold leading-[1.1] tracking-tight text-thunder-black sm:text-[42px]"
             >
-              Let&apos;s get your
-              <br />
-              <span className="text-primary">chatbot live</span>
+              Ready to Stop Losing Visitors?
+              <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text pr-2 italic text-transparent">
+                Let&apos;s Live Your ChatBot
+              </span>
             </motion.h2>
 
             <motion.p
@@ -165,9 +167,8 @@ const ContactForm = () => {
               transition={{ duration: 0.6, delay: 0.16 }}
               className="mx-auto mb-8 max-w-md text-base text-gray-600 lg:mx-0"
             >
-              Have a question about plans, setup, or your business specifically?
-              Send us a message and our team will get back to you within one
-              business day.
+              Ask us anything about plans, setup, or your specific business. We
+              reply within one business day.
             </motion.p>
 
             <div className="mb-6 flex flex-col gap-3">
