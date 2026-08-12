@@ -91,6 +91,11 @@ const CHANNEL_LABEL: Record<ChannelType, string> = {
   whatsapp: "WhatsApp",
 };
 
+// Shown as a placeholder row for any channel with zero connections, so the
+// page always makes it obvious which channels are and aren't connected
+// instead of one ambiguous "no channels connected" sentence.
+const CHANNEL_CHECKLIST: ChannelType[] = ["messenger", "instagram", "whatsapp"];
+
 const AppsIntegrationDetials = () => {
   const [connections, setConnections] = useState<ChannelConnectionSummary[]>([]);
   const [loadingConnections, setLoadingConnections] = useState(true);
@@ -276,7 +281,20 @@ const AppsIntegrationDetials = () => {
         toast.error("WhatsApp signup failed — please try again.");
         return;
       }
-      if (data.event !== "FINISH" || !data.data) return;
+      // Meta documents several finish variants (FINISH, FINISH_ONLY_WABA,
+      // FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING, ...) depending on which
+      // path the customer took inside the wizard — matching only the exact
+      // string "FINISH" silently dropped every other variant, leaving the
+      // button stuck on "Connecting…" forever with no error shown.
+      if (!data.event?.startsWith("FINISH") || !data.data) return;
+
+      if (!data.data.phone_number_id || !data.data.waba_id) {
+        cleanup();
+        toast.error(
+          "WhatsApp signup finished without a phone number selected — please try again and complete every step.",
+        );
+        return;
+      }
 
       phoneNumberId = data.data.phone_number_id;
       wabaId = data.data.waba_id;
@@ -434,6 +452,14 @@ const AppsIntegrationDetials = () => {
             </div>
           </div>
 
+          {(startingOAuth || connectingWhatsApp) && (
+            <p className="mb-3 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700">
+              A Facebook popup window should appear now. If nothing shows up,
+              your browser likely blocked it — look for a blocked-popup icon
+              in the address bar, allow popups for this site, then try again.
+            </p>
+          )}
+
           {loadingConnections ? (
             <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-400">
               <BiLoaderAlt className="animate-spin" size={18} />
@@ -450,11 +476,6 @@ const AppsIntegrationDetials = () => {
                 Try again
               </button>
             </div>
-          ) : connections.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-400">
-              No channels connected yet — click Connect Facebook or Connect
-              WhatsApp to add one.
-            </p>
           ) : (
             <div className="divide-y divide-gray-100">
               {connections.map((connection) => {
@@ -535,6 +556,38 @@ const AppsIntegrationDetials = () => {
                           Connect
                         </button>
                       )}
+                    </div>
+                  </div>
+                );
+              })}
+              {CHANNEL_CHECKLIST.filter(
+                (channel) => !connections.some((c) => c.channel === channel),
+              ).map((channel) => {
+                const Icon = CHANNEL_ICON[channel];
+                return (
+                  <div
+                    key={`missing-${channel}`}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
+                        <Icon size={18} className="text-gray-300" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-gray-400">
+                            {CHANNEL_LABEL[channel]}
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
+                            Not connected
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-400">
+                          {channel === "instagram"
+                            ? "Connects automatically with a linked Facebook Page"
+                            : `Click Connect ${CHANNEL_LABEL[channel]} above to add it`}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );
