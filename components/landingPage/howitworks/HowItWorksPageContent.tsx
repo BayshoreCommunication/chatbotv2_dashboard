@@ -18,6 +18,7 @@ import type { ReactNode } from "react";
 // ============================================================================
 // DATA
 // ============================================================================
+
 const STEPS: {
   number: string;
   title: string;
@@ -29,15 +30,15 @@ const STEPS: {
     number: "01",
     title: "Scan",
     description:
-      "Add your company name and website URL. Go Converto crawls every page — your services, pricing, and FAQs — and pulls in details from Google too, with nothing to upload or configure by hand.",
+      "Enter your company name and website URL. Go Converto reviews your website, including your services, pricing, and FAQs, then brings in helpful business information from Google. There's nothing to upload or set up yourself.",
     icon: <Search className="h-7 w-7 text-white" strokeWidth={2.5} />,
     gradient: "from-blue-600 via-blue-500 to-cyan-500",
   },
   {
     number: "02",
-    title: "Train",
+    title: "Learn",
     description:
-      "In under a minute, your assistant builds a knowledge base from everything it found and is ready to go live — no developer, no scripts, and no training documents to write yourself.",
+      "In less than a minute, your assistant organizes everything it finds into a knowledge base and gets ready to chat with visitors. There's no coding, no developer, and no training documents to create.",
     icon: <GraduationCap className="h-7 w-7 text-white" strokeWidth={2.5} />,
     gradient: "from-purple-600 via-fuchsia-500 to-pink-500",
   },
@@ -45,7 +46,7 @@ const STEPS: {
     number: "03",
     title: "Respond",
     description:
-      "Your assistant answers visitor questions instantly and accurately, qualifies leads with the right follow-up questions, and can book appointments directly into your calendar — all day, every day.",
+      "Your assistant answers questions, qualifies leads with thoughtful follow up questions, and books appointments directly on your calendar. It keeps working around the clock, so every visitor gets a response.",
     icon: <MessageCircle className="h-7 w-7 text-white" strokeWidth={2.5} />,
     gradient: "from-emerald-600 via-green-500 to-lime-400",
   },
@@ -56,28 +57,28 @@ const FEATURES = [
     icon: Rocket,
     title: "Easy Setup",
     description:
-      "No developers, no scripts, no waiting on IT. Paste your website URL and your assistant is live in under 10 minutes — ready to start talking to customers the same day.",
+      "Skip the developers and technical setup. Add your website URL and your assistant can be ready to talk with customers in less than 10 minutes.",
     gradient: "from-blue-600 via-blue-500 to-cyan-500",
   },
   {
     icon: Settings2,
     title: "Easy to Use",
     description:
-      "Your dashboard is built for business owners, not engineers. Update your welcome message, brand color, and widget placement yourself, and see every change reflected instantly.",
+      "The dashboard is simple and prepared for business owners. Update your welcome message, brand colors, or chat widget whenever you like, and your changes appear right away.",
     gradient: "from-purple-600 via-fuchsia-500 to-pink-500",
   },
   {
     icon: Sparkles,
-    title: "Effortless Content",
+    title: "Content Made Simple",
     description:
-      "You don't have to write a single FAQ. Go Converto reads your website and pricing and turns it into a knowledge base automatically — and re-trains itself any time your site changes.",
+      "There's no need to write FAQs from scratch. Go Converto learns from your website and pricing information, then updates its knowledge whenever your website changes.",
     gradient: "from-emerald-600 via-green-500 to-lime-400",
   },
   {
     icon: Smartphone,
-    title: "Manage On the Go",
+    title: "Work from Anywhere",
     description:
-      "Check new leads, review conversations, and confirm appointments from the Go Converto mobile app — your dashboard, in your pocket, wherever business takes you.",
+      "View new leads, read conversations, and manage appointments from the Go Converto mobile app, whether you're at the office or on the go.",
     gradient: "from-amber-500 via-orange-500 to-yellow-400",
   },
 ];
@@ -87,25 +88,26 @@ const STATS = [
     icon: Rocket,
     title: "Faster Time to Value",
     description:
-      "No coding, no complexity — paste your URL and your assistant is answering customers the same day.",
+      "Skip the coding and technical setup. Paste your website URL and start answering customer questions in minutes.",
   },
   {
     icon: TrendingUp,
     title: "More Conversations",
     description:
-      "Every visitor gets an instant, accurate answer, so fewer of them leave without engaging.",
+      "Every visitor gets a quick, accurate answer, giving them a reason to stay and start a conversation.",
   },
   {
     icon: User,
-    title: "More Leads & Sales",
+    title: "More Leads and Sales",
     description:
-      "Qualified leads and booked appointments land straight in your dashboard, ready for follow-up.",
+      "Qualified leads and booked appointments go straight to your dashboard, so your team can follow up without delay.",
   },
 ];
 
 // ============================================================================
 // HOW IT WORKS PAGE CONTENT
 // ============================================================================
+
 const HowItWorksPageContent = () => {
   return (
     <section className="bg-white py-10 lg:py-16">
@@ -117,17 +119,20 @@ const HowItWorksPageContent = () => {
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               The process
             </span>
+
             <h2 className="mb-2 text-2xl font-extrabold tracking-tight text-thunder-black sm:text-3xl">
-              From website to working assistant
+              From website to a live assistant
             </h2>
+
             <p className="text-base text-gray-600">
-              Three steps, no technical work required.
+              Get started in three simple steps, with no technical setup
+              required.
             </p>
           </div>
 
           <div className="relative">
             {/* Connecting line behind the numbered circles */}
-            <div className="absolute left-7 top-7 bottom-7 w-px bg-gray-200" />
+            <div className="absolute bottom-7 left-7 top-7 w-px bg-gray-200" />
 
             {STEPS.map((step, index) => (
               <motion.div
@@ -143,13 +148,16 @@ const HowItWorksPageContent = () => {
                 >
                   {step.icon}
                 </div>
+
                 <div className="pt-1">
                   <span className="text-xs font-bold uppercase tracking-wide text-primary-dark">
                     Step {step.number}
                   </span>
+
                   <h3 className="mb-2 mt-1 text-xl font-extrabold text-thunder-black">
                     {step.title}
                   </h3>
+
                   <p className="max-w-lg text-base leading-relaxed text-gray-600">
                     {step.description}
                   </p>
@@ -159,24 +167,28 @@ const HowItWorksPageContent = () => {
           </div>
         </div>
 
-        {/* --- Built to be easy --- */}
+        {/* --- Why business owners choose Go Converto --- */}
         <div className="mt-20">
           <div className="mb-10 text-center">
             <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-[7px] text-[13px] font-semibold text-primary-dark">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Why business owners choose us
+              Why business owners choose Go Converto
             </span>
+
             <h2 className="mb-2 text-2xl font-extrabold tracking-tight text-thunder-black sm:text-3xl">
-              Built for business owners, not developers
+              Made specifically for business owners
             </h2>
+
             <p className="mx-auto max-w-xl text-base text-gray-600">
-              Every part of Go Converto — setup, daily use, content, and
-              management — is designed so you never need a developer to run it.
+              Everything about Go Converto is built to be simple to set up, easy
+              to manage, and ready to use without technical help.
             </p>
           </div>
+
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {FEATURES.map((feature, index) => {
               const Icon = feature.icon;
+
               return (
                 <motion.div
                   key={feature.title}
@@ -191,9 +203,11 @@ const HowItWorksPageContent = () => {
                   >
                     <Icon className="h-6 w-6" />
                   </div>
+
                   <h3 className="mb-2 text-base font-bold text-thunder-black">
                     {feature.title}
                   </h3>
+
                   <p className="text-sm leading-relaxed text-gray-600">
                     {feature.description}
                   </p>
@@ -212,17 +226,21 @@ const HowItWorksPageContent = () => {
           className="relative mt-20 overflow-hidden rounded-2xl bg-gradient-to-br from-thunder-black via-thunder-black to-primary-dark px-6 py-12 sm:px-10"
         >
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[length:20px_20px]" />
+
           <div className="relative grid grid-cols-1 gap-10 sm:grid-cols-3">
             {STATS.map((stat) => {
               const Icon = stat.icon;
+
               return (
                 <div key={stat.title} className="text-center">
                   <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white">
                     <Icon className="h-6 w-6" />
                   </div>
+
                   <h3 className="mb-2 text-base font-bold text-white">
                     {stat.title}
                   </h3>
+
                   <p className="text-sm leading-relaxed text-gray-300">
                     {stat.description}
                   </p>
