@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const LANDING_TITLE = "Go Converto — AI That Turns Visitors Into Customers";
+const LANDING_TITLE = "Go Converto AI Chatbot for Website Lead Generation";
 const LANDING_DESCRIPTION =
-  "Instant replies, more leads, and happier customers — all powered by AI. Train Go Converto on your website and start converting visitors in minutes.";
+  "With Go Converto your client can communicate and ask questions directly with a powerful AI ChatBot to find information and answer questions within seconds.";
 
 export const metadata: Metadata = {
   // `absolute` opts out of the root layout's `%s · Go Converto` title
@@ -55,9 +55,7 @@ export default async function LandingPageLayout({
 
   // Fetch fresh company/profile data from the backend so the navbar never shows
   // stale info baked into the long-lived (30-day) NextAuth session JWT.
-  const userDetails = session?.user
-    ? await getCurrentUserDetails()
-    : null;
+  const userDetails = session?.user ? await getCurrentUserDetails() : null;
   const freshUser = userDetails?.ok ? userDetails.data : null;
 
   // Transform user to match Navbar's expected type — prefer fresh backend data,

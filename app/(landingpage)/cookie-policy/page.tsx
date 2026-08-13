@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import LegalPageLayout from "@/components/shared/LegalPageLayout";
 import { OG_IMAGE } from "@/config/seo";
 
-const PAGE_TITLE = "Cookie Policy — Go Converto";
+const PAGE_TITLE = "Cookie Policy | Go Converto";
 const PAGE_DESCRIPTION =
-  "Learn how Go Converto uses cookies and similar technologies to operate its services, remember preferences, and understand website usage.";
+  "See how Go Converto uses cookies to improve website performance, remember your preferences, analyze traffic, and support necessary website functions.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },

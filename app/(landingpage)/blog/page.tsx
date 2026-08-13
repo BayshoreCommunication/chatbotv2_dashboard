@@ -4,9 +4,9 @@ import { OG_IMAGE } from "@/config/seo";
 import PageHero from "@/components/shared/PageHero";
 import BlogListContent from "./BlogListContent";
 
-const PAGE_TITLE = "Blog — Go Converto";
+const PAGE_TITLE = "Guide Blogs on Converting Website Traffic | Go Converto";
 const PAGE_DESCRIPTION =
-  "Guides, playbooks, and product tips on automating support, capturing more leads, and getting the most out of your AI assistant.";
+  "Read guides and product tips on turning website visitors into paying customers, straight from the team building Go Converto's AI chatbot platform.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
