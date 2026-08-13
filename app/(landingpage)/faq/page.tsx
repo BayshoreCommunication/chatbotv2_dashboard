@@ -5,9 +5,9 @@ import PageHero from "@/components/shared/PageHero";
 import { OG_IMAGE } from "@/config/seo";
 import type { Metadata } from "next";
 
-const PAGE_TITLE = "FAQ — Go Converto";
+const PAGE_TITLE = "Contact Go Converto";
 const PAGE_DESCRIPTION =
-  "Answers to common questions about setup, features, billing, and support for your AI assistant.";
+  "Have a question or need help choosing a plan? Reach out to us & we'll respond as soon as possible.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },

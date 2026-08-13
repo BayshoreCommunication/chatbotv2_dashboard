@@ -3,9 +3,10 @@ import PageHero from "@/components/shared/PageHero";
 import IndustriesPageContent from "@/components/landingPage/industries/IndustriesPageContent";
 import { OG_IMAGE } from "@/config/seo";
 
-const PAGE_TITLE = "Go Converto AI Assistant for Every Industry ";
+const PAGE_TITLE = "AI Chatbot for SaaS & Tech Companies | Go Converto";
+
 const PAGE_DESCRIPTION =
-  "Bayshore Communication offers the Go Converto AI assistant for your website, answering client questions anytime and helping qualify leads and book calls.";
+  "Go Converto is an AI chatbot that answers pricing and product questions, recommends solutions, qualifies leads, and routes demo requests. Train it on your website and go live in minutes.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },

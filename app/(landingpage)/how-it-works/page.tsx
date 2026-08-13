@@ -3,9 +3,10 @@ import PageHero from "@/components/shared/PageHero";
 import HowItWorksPageContent from "@/components/landingPage/howitworks/HowItWorksPageContent";
 import { OG_IMAGE } from "@/config/seo";
 
-const PAGE_TITLE = "How It Works — Go Converto";
+const PAGE_TITLE = "How Go Converto Works";
+
 const PAGE_DESCRIPTION =
-  "From pasting your URL to going live — see exactly how Go Converto scans, trains, and responds on your behalf.";
+  "See how Go Converto uses AI to answer customer questions, qualify leads, automate conversations, and get your website chatbot live with an easy setup process.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },

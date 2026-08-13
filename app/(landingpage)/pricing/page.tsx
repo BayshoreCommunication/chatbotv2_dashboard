@@ -1,6 +1,27 @@
+import type { Metadata } from "next";
 import { auth } from "@/auth";
 import SubscriptionSection from "@/components/landingPage/SubscriptionSection";
 import PageHero from "@/components/shared/PageHero";
+
+const PAGE_TITLE = "AI Chatbot Pricing Plans | Go Converto";
+
+const PAGE_DESCRIPTION =
+  "Choose a pricing plan that matches your business needs. Get vigorous AI chatbot features, flexible options, and a simple setup with Go Converto.";
+
+export const metadata: Metadata = {
+  title: { absolute: PAGE_TITLE },
+  description: PAGE_DESCRIPTION,
+  openGraph: {
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+  },
+};
 
 const page = async ({
   searchParams,
@@ -17,14 +38,12 @@ const page = async ({
       }
     : null;
 
-  // Pass the redirect intent through so the checkout page knows where to send
-  // the user after payment (e.g. "widget-settings" from the free-trial CTA).
   const redirectAfterCheckout =
     params.redirect === "widget-settings"
       ? "widget-settings"
       : params.redirect === "start-free-trial"
-      ? "start-free-trial"
-      : undefined;
+        ? "start-free-trial"
+        : undefined;
 
   return (
     <>
@@ -32,6 +51,7 @@ const page = async ({
         breadcrumbs={[{ label: "Home", href: "/" }, { label: "Pricing" }]}
         title="Simple, transparent pricing"
       />
+
       <SubscriptionSection
         isAuthenticated={!!session?.user}
         user={user}
