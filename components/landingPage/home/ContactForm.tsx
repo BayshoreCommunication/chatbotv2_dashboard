@@ -10,6 +10,7 @@ import {
   Globe,
   Loader2,
   Mail,
+  MapPin,
   MessageSquare,
   Phone,
   Send,
@@ -154,9 +155,9 @@ const ContactForm = () => {
               transition={{ duration: 0.6, delay: 0.08 }}
               className="mb-4 text-4xl font-extrabold leading-[1.1] tracking-tight text-thunder-black sm:text-[42px]"
             >
-              Ready to Stop Losing Visitors?
+              Let&apos;s Bring Your <br />
               <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text pr-2 italic text-transparent">
-                Let&apos;s Live Your ChatBot
+                Chatbot Live
               </span>
             </motion.h2>
 
@@ -167,13 +168,32 @@ const ContactForm = () => {
               transition={{ duration: 0.6, delay: 0.16 }}
               className="mx-auto mb-8 max-w-md text-base text-gray-600 lg:mx-0"
             >
-              Ask us anything about plans, setup, or your specific business. We
-              reply within one business day.
+              Questions about our plans, setup, or how Go Converto can help your
+              business? Contact us and our team will get back to you within one
+              business day.
             </motion.p>
 
             <div className="mb-6 flex flex-col gap-3">
-              {CONTACT_INFO.map((item, index) => {
+              {[
+                {
+                  label: "Email",
+                  value: "hello@goconverto.com",
+                  icon: Mail,
+                },
+                {
+                  label: "Office",
+                  value:
+                    "1211 Tech Blvd, Suite 120, Tampa, FL 33619, United States",
+                  icon: MapPin,
+                },
+                {
+                  label: "Support Hours",
+                  value: "24/7 Live Support",
+                  icon: Clock,
+                },
+              ].map((item, index) => {
                 const Icon = item.icon;
+
                 return (
                   <motion.div
                     key={item.label}
@@ -186,10 +206,12 @@ const ContactForm = () => {
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Icon className="h-5 w-5" />
                     </span>
+
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                         {item.label}
                       </p>
+
                       <p className="text-sm font-bold text-thunder-black">
                         {item.value}
                       </p>
