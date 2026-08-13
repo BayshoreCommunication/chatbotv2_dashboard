@@ -4,7 +4,7 @@ import { OG_IMAGE } from "@/config/seo";
 
 const PAGE_TITLE = "Cookie Policy — Go Converto";
 const PAGE_DESCRIPTION =
-  "How Go Converto uses cookies and similar tracking technologies.";
+  "Learn how Go Converto uses cookies and similar technologies to operate its services, remember preferences, and understand website usage.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
@@ -23,36 +23,36 @@ export const metadata: Metadata = {
   },
 };
 
-// Drafted boilerplate reflecting how the product actually works — have
-// counsel review before publishing.
+// Drafted boilerplate reflecting the product and business practices.
+// Have qualified legal counsel review before publishing.
 const SECTIONS = [
   {
     heading: "What Are Cookies",
-    body: "Cookies are small text files placed on your device when you visit a website. They let a site remember information about your visit, like whether you're signed in or what preferences you've set.",
+    body: "Cookies are small text files placed on your computer or device when you visit a website. They allow the website to remember information about your visit, including your sign-in status, preferences, and other settings, so the service can provide a more consistent experience.",
   },
   {
     heading: "How We Use Cookies",
-    body: "We use cookies to keep you signed in to your dashboard, remember settings for your chat widget, and understand how our service is used so we can improve it over time.",
+    body: "Go Converto uses cookies to keep your dashboard session active, remember your chat widget preferences, and understand how visitors and customers use our services. This information helps us maintain essential functionality, improve performance, and enhance the Go Converto experience over time.",
   },
   {
     heading: "Types of Cookies We Use",
-    body: "Essential cookies keep you signed in and let core features like the dashboard and chat widget function — these can't be turned off without breaking the service. Functional cookies remember preferences such as your widget configuration. Analytics cookies help us understand overall usage patterns so we can improve Go Converto.",
+    body: "Essential cookies are required for core features such as account authentication, the user dashboard, and the chat widget to function properly. Functional cookies remember preferences and settings, including your chat widget configuration. Analytics cookies help us understand overall usage patterns and how our services are being used so we can identify areas for improvement.",
   },
   {
     heading: "Managing Your Cookie Preferences",
-    body: "Most browsers let you view, delete, and block cookies through their settings. Blocking essential cookies may prevent you from signing in or using parts of the dashboard, so we recommend only disabling non-essential cookies if you'd prefer not to be tracked for analytics purposes.",
+    body: "Most modern web browsers provide options to view, delete, block, or manage cookies through their settings. Disabling essential cookies may prevent you from signing in or accessing certain Go Converto features. If you prefer not to allow analytics cookies, you may choose to disable non-essential cookies through your browser or available cookie preference controls.",
   },
   {
     heading: "Third-Party Cookies",
-    body: "Some cookies may be set by third-party services we rely on to operate Go Converto, such as our payment processor or analytics provider. If you connect a Facebook Page or Instagram Business Account, Meta's Facebook SDK (loaded when you use the \"Continue with Facebook\" option) may also set its own cookies as part of that login process. These providers have their own privacy and cookie practices, which we encourage you to review.",
+    body: "Third-party services that support the operation of Go Converto, including payment processors and analytics providers, may place cookies or similar technologies on your device. These third parties maintain their own privacy and cookie practices. We encourage you to review their respective policies to understand how they collect and use information.",
   },
   {
     heading: "Changes to This Policy",
-    body: "We may update this Cookie Policy from time to time as our use of cookies changes. If we make material changes, we'll update the date at the top of this page.",
+    body: "We may update this Cookie Policy from time to time to reflect changes in our services, technology, or use of cookies and similar tracking technologies. If we make material changes, we will update the date at the top of this page and, where appropriate, provide additional notice.",
   },
   {
     heading: "Contact Us",
-    body: "Questions about how we use cookies? Reach us at info@goconverto.com or 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
+    body: "If you have questions about how Go Converto uses cookies, contact us at hello@goconverto.com or by mail at 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
   },
 ];
 

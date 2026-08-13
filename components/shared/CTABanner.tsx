@@ -12,14 +12,16 @@ interface CTABannerProps {
 // toward starting a free trial.
 const CTABanner = ({
   title = "Ready to Turn Visitors Into Customers?",
-  description = "Set up your own AI assistant in minutes without any coding.",
+  description = "Set up your own AI assistant in minutes. Start your free trial and stop losing qualified leads to slow reply times.",
   href = "/start-free-trial",
   linkLabel = "Start Your Free Trial",
 }: CTABannerProps) => {
   return (
     <div className="rounded-2xl bg-thunder-black px-8 py-10 text-center">
       <h2 className="mb-2 text-2xl font-extrabold text-white">{title}</h2>
-      <p className="mb-6 text-sm text-gray-400">{description}</p>
+      <p className="mb-6 text-sm text-gray-400 max-w-md mx-auto">
+        {description}
+      </p>
       <Link
         href={href}
         className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark"
