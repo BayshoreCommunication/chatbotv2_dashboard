@@ -8,7 +8,6 @@ import {
   getIndustry,
   getOtherIndustries,
 } from "@/lib/industriesData";
-import { OG_IMAGE } from "@/config/seo";
 import PageHero from "@/components/shared/PageHero";
 import CTABanner from "@/components/shared/CTABanner";
 import Container from "@/components/shared/Container";
@@ -28,21 +27,36 @@ export async function generateMetadata({
 
   const title = `${industry.title} — Go Converto`;
 
+  const description = industry.description;
+  const canonicalUrl = `/industries/${slug}`;
+
   return {
-    title,
-    description: industry.description,
-    alternates: { canonical: `/industries/${slug}` },
+    // Prevent the root title template from appending the brand name twice.
+    title: { absolute: title },
+    description,
+    keywords: [
+      `${industry.title} AI chatbot`,
+      `AI chatbot for ${industry.title}`,
+      "Go Converto",
+    ],
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title,
-      description: industry.description,
+      description,
       type: "website",
-      images: [OG_IMAGE],
+      url: canonicalUrl,
+      images: [
+        {
+          url: industry.image,
+          alt: `Go Converto AI chatbot for ${industry.title}`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description: industry.description,
-      images: [OG_IMAGE],
+      description,
+      images: [industry.image],
     },
   };
 }

@@ -5,9 +5,9 @@ import PageHero from "@/components/shared/PageHero";
 import { OG_IMAGE } from "@/config/seo";
 import type { Metadata } from "next";
 
-const PAGE_TITLE = "Contact Go Converto";
+const PAGE_TITLE = "Frequently Asked Questions | Go Converto";
 const PAGE_DESCRIPTION =
-  "Have a question or need help choosing a plan? Reach out to us & we'll respond as soon as possible.";
+  "Find answers about setup, billing, features, support and everything you need to know before choosing Go Convetto. ";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
