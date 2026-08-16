@@ -9,6 +9,7 @@ const PAGE_DESCRIPTION =
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
   description: PAGE_DESCRIPTION,
+  alternates: { canonical: "/data-deletion" },
   openGraph: {
     title: PAGE_TITLE,
     description: PAGE_DESCRIPTION,

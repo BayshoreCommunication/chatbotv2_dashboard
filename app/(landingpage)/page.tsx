@@ -8,6 +8,11 @@ import IndustriesSections from "@/components/landingPage/home/IndustriesSections
 import TrustedByBusiness from "@/components/landingPage/home/TrustedByBusiness";
 import LandingPage from "@/components/landingPage/MainPage";
 import SubscriptionSection from "@/components/landingPage/SubscriptionSection";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const page = async () => {
   const session = await auth();

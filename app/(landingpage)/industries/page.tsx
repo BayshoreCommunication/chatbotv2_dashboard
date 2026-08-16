@@ -6,11 +6,12 @@ import { OG_IMAGE } from "@/config/seo";
 const PAGE_TITLE = "AI Chatbot for SaaS & Tech Companies | Go Converto";
 
 const PAGE_DESCRIPTION =
-  "Go Converto is an AI chatbot that answers pricing and product questions, recommends solutions, qualifies leads, and routes demo requests. Train it on your website and go live in minutes.";
+  "Bayshore Communication offers the Go Converto AI assistant for your website, answering client questions anytime and helping qualify leads and book calls.";
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
   description: PAGE_DESCRIPTION,
+  alternates: { canonical: "/industries" },
   openGraph: {
     title: PAGE_TITLE,
     description: PAGE_DESCRIPTION,
