@@ -29,6 +29,7 @@ export async function proxy(request: NextRequest) {
     "/cookie-policy",
     "/accept-invite",
     "/verify-team-access",
+    "/user-guide",
   ];
 
   // 2. STATIC ASSETS + NEXTAUTH INTERNALS: Always allow.
@@ -49,6 +50,14 @@ export async function proxy(request: NextRequest) {
     "/apple-icon",
     "/assets/",
     "/api/auth/",
+    // Crawlers/bots never carry a session cookie — gating these behind
+    // sign-in silently breaks robots.txt/sitemap discovery entirely (Google
+    // just sees a redirect to a login page and gives up).
+    "/robots.txt",
+    "/sitemap.xml",
+    // The User Guide's "Download as PDF" button — same public page as
+    // /user-guide above, must work for signed-out visitors too.
+    "/api/user-guide/",
   ];
 
   // Check for static assets
