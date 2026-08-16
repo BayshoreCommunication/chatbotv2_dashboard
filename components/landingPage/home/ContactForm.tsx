@@ -10,7 +10,6 @@ import {
   Globe,
   Loader2,
   Mail,
-  MapPin,
   MessageSquare,
   Phone,
   Send,
@@ -174,24 +173,7 @@ const ContactForm = () => {
             </motion.p>
 
             <div className="mb-6 flex flex-col gap-3">
-              {[
-                {
-                  label: "Email",
-                  value: "hello@goconverto.com",
-                  icon: Mail,
-                },
-                {
-                  label: "Office",
-                  value:
-                    "1211 Tech Blvd, Suite 120, Tampa, FL 33619, United States",
-                  icon: MapPin,
-                },
-                {
-                  label: "Support Hours",
-                  value: "24/7 Live Support",
-                  icon: Clock,
-                },
-              ].map((item, index) => {
+              {CONTACT_INFO.map((item, index) => {
                 const Icon = item.icon;
 
                 return (
