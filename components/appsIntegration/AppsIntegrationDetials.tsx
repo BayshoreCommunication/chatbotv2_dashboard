@@ -11,11 +11,19 @@ import {
   type ChannelType,
   type OAuthCandidatePage,
 } from "@/app/actions/appsintegrations";
+import { getSubscriptionAction } from "@/app/actions/subscriptions";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { IconType } from "react-icons";
-import { BiCheckCircle, BiErrorCircle, BiLoaderAlt, BiX } from "react-icons/bi";
+import { BiCheckCircle, BiErrorCircle, BiLoaderAlt, BiLockAlt, BiX } from "react-icons/bi";
 import { FaFacebookMessenger, FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { toast } from "react-hot-toast";
+
+// Apps Integration is an Advanced-plan feature (see pricing.ts) — the
+// backend enforces this on every endpoint (routers/apps_integration_router.py's
+// require_advanced_subscription), this is just the friendlier front door so a
+// Professional/trial user sees an upgrade prompt instead of a raw 403.
+const ADVANCED_TIERS = new Set(["advanced", "enterprise"]);
 
 // ── Facebook JS SDK (shared by every Meta Login for Business flow —
 // currently just WhatsApp Embedded Signup) ─────────────────────────────────
@@ -97,6 +105,11 @@ const CHANNEL_LABEL: Record<ChannelType, string> = {
 const CHANNEL_CHECKLIST: ChannelType[] = ["messenger", "instagram", "whatsapp"];
 
 const AppsIntegrationDetials = () => {
+  // Advanced-plan gate — checked client-side for a friendly upgrade prompt;
+  // the backend enforces the real block on every endpoint regardless.
+  const [checkingAccess, setCheckingAccess] = useState(true);
+  const [hasAdvancedAccess, setHasAdvancedAccess] = useState(false);
+
   const [connections, setConnections] = useState<ChannelConnectionSummary[]>([]);
   const [loadingConnections, setLoadingConnections] = useState(true);
   const [connectionsError, setConnectionsError] = useState<string | null>(null);
@@ -143,11 +156,26 @@ const AppsIntegrationDetials = () => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    getSubscriptionAction().then((res) => {
+      if (cancelled) return;
+      const tier = res.ok ? res.data?.subscription_tier : undefined;
+      const active = res.ok ? res.data?.is_active : false;
+      setHasAdvancedAccess(!!tier && ADVANCED_TIERS.has(tier) && !!active);
+      setCheckingAccess(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (checkingAccess || !hasAdvancedAccess) return;
     const load = async () => {
       await loadConnections();
     };
     load();
-  }, []);
+  }, [checkingAccess, hasAdvancedAccess]);
 
   // Picks up where the backend's OAuth callback left off: it redirects the
   // browser back here with either ?selection_id=... (pick which Page(s) to
@@ -438,6 +466,53 @@ const AppsIntegrationDetials = () => {
     setDisconnectTarget(null);
     loadConnections();
   };
+
+  if (checkingAccess) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <BiLoaderAlt className="animate-spin text-gray-400" size={24} />
+      </div>
+    );
+  }
+
+  if (!hasAdvancedAccess) {
+    return (
+      <div className="@container">
+        <div className="flex flex-col gap-6 bg-gray-50 min-h-screen">
+          <div className="rounded border border-gray-200 bg-white p-6">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Apps &amp; Integrations
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Connect your AI assistant to the channels your customers already
+              use
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-4 rounded border border-gray-200 bg-white p-12 text-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <BiLockAlt size={26} />
+            </span>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">
+                Available on the Advanced plan
+              </h2>
+              <p className="mx-auto mt-1 max-w-sm text-sm text-gray-500">
+                Connect Messenger, Instagram, and WhatsApp to your AI
+                assistant by upgrading to the Advanced plan.
+              </p>
+            </div>
+            <Link
+              href="/pricing"
+              className="rounded-lg bg-thunder-black px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-thunder-black/90"
+            >
+              Upgrade to Advanced
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="@container">
