@@ -95,6 +95,10 @@ export async function askChatAction(
           session_id: sessionId.trim(),
           message: message.trim(),
           user_timezone: userTimezone?.trim() || undefined,
+          // This action is only ever called from the dashboard's own
+          // "test your bot" preview (Train AI) — never count it toward the
+          // company's real visitor limit.
+          channel: "test",
         }),
         cache: "no-store",
       }

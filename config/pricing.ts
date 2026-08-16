@@ -23,7 +23,7 @@ export const pricingPlans: PricingPlan[] = [
     description: "Ideal for growing businesses",
     features: [
       "AI training in 5 minutes",
-      "1,000 conversations per month",
+      "1,000 visitors per month",
       "AI & human takeover",
       "AI lead capture — no forms",
       "Real-time analytics & insights",
@@ -43,7 +43,7 @@ export const pricingPlans: PricingPlan[] = [
     description: "Maximum value for committed teams",
     features: [
       "Everything in Professional plan",
-      "2,500 conversations per month",
+      "2,500 visitors per month",
       "Team member access — invite your team",
       "Priority email & chat support",
       "Dedicated account manager",
@@ -62,7 +62,7 @@ export const pricingPlans: PricingPlan[] = [
     description: "Custom solutions for large organizations",
     features: [
       "Everything in Advanced plan",
-      "Unlimited conversations — no cap",
+      "Unlimited visitors — no cap",
       "Fully custom AI training & chatbot setup",
       "Custom integrations built for any platform",
       "Works for any business or industry",
