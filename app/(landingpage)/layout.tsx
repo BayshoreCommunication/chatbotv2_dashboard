@@ -1,10 +1,11 @@
-import { auth } from "@/auth";
 import { getCurrentUserDetails } from "@/app/actions/user";
+import { auth } from "@/auth";
 import Footer from "@/components/landingPage/Footer";
 import Navbar from "@/components/landingPage/Navbar";
+import { OG_IMAGE, SITE_IS_LIVE } from "@/config/seo";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { OG_IMAGE, SITE_IS_LIVE } from "@/config/seo";
+import Script from "next/script";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -79,7 +80,14 @@ export default async function LandingPageLayout({
         isSubscribed={!!freshUser?.is_subscribed}
         glowAnimation={null}
       />
-      <main>{children}</main>
+      <main>
+        {children}
+        <Script
+          src="https://widget.goconverto.com/widget.js"
+          data-api-key="org-6a815b158c3bd9812b0e7b01"
+          strategy="lazyOnload"
+        />
+      </main>
       <Footer />
     </div>
   );
