@@ -15,17 +15,17 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
       {
         question: "How does Go Converto get information about my business?",
         answer:
-          "Enter your Company Name and Website URL. Go Converto scans your website for your services, pricing, FAQs, and other important information, then automatically creates its own knowledge base. You don't need to upload files, manually write content, or handle any coding.",
+          "Enter your Company Name and Website URL. The system scans your pages for your services, pricing and common questions, and creates its own knowledge base. Instead, you won't need to upload files, write, copy or touch any code.",
       },
       {
         question: "How long does setup take?",
         answer:
-          "Most businesses can complete setup in less than 10 minutes. Once Go Converto finishes processing your website content, your chatbot is trained and ready to start engaging with visitors instantly.",
+          "The majority of people have it complete in less than 10 minutes. After the platform processes your web page material, it will catch up promptly and begin talking to guests instantly.",
       },
       {
         question: "Do I need any technical or coding skills?",
         answer:
-          "No technical background is required. Simply enter your Website URL, copy and paste a short embed code, and Go Converto handles the rest.",
+          "There isn't a need for any particular background. Enter your Web site URL, copy and paste a brief bit of code and the software does the rest.",
       },
     ],
   },
@@ -35,22 +35,22 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
       {
         question: "Can it book appointments and capture leads?",
         answer:
-          "Yes. Go Converto can qualify visitors, collect their contact information, and schedule appointments directly during the conversation. Qualified leads can then be sent straight to your team.",
+          "Yes. During the conversation, Go Converto qualifies visitors and gathers their contact information, and arranges appointments. The qualified leads are then sent straight to your team.",
       },
       {
         question: "Can I customize how the chatbot looks?",
         answer:
-          "Yes. You can select your brand colors, add a custom welcome message, and choose where the chat widget appears on your website. All changes can be managed from your dashboard and updated instantly.",
+          "Yes. Select brand colors, include a fun welcome message and then decide where to place the chat widget on the website. Any changes will be accomplished through your dashboard and will be updated instantly.",
       },
       {
-        question: "Where can I install Go Converto?",
+        question: "Where can I install it?",
         answer:
-          "Go Converto can be installed on virtually any website. Use one-click integrations for platforms such as WordPress, Shopify, and Webflow, or add a single line of code before the closing body tag on your website.",
+          "Go Converto can be used on any webpage. Use the one click WordPress, Shopify, Webflow and other popular platform integration or add one line of code before the closing tag.",
       },
       {
         question: "Does it have a maximum number of conversations?",
         answer:
-          "No. Go Converto can handle unlimited simultaneous conversations, allowing every visitor to receive a fast response without waiting or being placed on hold.",
+          "No. Your chatbot will be able to manage unlimited conversations at once, which implies each visitor will receive a reaction as quickly as they reach your website.",
       },
     ],
   },
@@ -58,14 +58,14 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
     name: "Billing & Plans",
     items: [
       {
-        question: "What happens when my free trial ends?",
+        question: "What if I run out of my free trial?",
         answer:
-          "We'll send you a reminder before your free trial ends. If you choose not to subscribe, your chatbot will simply pause. There are no hidden charges, and your data remains safe and secure.",
+          "We send you a quick reminder before your trial period ends. If you choose not to subscribe your chatbot simply pauses its work. You will never face hidden fees and your data stays completely secure.",
       },
       {
         question: "Can I cancel or change my plan later?",
         answer:
-          "Yes. You can upgrade, downgrade, or cancel your plan anytime from your dashboard. There are no long-term contracts or cancellation fees.",
+          "Yes you can modify or cancel your plan through your dashboard whenever you want. There are no long term contracts and zero cancellation fees to worry about.",
       },
     ],
   },
@@ -75,12 +75,12 @@ export const FAQ_CATEGORIES: FAQCategory[] = [
       {
         question: "What should I do if I run into trouble?",
         answer:
-          "Our team is always available to help. If you have questions or need assistance with setup, contact us through our contact page and we'll get back to you within one business day.",
+          "We are always available to support you whenever you need it. If you have questions or need setup assistance just reach out through our contact page and we will reply by the next business day.",
       },
       {
         question: "How can I get in touch with the team?",
         answer:
-          "You can contact our team through the contact page or email us directly. We typically respond within one business day.",
+          "You are welcome to get in touch with us. Just drop the team a message through our contact page or email us directly. We will get back to you within one business day.",
       },
     ],
   },

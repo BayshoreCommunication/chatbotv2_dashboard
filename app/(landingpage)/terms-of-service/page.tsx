@@ -28,47 +28,47 @@ export const metadata: Metadata = {
 const SECTIONS = [
   {
     heading: "Acceptance of Terms",
-    body: "Creating a Go Converto account confirms your agreement to these Terms of Service. If you register or use Go Converto on behalf of an organization, you confirm that you have the legal authority to bind that organization to these Terms.",
+    body: "Creating a Go Converto account confirms your agreement to these Terms of Service. Authorized representatives registering for an organization confirm full legal authority to bind their company to these operational rules.",
   },
   {
     heading: "Description of Service",
-    body: "Go Converto is an AI chatbot platform that uses your website URL and business information to answer visitor questions, capture sales leads, and schedule calendar appointments automatically. The features and functionality available to you depend on your selected subscription plan.",
+    body: "Go Converto operates as an AI chatbot platform that ingests your website URL to answer visitor questions, capture sales leads, and schedule calendar appointments automatically. Active feature access matches your specific subscription tier.",
   },
   {
     heading: "User Accounts & Responsibilities",
-    body: "You are responsible for providing accurate account and contact information and for maintaining the security of your login credentials. Account holders are responsible for all activity performed through their account and dashboard. If you suspect unauthorized access to your account, you should contact our support team as soon as possible.",
+    body: "Account registration requires accurate contact details and strict password security management. Account holders hold full accountability for all actions performed within their user dashboard. Immediate support notifications protect your account if you suspect unauthorized login activity.",
   },
   {
     heading: "Subscription & Billing",
-    body: "Paid subscriptions renew automatically according to the billing cycle associated with your selected plan unless you cancel before the next billing period. You can upgrade, downgrade, or cancel your subscription through your dashboard. Cancellation stops future charges, while your paid access remains available through the end of the current billing period unless otherwise stated or required by law.",
+    body: "Paid subscriptions renew automatically on a recurring billing cycle unless cancelled within your billing settings. You can update or cancel plan access at any time from your user dashboard. Canceling stops subsequent invoice charges while retaining paid access through your current billing cycle end date.",
   },
   {
     heading: "Acceptable Use",
-    body: "You agree not to use Go Converto for unlawful activities, unauthorized web scraping, system overloading, service disruption, or reverse engineering of the platform or its software. You must also ensure that any copyrighted, proprietary, or other protected content provided to Go Converto is content you have the legal right to use and process.",
+    body: "Users must avoid platform web scraping, system overloading, unlawful activity, and unauthorized software reverse engineering. Ingesting copyrighted materials or proprietary text without proper usage rights violates our acceptable use standards.",
   },
   {
     heading: "Intellectual Property",
-    body: "You retain all intellectual property rights in the website content, business information, and other materials you provide to Go Converto. Go Converto retains all rights to its AI technology, algorithms, software, chatbot code, platform infrastructure, and related intellectual property. By providing content to Go Converto, you grant us a limited license to process that content solely as necessary to provide and operate the service, including generating customized responses for your website visitors.",
+    body: "Website owners retain 100% intellectual property rights over all training text uploaded to our system. Go Converto maintains sole ownership of the underlying AI algorithms, proprietary chatbot code, and platform infrastructure. Your uploaded data receives a limited processing license strictly used to deliver customized conversation responses to your site visitors.",
   },
   {
     heading: "Termination",
-    body: "You may stop using Go Converto and close your account at any time. Go Converto may suspend or terminate an account if it violates these Terms, creates a security risk, disrupts the service, or otherwise presents a reasonable risk to Go Converto or its users. Following account closure, user data is handled according to the applicable retention and deletion practices described in our Privacy Policy.",
+    body: "Account owners retain full freedom to stop service and close accounts at any moment. Go Converto reserves suspension rights for accounts causing system security risks or policy violations. Stored user data follows standard deletion and retention routines defined in our Privacy Policy upon account closure.",
   },
   {
     heading: "Limitation of Liability",
-    body: 'Go Converto provides its AI customer service tools on an "as is" and "as available" basis without implied guarantees regarding uninterrupted availability, accuracy, or specific business results. To the fullest extent permitted by law, Go Converto will not be responsible for indirect, incidental, special, consequential, or similar damages. Our total liability for claims arising from or related to the service will not exceed the fees you actually paid to Go Converto during the twelve months preceding the event giving rise to the claim.',
+    body: 'Go Converto provides AI customer service tools on an "as is" basis without implied performance guarantees. Total financial liability for service issues caps strictly at the actual fees paid during the preceding 12 month period. Indirect or consequential damages remain excluded under standard legal protections.',
   },
   {
     heading: "Governing Law",
-    body: "These Terms of Service are governed by the laws of the State of Florida, United States, without regard to its conflict-of-law principles. Any formal legal proceedings relating to these Terms or the service will be subject to the applicable jurisdiction of the courts in Florida.",
+    body: "State of Florida legal statutes govern these Terms of Service and user agreements. Any formal legal proceedings resolve under Florida judicial jurisdiction regardless of local conflict-of-law rules.",
   },
   {
     heading: "Changes to These Terms",
-    body: "We may update these Terms of Service from time to time. Updated terms will be published on this page with a revised effective or last-updated date. For material changes, we may also notify active account administrators by email. Your continued use of Go Converto after updated Terms become effective constitutes acceptance of the revised Terms.",
+    body: "Updated terms publish directly to this page alongside a refreshed revision date. Material updates prompt direct email notifications sent to active account administrators. Continued dashboard usage following policy updates confirms user agreement to modified terms.",
   },
   {
     heading: "Contact Us",
-    body: "For questions about these Terms of Service or policy compliance, contact us at hello@bayai.com. Physical correspondence can be sent to 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
+    body: "Support questions regarding policy compliance resolve via email at hello@bayai.com. Physical correspondence routes to 1211 Tech Blvd Suite 120, Tampa, FL 33619, United States.",
   },
 ];
 

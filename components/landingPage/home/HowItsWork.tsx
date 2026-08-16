@@ -54,7 +54,8 @@ const STEPS: TimelineStep[] = [
     id: "step-2",
     number: "02",
     title: "Train",
-    description: "Your chatbot learns your content and goes live in minutes.",
+    description:
+      "Your chatbot studies the corresponding content and goes live in minutes.",
     icon: <GraduationCap className="h-7 w-7 text-primary" strokeWidth={2.5} />,
     translateX: "translate-x-[36px]",
     hasBorder: true,
@@ -64,7 +65,7 @@ const STEPS: TimelineStep[] = [
     number: "03",
     title: "Respond",
     description:
-      "It answers new visitors accurately, anytime, without any script.",
+      "It answers new visitors accurately, any hour without any script.",
     icon: <ChatFilledIcon />,
     translateX: "translate-x-[12px]",
     hasBorder: false,
@@ -75,17 +76,18 @@ const STATS = [
   {
     icon: Zap,
     title: "Setup in Minutes",
-    description: "Skip complex coding and go live with real-time results.",
+    description:
+      "Skip complex coding steps and you'll be live with real time outcomes. ",
   },
   {
     icon: TrendingUp,
     title: "More Conversations",
-    description: "Give every visitor an instant answer, any day, anytime.",
+    description: "Every visitor gets an answer any day, anytime.",
   },
   {
     icon: User,
     title: "More Leads & Sales",
-    description: "Turn casual browsers into booked calls and paying customers.",
+    description: "Casual browsers turn into booked calls and paying customers.",
   },
 ];
 

@@ -34,44 +34,44 @@ export const INDUSTRIES: Industry[] = [
   description:
     "Answers technical, pricing, and integration questions the moment a prospect lands on your website. It qualifies demo requests, triages support inquiries, and routes high-intent leads to your sales team with the right context.",
   intro:
-    "Every unanswered pricing or product question creates another opportunity for a prospect to leave and compare a competitor. Go Converto trains on your product pages, pricing tiers, documentation, and integrations so it can answer technical questions instantly, qualify visitors, and capture the leads that are ready to buy.",
+    "Every unanswered pricing question costs you a demo. A visitor lands on your docs page, asks one technical question, and gets a contact form instead of an answer. Go Converto trains on your product pages, pricing tiers, and documentation. It answers that question on the spot, qualifies the visitor, and hands your sales team only the leads worth their time.",
   gradient: "from-blue-600 via-blue-500 to-cyan-500",
   image: "/assets/industries/tech-company.png",
 
   capabilities: [
-    "Answers technical, pricing, and integration questions instantly, 24/7",
-    "Qualifies visitors based on their use case, team size, and technology stack",
+    "Answers technical and pricing questions around the clock",
+    "Qualifies visitors based on their use case, team size, and current stack",
     "Captures qualified leads directly inside the conversation",
-    "Routes enterprise prospects to your sales team with complete conversation context",
-    "Provides self-serve prospects with the right signup or product link instantly",
-    "Triages support inquiries before they reach your support team",
+    "Routes qualified demo requests straight to your sales team's calendar",
+    "Provides self-serve buyers with a signup link instantly",
+    "Triages incoming support tickets before they reach your support team",
   ],
 
   process: [
     {
       step: "Visitor Asks About the Product",
       description:
-        "A prospect on your pricing, product, or documentation page asks about a specific feature, integration, plan, or technical requirement. Go Converto finds the relevant information from your own business content and responds instantly.",
+        "A prospect on your pricing or docs page asks about a specific feature or integration. Go Converto pulls the answer straight from your own product content and responds right there.",
     },
     {
-      step: "Separates Real Buyers From Casual Visitors",
+      step: "Separates Real Buyers From Online Consumers",
       description:
-        "The assistant asks relevant questions about the visitor's use case, team size, and current technology stack. This helps identify whether they are ready for a demo, an enterprise conversation, or a self-serve signup.",
+        "It asks about the visitor's use case, team size, and current stack. Those three answers tell you fast if this is a demo lead or a self-serve signup.",
     },
     {
-      step: "Captures the Lead in the Conversation",
+      step: "Fastest Lead Capture Form",
       description:
-        "High-intent prospects can provide their email address, company name, and other relevant details directly inside the chat. Your team gets the information they need without forcing visitors through a separate contact form.",
+        "Prospects worth pursuing leave their email and company name directly in the conversation. Your team gets the contact details without a single extra click.",
     },
     {
-      step: "Routes Each Lead to the Right Outcome",
+      step: "Self Serve Buyers Receive Signup Link",
       description:
-        "Self-serve prospects receive a signup or product link immediately. Enterprise prospects are routed to your sales team with their qualification details and conversation context already attached.",
+        "Self-serve leads receive a signup link the moment they qualify. Enterprise leads get routed to your sales team with full context already attached.",
     },
   ],
 
   salesImpact:
-    "A prospect who gets an immediate, accurate answer has less reason to leave your website and visit a competitor. Go Converto engages high-intent visitors at the exact moment they are considering your product, qualifies their needs, and routes them to the right next step. Your sales team can spend less time sorting through low-value inquiries and more time closing deals that are ready to move forward.",
+    "A prospect who gets an instant answer skips your competitor's comparison page entirely. Go Converto qualifies and routes leads the second they're ready to talk. Your sales team spends time on deals ready to close instead of cold outreach to unimportant inquiries.",
 },
  {
   slug: "law-firm",
@@ -80,186 +80,191 @@ export const INDUSTRIES: Industry[] = [
   description:
     "Engages new legal inquiries 24/7, collects the case details your intake team needs, screens prospects based on your practice areas, and helps qualified clients book consultations without waiting for a callback.",
   intro:
-    "Legal prospects often contact the first firm that responds. Go Converto engages potential clients immediately, asks structured intake questions based on your practice areas, captures important case details, and helps qualified prospects schedule an initial consultation. Your team receives the conversation context before the appointment, reducing manual intake work and missed opportunities.",
+    "The first attorney to respond to a client inquiry in personal injury, family law, or criminal defense will be hired. Go Converto instantly welcomes visitors to your website, qualifies case eligibility according to your firm's particular practice areas, and books initial consultations directly into Google Calendar or Microsoft Outlook. Your legal staff receives complete case summaries and client contact details instantly.",
   gradient: "from-indigo-700 via-purple-600 to-violet-500",
   image: "/assets/industries/law-firm.png",
 
   capabilities: [
-    "Screens legal inquiries and collects key case details before a consultation",
-    "Helps qualified prospects schedule initial consultations 24/7",
-    "Filters inquiries based on your practice areas and service requirements",
-    "Captures client contact information and organized intake notes",
-    "Provides your team with conversation context before the scheduled consultation",
-    "Reduces manual follow-up for new case inquiries, including evenings and weekends",
+    "Screens legal inquiries and organizes case details before consultations",
+    "Schedules initial consultations in your firm's calendar 24/7",
+    "Automatically filters out inquiries beyond your jurisdiction or practice areas",
+    // "Captures client contact information, incident facts, and intake notes",
+    // "Provides your legal team with complete case summaries before consultations",
+    // "Reduces manual follow-up for new case inquiries, including evenings and weekends",
   ],
 
   process: [
     {
       step: "Immediate Prospect Engagement",
       description:
-        "A potential client arrives with an urgent legal question about an accident, dispute, filing, or another legal matter. Go Converto starts the conversation immediately instead of allowing the visitor to leave and contact another firm.",
+        "Potential clients with urgent legal questions regarding accidents, contract disputes, or court filings engage with the interactive assistant instead of abandoning your website.",
     },
     {
       step: "Custom Case Screening",
       description:
-        "The assistant asks relevant intake questions based on your firm's practice areas, such as what happened, when and where it occurred, and the type of legal issue involved.",
+        "The software asks targeted intake questions regarding incident dates, geographic jurisdiction, and specific legal issues tailored to your practice guidelines.",
     },
     {
-      step: "Automated Case Information Capture",
+      step: "Automated Case File Creation",
       description:
-        "Client contact information, incident details, and relevant intake responses are captured during the conversation and organized so your legal team can review the information before the consultation.",
+        "Client contact information, incident facts, and intake notes are captured and organized for paralegals and attorneys to review.",
     },
     {
-      step: "Direct Consultation Booking",
+      step: "Direct Calendar Booking",
       description:
-        "When an inquiry meets your firm's qualification criteria, the prospect can select an available consultation time directly through your connected calendar, reducing voicemail, phone tag, and manual scheduling.",
+        "Eligible leads select available consultation slots directly on your calendar, eliminating voicemail tags and manual follow-up delays.",
     },
   ],
 
   salesImpact:
-    "Legal prospects value speed and an easy path to speak with an attorney. By engaging visitors immediately, screening inquiries, and helping qualified prospects schedule consultations outside normal office hours, Go Converto helps your firm respond to opportunities before they move to another practice. Your intake team spends less time sorting through basic inquiries and more time preparing for qualified consultations.",
+    "Legal prospects select law firms that provide immediate responses and effortless consultation booking. By evaluating case eligibility and scheduling appointments during evening hours and weekends, Go Converto captures cases that competing law firms miss. Automated screening ensures attorneys spend time exclusively with qualified clients who are ready to sign retainers.",
 },
 
-
-  {
+{
   slug: "healthcare",
   icon: FaHeartbeat,
   title: "Healthcare",
   description:
     "Handles routine patient questions, appointment requests, and rescheduling 24/7. Go Converto answers questions about services, hours, and accepted insurance, while routing clinical or urgent concerns to the appropriate staff.",
+
   intro:
-    "Patients should not have to wait on hold to ask about office hours, accepted insurance, available services, or appointments. Go Converto automates routine front-desk conversations around the clock, captures appointment details, and helps patients schedule or reschedule visits. When a question requires clinical expertise or staff attention, the assistant knows when to step aside and route the conversation appropriately.",
+    "Go Converto automates the answering of administrative patient questions, validating accepted insurance providers and booking patient appointments 24/7. The ChatBot automatically routes calls to the nursing staff for complex clinical questions, helping to offload the front-desk workload, while ensuring a high patient retention rate.",
+
   gradient: "from-teal-700 via-emerald-600 to-cyan-500",
   image: "/assets/industries/healthcare.png",
 
   capabilities: [
-    "Books and reschedules patient appointments automatically",
-    "Answers common questions about services, office hours, and accepted insurance",
-    "Collects patient contact details, preferred appointment times, and visit information",
-    "Handles routine administrative inquiries 24/7",
-    "Routes clinical questions and urgent concerns to the appropriate healthcare staff",
-    "Reduces repetitive front-desk workload so staff can focus on patients in the clinic",
+    "Automatically books and reschedules medical appointments",
+    "Answers common patient questions about hours, insurance plans accepted and health care services",
+    "Directs clinical concerns to healthcare providers and triage staff",
   ],
 
   process: [
     {
       step: "Immediate Patient Engagement",
       description:
-        "Patients can ask about healthcare services, office hours, accepted insurance, appointment availability, or rescheduling without waiting on hold or calling the front desk.",
+        "Patients select medical services, request appointment slots, or verify insurance coverage via instant messaging without waiting on hold.",
     },
+
     {
-      step: "Automated Response & Appropriate Routing",
+      step: "Automated Triage & Response",
       description:
-        "Go Converto answers routine administrative questions immediately. Questions involving clinical symptoms, medical advice, or urgent concerns are identified and routed to the appropriate healthcare staff.",
+        "The software answers routine clinic inquiries immediately and escalates medical symptoms or urgent care requests directly to triage staff.",
     },
+
     {
-      step: "Patient Information Collection",
+      step: "Accurate Patient Data Collection",
       description:
-        "The assistant collects relevant contact information, preferred appointment dates, and the reason for the visit during the conversation, reducing repetitive intake work for your front desk.",
+        "Contact details, preferred visit dates, and reasons for care are captured accurately during initial interactions.",
     },
+
     {
-      step: "Appointment Scheduling",
+      step: "Direct EHR Calendar Confirmation",
       description:
-        "Patients can select an available appointment time or request a schedule change directly through the conversation, reducing phone delays and unnecessary back-and-forth.",
+        "Requested appointment slots and schedule changes update directly into your practice management software without phone delays.",
     },
   ],
 
   salesImpact:
-    "Missed calls and long wait times can lead to missed appointments and lost revenue for healthcare practices. By handling routine administrative questions and appointment requests instantly, Go Converto helps keep your schedule organized while reducing repetitive front-desk work. Your staff can spend more time supporting patients in the clinic while the assistant manages routine conversations around the clock.",
+    "Medical practices lose revenue from long hold times or calls going unreturned. By processing administrative queries and booking appointments instantaneously, Go Converto keeps provider schedules full. Front desk staff no longer have to do repetitive intake tasks and are able to focus to patients in the clinic.",
 },
+
 {
   slug: "real-estate",
   icon: FaHandshake,
   title: "Real Estate",
   description:
-    "Engages buyers and renters the moment they land on a property listing. Go Converto answers questions about pricing, availability, and property details, qualifies prospects, and helps schedule tours 24/7.",
+    "Instantly engages buyers and renters when they land on a listing. It answers property questions on the spot and schedules tours around the clock so no inquiry gets left hanging after hours.",
+
   intro:
-    "The first few hours after a property listing goes live can generate some of the highest-intent inquiries, but agents are not always available to respond immediately. Go Converto engages visitors on the spot, answers questions about properties, captures buyer and renter preferences, and helps qualified prospects schedule a showing without waiting for a callback.",
+    " ​Listings spark the most interest during their first few hours online, right when agents are usually tied up or offline. Go Converto steps in immediately to answer questions, gather contact details, and book showings. Buyers and renters get fast answers instead of waiting around until the next morning.",
+
   gradient: "from-amber-600 via-orange-500 to-yellow-400",
   image: "/assets/industries/real-estate.png",
 
   capabilities: [
-    "Captures active buyer and renter leads directly from property listings",
-    "Answers questions about pricing, availability, features, and property details instantly",
-    "Qualifies prospects based on budget, timeline, and purchase or rental requirements",
-    "Collects contact details and property preferences automatically",
-    "Helps qualified buyers and renters schedule property tours 24/7",
-    "Reduces missed inquiries and follow-up delays for real estate teams",
+    "Captures active buyer and renter leads the moment they land on a property page",
+    "Delivers instant answers about price, availability, and property details",
+    "Schedules tours without unnecessary email exchanges",
   ],
 
   process: [
     {
-      step: "Visitor Asks About a Listing",
+      step: "A Visitor Asks About a Listing",
       description:
-        "A buyer or renter asks about pricing, availability, property features, location, layout, or other listing details. Go Converto responds directly from the property information available on your website.",
+        "Questions about pricing, availability, layout, or the neighborhood get instant answers directly on the page.",
     },
+
     {
       step: "The Assistant Qualifies the Lead",
       description:
-        "Go Converto asks relevant questions about the prospect's budget, preferred move-in or purchase timeline, property requirements, and other qualification details to understand their level of intent.",
+        "It collects essential information such as budget, move in time and is it pre-approved or not.",
     },
+
     {
-      step: "Lead Information Is Captured",
+      step: "Lead Information Is Saved",
       description:
-        "Contact details, property preferences, budget information, and the listing the prospect is interested in are captured during the conversation, giving your team useful context before follow-up.",
+        "Contact details, preferences, and the listing of interest are captured automatically.",
     },
+
     {
-      step: "A Property Tour Is Booked",
+      step: "A Tour Is Booked",
       description:
-        "Qualified buyers and renters can move directly to scheduling a property tour, reducing unnecessary calls, emails, and back-and-forth communication.",
+        "Qualified buyers and renters can book a property tour immediately, without waiting for a callback.",
     },
   ],
 
   salesImpact:
-    "Real estate prospects often act quickly when they find a property they like. If an agent does not respond, that interest can shift to another listing or competing agent. Go Converto engages prospects during that critical first interaction, answers their questions, captures their intent, and helps turn property inquiries into confirmed tours. Your agents can then focus their time on serious buyers and renters instead of manually handling every initial inquiry.",
+    "Peak interest happens immediately after a listing goes live, usually when agents are busy elsewhere. Go Converto catches that initial enthusiasm and converts it into a confirmed tour before prospects lose interest or wander over to another listing.",
 },
+
  {
   slug: "consultancy",
   icon: FaHandshake,
   title: "Consultancy",
   description:
-    "Qualifies prospects before they reach your calendar, asks the right discovery questions, shares relevant expertise and case studies, and books calls with prospects who are a strong fit for your consulting services.",
+    "Qualifies prospects from the beginning with the right discovery questions and have a qualified prospect on every call you make.",
 
   intro:
-    "Not every discovery call is worth taking. Go Converto handles the first stage of your sales process by answering questions about your consulting services, understanding the prospect's needs, and gathering important information about budget, timeline, and project scope. Qualified prospects can book a call directly, while inquiries outside your ideal client profile can be guided toward more appropriate resources.",
+    "Not all discovery calls are worthy of being scheduled. Go Converto poses the same types of questions you may ask during an initial conversation such as budget, time frame and project scope. Those calls that are suitable will already match well while those who are not suitable will be directed to a more suitable resource.",
 
   gradient: "from-slate-700 via-slate-600 to-slate-400",
   image: "/assets/industries/consultancy.png",
 
   capabilities: [
-    "Pre-qualifies prospects with structured discovery questions",
-    "Captures budget, timeline, project scope, and business requirements",
-    "Shares relevant consulting services, case studies, and portfolio information",
-    "Collects company and contact details before a consultation",
-    "Books discovery calls only with prospects who meet your qualification criteria",
-    "Redirects prospects who are not a suitable fit toward relevant resources",
+    "Pre-qualifies prospects with the right discovery questions from the start",
+    "Automatically shares relevant case studies and service information",
+    "Books calls only with prospects who are a good fit",
   ],
 
   process: [
     {
-      step: "Prospect Asks About Your Services",
+      step: "A Prospect Asks About Your Services",
       description:
-        "A potential client explores your consulting services, expertise, previous work, and whether your experience matches their specific business challenge.",
+        "They learn about what you do, review past work, and see if your expertise aligns with their specific challenge.",
     },
+
     {
       step: "The Assistant Runs Discovery",
       description:
-        "Go Converto asks the same essential questions you would normally cover during an initial call, including project scope, budget expectations, timeline, goals, and business requirements.",
+        "It gathers essential details on budget, timeline, and scope, asking the exact questions you would cover during an initial call.",
     },
+
     {
-      step: "Important Details Are Captured",
+      step: "Important Details Are Recorded",
       description:
-        "The prospect's contact information, company details, project requirements, and conversation context are captured automatically so your team has the information needed before the call.",
+        "Contact information, company details, and a clear summary of their requirements are captured for your review.",
     },
+
     {
-      step: "Call Is Booked or Redirected",
+      step: "A Call Is Booked or Redirected",
       description:
-        "Qualified prospects can select an available time directly on your calendar. Prospects outside your target profile can be guided toward relevant services, resources, or next steps instead.",
+        "Strong matches pick a time directly on your calendar. Any leads outside your target profile are guided toward more appropriate resources.",
     },
   ],
 
   salesImpact:
-    "Low-quality discovery calls consume valuable consulting time and take attention away from clients who are ready to move forward. Go Converto filters prospects before they reach your calendar by understanding their needs, budget, timeline, and project scope. Your team spends more time speaking with qualified opportunities and less time on conversations that are unlikely to become revenue.",
+    "Dead-end discovery calls take valuable time away from your paying clients. Go Converto filters prospects before anything hits your calendar, making sure every conversation your team actually holds is built around real revenue potential.",
 },
   
   {
@@ -267,46 +272,48 @@ export const INDUSTRIES: Industry[] = [
   icon: FaBullhorn,
   title: "Agency",
   description:
-    "Handles inbound project inquiries 24/7, explains your services and pricing, shares relevant portfolio work, qualifies new opportunities, and books discovery calls while your team stays focused on existing clients.",
+    "Handles incoming project requests, outlines your service packages and pricing, and schedules initial discovery calls. That way, your team can keep their focus entirely on active client work.",
+
   intro:
-    "New business inquiries should not interrupt the client work already on your team's schedule. Go Converto handles initial conversations with potential clients, answers questions about your services and pricing, shares relevant portfolio examples, and gathers essential project details. Qualified prospects can then book a discovery call directly, keeping your sales pipeline moving without adding more administrative work to your team.",
+    "New leads should never have to compete with current client deliverables. Go Converto fields questions about your services and rates, delivers customized details based on the project type, and schedules introduction calls. Your team stays focused on current work without slowing down new business.",
+
   gradient: "from-emerald-600 via-green-500 to-lime-400",
   image: "/assets/industries/agency.png",
 
   capabilities: [
-    "Answers inbound project inquiries around the clock",
-    "Shares relevant service packages, pricing information, and portfolio examples",
-    "Qualifies prospects based on project goals, budget, and timeline",
-    "Captures contact details and creates a clear project summary for your team",
-    "Books qualified prospects directly into your discovery calendar",
-    "Keeps new business inquiries moving without interrupting active client work",
+    "Answers project inquiries around the clock",
+    "Shares service packages, pricing, and portfolio samples automatically",
+    "Books initial calls for your team by letting them focus on existing clients.",
   ],
 
   process: [
     {
       step: "Visitor Asks About a Project",
       description:
-        "A potential client asks about your services, relevant past work, pricing, or whether your agency can handle their specific project requirements.",
+        "They learn about your services, view relevant portfolio work, and get clear ballpark pricing for their project type.",
     },
+
     {
-      step: "The Assistant Qualifies the Project",
+      step: "Assistant Qualifies the Project",
       description:
-        "Go Converto gathers important project information through a natural conversation, including goals, project type, expected budget, timeline, and other relevant requirements.",
+        "It gathers details on project goals, budget expectations, and timelines through a natural conversation.",
     },
+
     {
       step: "Lead Information Is Captured",
       description:
-        "The prospect's contact details and project requirements are captured automatically, giving your team a structured summary to review before the discovery call.",
+        "Contact details and a clean project summary are saved automatically for your team to review.",
     },
+
     {
-      step: "Discovery Call Is Booked",
+      step: "Initial Call Is Booked",
       description:
-        "Qualified prospects can choose an available time directly from your connected calendar, with the preliminary project details already available to your team.",
+        "Qualified prospects choose a time directly on your calendar with all preliminary scope details attached.",
     },
   ],
 
   salesImpact:
-    "Agency inquiries often arrive while your team is busy delivering work for existing clients. Go Converto keeps your new-business pipeline active without creating additional interruptions. By answering questions, qualifying opportunities, capturing project details, and booking discovery calls automatically, your agency can generate new business while maintaining the quality of service your current clients expect.",
+    "Questions typically arrive at the right time, when you're actively working. Go Converto continues to work on your growth machine, tracking and qualifying important prospects. You acquire new business without compromising on the service quality to your existing clients.",
 },
 ];
 

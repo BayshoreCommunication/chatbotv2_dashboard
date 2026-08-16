@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Cookie, Layers, Settings, ShieldCheck, Mail } from "lucide-react";
+import { BrainCircuit, Code2, Layers, Headphones, Mail } from "lucide-react";
 import Container from "@/components/shared/Container";
 import CTABanner from "@/components/shared/CTABanner";
 
@@ -11,46 +11,32 @@ import CTABanner from "@/components/shared/CTABanner";
 // ============================================================================
 const COOKIE_SECTIONS = [
   {
-    icon: Cookie,
-    title: "What Are Cookies",
+    icon: Code2,
+    title: "Zero Developer Dependency",
     description:
-      "Cookies are small text files placed on your computer or device when you visit a website. They allow websites to remember information about your visit, including your sign-in status, preferences, and other settings, so you can have a more consistent experience.",
+      "Software tools often fail because their setup processes are overly complex. Go Converto designs every automation feature specifically for non-technical business operators. You can customize, test, and deploy your customer service AI assistant without opening a user manual or writing code.",
     gradient: "from-blue-600 via-blue-500 to-cyan-500",
   },
   {
-    icon: Layers,
-    title: "How We Use Cookies",
+    icon: BrainCircuit,
+    title: "Industry Specific AI Framework",
     description:
-      "Go Converto uses cookies to keep your dashboard session active, save your chat widget preferences, and understand how our services are being used. This information helps us maintain essential functionality and improve Go Converto over time.",
+      "Generic customer chatbots fail to grasp specific industry terminology and compliance needs. Go Converto adapts its response engine to match the operational workflows of law practices, real estate agencies, healthcare providers, and local services. Your automated assistant operates using your company’s precise knowledge base rather than generic response templates.",
     gradient: "from-purple-600 via-fuchsia-500 to-pink-500",
   },
   {
-    icon: ShieldCheck,
-    title: "Types of Cookies We Use",
+    icon: Layers,
+    title: "Capture High-Value Sales Leads 24/7",
     description:
-      "Essential cookies are required for core features such as your user dashboard and chat widget to function properly. Functional cookies remember preferences, including your chat widget configuration. Analytics cookies provide information about overall usage patterns so we can continue improving Go Converto.",
+      "Prospective customers submit high-intent questions well past standard business hours. The Go Converto AI engine maintains active engagement with site visitors 24 hours a day. Your sales funnel continues capturing qualified lead data and booking client calls outside regular operational hours.",
     gradient: "from-emerald-600 via-green-500 to-lime-400",
   },
   {
-    icon: Settings,
-    title: "Managing Your Cookie Preferences",
+    icon: Headphones,
+    title: "Automate Technical Support",
     description:
-      "Most modern web browsers allow you to view, delete, or block cookies through their settings. Disabling essential cookies may prevent you from signing in or using certain Go Converto features. If you prefer not to use analytics cookies, you can disable non-essential cookies through your browser or available cookie controls.",
+      "Software providers often hide behind automated email scripts and unhelpful ticketing systems. Go Converto backs its software with accessible, dedicated account specialists. Our support team personally reviews your technical inquiries and delivers human responses within one business day.",
     gradient: "from-amber-500 via-orange-500 to-yellow-400",
-  },
-  {
-    icon: Layers,
-    title: "Third-Party Cookies",
-    description:
-      "Third-party services that support Go Converto, including payment processors and analytics providers, may place cookies or similar technologies on your device. These providers maintain their own privacy and cookie practices, and we encourage you to review their respective policies.",
-    gradient: "from-indigo-600 via-violet-500 to-purple-500",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Changes to This Policy",
-    description:
-      "We may update this Cookie Policy from time to time to reflect changes in our services, technology, or use of cookies and similar technologies. Material changes will be reflected by updating the date at the top of this policy.",
-    gradient: "from-rose-600 via-pink-500 to-orange-400",
   },
 ];
 
@@ -65,22 +51,27 @@ const CookiePolicyPageContent = () => {
         <div className="mx-auto max-w-3xl text-center">
           <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-[7px] text-[13px] font-semibold text-primary-dark">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Cookie Policy
+            What We Believe
           </span>
 
           <h1 className="mb-5 text-3xl font-extrabold leading-tight tracking-tight text-thunder-black sm:text-4xl">
-            How Go Converto Uses Cookies
+            Meet the AI Assistant Built for Direct Lead Conversion
           </h1>
 
           <p className="text-base leading-relaxed text-gray-600 sm:text-lg">
-            Go Converto uses cookies and similar technologies to keep our
-            services working, remember your preferences, and understand how
-            users interact with our platform.
+            Most website visitors leave without buying because nobody answers
+            their instant inquiries. Go Converto solves this drop-off by
+            deploying an automated AI assistant and trains directly on your
+            business data. This platform addresses customer queries in real
+            time, turning passive traffic into qualified sales leads and
+            scheduled appointments. Business owners execute this entire lead
+            capture process without writing code, hiring developers, or managing
+            call centers.
           </p>
         </div>
 
         {/* --- Cookie Sections --- */}
-        <div className="mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {COOKIE_SECTIONS.map((section, index) => {
             const Icon = section.icon;
 
@@ -126,7 +117,7 @@ const CookiePolicyPageContent = () => {
 
             <div>
               <p className="text-sm font-bold text-thunder-black">
-                Questions about cookies?
+                Need help with Go Converto?
               </p>
 
               <p className="text-sm text-gray-600">
