@@ -25,6 +25,9 @@ export const metadata: Metadata = {
     template: "%s · Go Converto",
   },
   description: SITE_DESCRIPTION,
+  verification: {
+    google: "google8fed4938c81df47d.html",
+  },
   openGraph: {
     siteName: "Go Converto",
     type: "website",
