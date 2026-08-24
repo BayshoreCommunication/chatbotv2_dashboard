@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   // append "· Go Converto" a second time onto the end of it.
   title: { absolute: LANDING_TITLE },
   description: LANDING_DESCRIPTION,
+  verification: {
+    google: "google8fed4938c81df47d.html",
+  },
   robots: { index: true, follow: true },
   openGraph: {
     title: LANDING_TITLE,
