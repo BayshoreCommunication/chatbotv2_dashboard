@@ -30,6 +30,7 @@ export async function proxy(request: NextRequest) {
     "/accept-invite",
     "/verify-team-access",
     "/user-guide",
+    "/ai-chatbot-law-firm-website",
   ];
 
   // 2. STATIC ASSETS + NEXTAUTH INTERNALS: Always allow.
@@ -97,11 +98,12 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Allow other public paths
+    // Allow other public paths (including SEO service landing pages)
     if (
       publicPaths.some(
         (path) => pathname === path || pathname.startsWith(path + "/"),
-      )
+      ) ||
+      pathname.startsWith("/ai-chatbot-")
     ) {
       return NextResponse.next();
     }
@@ -157,7 +159,8 @@ export async function proxy(request: NextRequest) {
     if (
       publicPaths.some(
         (path) => pathname === path || pathname.startsWith(path + "/"),
-      )
+      ) ||
+      pathname.startsWith("/ai-chatbot-")
     ) {
       return NextResponse.next();
     }
