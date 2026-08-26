@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import {
+  BuiltForFirmsSection,
+  CaseStudiesSection,
+  CustomizationSection,
+  DeploymentSection,
+  DifferenceSection,
   HowItWorksSection,
+  IntegrationsSection,
   LawFirmHero,
   OnboardingSection,
+  PracticeAreasSection,
   ProblemSection,
+  SecurityPrivacySection,
   SeeItInActionSection,
   SocialProofSection,
   SolutionSection,
+  TheMathSection,
   WhatGetsCapturedSection,
 } from "@/components/seo-service/ai-chatbot-law-firm-website";
 
@@ -28,6 +37,17 @@ export default function LawFirmSeoPage() {
       <HowItWorksSection />
       <OnboardingSection />
       <WhatGetsCapturedSection />
+      <BuiltForFirmsSection />
+      <IntegrationsSection />
+      <DeploymentSection />
+      <DifferenceSection />
+      <PracticeAreasSection />
+      <CustomizationSection />
+      <TheMathSection />
+      <CaseStudiesSection />
+      <SecurityPrivacySection />
     </div>
+
+
   );
 }

@@ -64,17 +64,17 @@ export default function WhatGetsCapturedSection() {
         >
           {/* Subtitle / Kicker */}
           <div className="mb-4 flex items-center justify-center gap-2.5">
-            <span className="h-0.5 w-6 bg-primary" />
-            <span className="text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
+            <span className="h-0.5 w-6 bg-primary-dark" />
+            <span className="text-xs font-bold uppercase tracking-wider text-primary-dark sm:text-sm">
               WHAT GETS CAPTURED
             </span>
-            <span className="h-0.5 w-6 bg-primary" />
+            <span className="h-0.5 w-6 bg-primary-dark" />
           </div>
 
           {/* Main Headline */}
           <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl md:text-4xl lg:text-[42px] leading-snug sm:leading-tight">
             Every detail your intake team <br className="hidden sm:inline" />
-            actually needs<span className="text-primary">.</span>
+            actually needs<span className="text-primary-dark">.</span>
           </h2>
 
           {/* Subtitle Paragraph */}
@@ -97,20 +97,20 @@ export default function WhatGetsCapturedSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group relative flex flex-col items-center text-center rounded-2xl sm:rounded-3xl border border-gray-100/90 border-t-2 border-t-primary bg-white p-6 sm:p-7 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-gray-200 transition-all duration-300"
+                className="group relative flex flex-col items-center text-center rounded-2xl sm:rounded-3xl border border-gray-100/90 border-t-2 border-t-primary-dark bg-white p-6 sm:p-7 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.03)] hover:shadow-lg hover:border-gray-200 transition-all duration-300"
               >
                 {/* Top Number Badge */}
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-xs transition-transform duration-300 group-hover:scale-110">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-primary-dark text-xs font-bold text-white shadow-xs transition-transform duration-300 group-hover:scale-110">
                   {card.id}
                 </div>
 
                 {/* Circular Icon Container */}
-                <div className="mt-4 mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-teal-100/80 bg-[#edf8f8] text-primary shadow-2xs transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20">
-                  <Icon className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
+                <div className="mt-4 mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-teal-100/80 bg-[#edf8f8] text-primary-dark shadow-2xs transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20">
+                  <Icon className="h-7 w-7 text-primary-dark sm:h-8 sm:w-8" />
                 </div>
 
                 {/* Category Tag */}
-                <span className="block mb-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-primary">
+                <span className="block mb-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-primary-dark">
                   {card.tag}
                 </span>
 
@@ -121,7 +121,7 @@ export default function WhatGetsCapturedSection() {
                 </h3>
 
                 {/* Bottom Accent Line */}
-                <div className="my-3 h-0.5 w-8 rounded-full bg-primary/70 transition-all duration-300 group-hover:w-12" />
+                <div className="my-3 h-0.5 w-8 rounded-full bg-primary-dark/70 transition-all duration-300 group-hover:w-12" />
 
                 {/* Description */}
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
