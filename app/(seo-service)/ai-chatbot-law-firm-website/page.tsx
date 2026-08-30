@@ -2,15 +2,21 @@ import type { Metadata } from "next";
 import {
   BuiltForFirmsSection,
   CaseStudiesSection,
+  CommonQuestionsSection,
+  ComparisonSection,
+  CtaSection,
   CustomizationSection,
   DeploymentSection,
   DifferenceSection,
+  FaqSection,
   HowItWorksSection,
   IntegrationsSection,
   LawFirmHero,
   OnboardingSection,
   PracticeAreasSection,
+  PricingSection,
   ProblemSection,
+  ResourcesSection,
   SecurityPrivacySection,
   SeeItInActionSection,
   SocialProofSection,
@@ -46,6 +52,12 @@ export default function LawFirmSeoPage() {
       <TheMathSection />
       <CaseStudiesSection />
       <SecurityPrivacySection />
+      <PricingSection />
+      <CommonQuestionsSection />
+      <ComparisonSection />
+      <ResourcesSection />
+      <FaqSection />
+      <CtaSection />
     </div>
 
 

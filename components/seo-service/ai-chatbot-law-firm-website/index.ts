@@ -18,6 +18,18 @@ export { default as IntegrationsSection } from "./IntegrationsSection";
 export { default as DeploymentSection } from "./DeploymentSection";
 export { default as DifferenceSection } from "./DifferenceSection";
 export { default as PracticeAreasSection } from "./PracticeAreasSection";
+export { default as PricingSection } from "./PricingSection";
+export { default as CommonQuestionsSection } from "./CommonQuestionsSection";
+export { default as ComparisonSection } from "./ComparisonSection";
+export { default as ResourcesSection } from "./ResourcesSection";
+export { default as FaqSection } from "./FaqSection";
+export { default as CtaSection } from "./CtaSection";
+
+
+
+
+
+
 
 
 
