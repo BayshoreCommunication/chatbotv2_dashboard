@@ -54,7 +54,9 @@ export default function WhatAreConversationalAiAgentsGuide() {
           { label: "Blog", href: "/blog" },
           { label: "What Are Conversational AI Agents?" }
         ]}
-        title="What Are Conversational AI Agents? Business Guide"
+        title="What Are Conversational AI Agents?"
+        image="/assets/blog/what-are-conversational-ai-agents-guide.webp"
+        imageAlt="What Are Conversational AI Agents?"
       />
 
       <article className="bg-white py-10 lg:py-16 text-gray-800 antialiased">
@@ -94,14 +96,16 @@ export default function WhatAreConversationalAiAgentsGuide() {
 
             {/* --- Main Image Section --- */}
             <div className="mb-10 overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 shadow-md">
-              <div className="relative aspect-[16/9] w-full">
+              <div className="w-full relative overflow-hidden bg-gray-900">
                 <Image
                   src="/assets/blog/what-are-conversational-ai-agents-guide.webp"
                   alt="Friendly white robot using a laptop next to a digital customer support chatbot interface in an office."
                   title="What Are Conversational AI Agents? Business Guide"
-                  fill
+                  width={1200}
+                  height={675}
                   priority
-                  className="object-cover"
+                  loading="eager"
+                  className="w-full h-auto object-contain rounded-t-2xl max-h-[500px]"
                   sizes="(max-width: 1024px) 100vw, 896px"
                 />
               </div>
