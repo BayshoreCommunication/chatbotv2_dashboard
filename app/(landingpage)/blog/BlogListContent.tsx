@@ -53,14 +53,16 @@ const BlogListContent = ({
                 {featuredPost.description}
               </p>
               <div className="flex items-center gap-2.5">
-                <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${featuredPost.avatarColor} text-xs font-bold text-white`}
-                >
-                  {featuredPost.initials}
-                </span>
+                {featuredPost.initials && (
+                  <span
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${featuredPost.avatarColor} text-xs font-bold text-white`}
+                  >
+                    {featuredPost.initials}
+                  </span>
+                )}
                 <span className="text-sm text-gray-500">
-                  {featuredPost.author} · {featuredPost.date} ·{" "}
-                  {featuredPost.readTime}
+                  {featuredPost.author ? `${featuredPost.author} · ` : ""}
+                  {featuredPost.date} · {featuredPost.readTime}
                 </span>
               </div>
             </div>
@@ -108,13 +110,16 @@ const BlogListContent = ({
                     {post.description}
                   </p>
                   <div className="flex items-center gap-2.5">
-                    <span
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${post.avatarColor} text-[10px] font-bold text-white`}
-                    >
-                      {post.initials}
-                    </span>
+                    {post.initials && (
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${post.avatarColor} text-[10px] font-bold text-white`}
+                      >
+                        {post.initials}
+                      </span>
+                    )}
                     <span className="text-xs text-gray-500">
-                      {post.author} · {post.readTime}
+                      {post.author ? `${post.author} · ` : ""}
+                      {post.readTime}
                     </span>
                   </div>
                 </div>
