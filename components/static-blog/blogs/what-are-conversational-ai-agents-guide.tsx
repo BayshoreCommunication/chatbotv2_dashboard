@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useInView, motion } from "framer-motion";
 import { 
   HiOutlineCheckCircle, 
   HiOutlineCalendar, 
@@ -18,6 +19,52 @@ import { FaQuoteLeft } from "react-icons/fa";
 import CTABanner from "@/components/shared/CTABanner";
 import Container from "@/components/shared/Container";
 import PageHero from "@/components/shared/PageHero";
+
+function AnimatedCounter({
+  target,
+  prefix = "",
+  suffix = "",
+  duration = 1600,
+}: {
+  target: number;
+  prefix?: string;
+  suffix?: string;
+  duration?: number;
+}) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-40px" });
+
+  useEffect(() => {
+    if (!isInView) return;
+    let startTime: number | null = null;
+    let frameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(ease * target));
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(step);
+      } else {
+        setCount(target);
+      }
+    };
+
+    frameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frameId);
+  }, [isInView, target, duration]);
+
+  return (
+    <span ref={ref}>
+      {prefix}
+      {count}
+      {suffix}
+    </span>
+  );
+}
 
 export default function WhatAreConversationalAiAgentsGuide() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -214,19 +261,25 @@ export default function WhatAreConversationalAiAgentsGuide() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
                   <div className="rounded-xl bg-white p-4 shadow-sm border border-gray-100">
-                    <div className="text-3xl font-black text-primary">80%</div>
+                    <div className="text-3xl font-black text-primary">
+                      <AnimatedCounter target={80} suffix="%" />
+                    </div>
                     <div className="mt-1 text-xs text-gray-600 leading-snug">
                       of new enterprise apps now embed at least one AI agent
                     </div>
                   </div>
                   <div className="rounded-xl bg-white p-4 shadow-sm border border-gray-100">
-                    <div className="text-3xl font-black text-primary">40%</div>
+                    <div className="text-3xl font-black text-primary">
+                      <AnimatedCounter target={40} suffix="%" />
+                    </div>
                     <div className="mt-1 text-xs text-gray-600 leading-snug">
                       of all enterprise apps projected to run task specific agents by year end
                     </div>
                   </div>
                   <div className="rounded-xl bg-white p-4 shadow-sm border border-gray-100">
-                    <div className="text-3xl font-black text-primary">7x</div>
+                    <div className="text-3xl font-black text-primary">
+                      <AnimatedCounter target={7} suffix="x" />
+                    </div>
                     <div className="mt-1 text-xs text-gray-600 leading-snug">
                       more likely to qualify a lead when response comes within the hour
                     </div>
@@ -311,30 +364,48 @@ export default function WhatAreConversationalAiAgentsGuide() {
                   <div>
                     <div className="flex justify-between text-xs font-bold text-gray-600 mb-1">
                       <span>2025</span>
-                      <span>5%</span>
+                      <span><AnimatedCounter target={5} suffix="%" /></span>
                     </div>
                     <div className="h-4 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full bg-gray-400 rounded-full" style={{ width: "5%" }} />
+                      <motion.div 
+                        initial={{ width: "0%" }}
+                        whileInView={{ width: "5%" }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.2, ease: "easeOut" }}
+                        className="h-full bg-gray-400 rounded-full" 
+                      />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-bold text-thunder-black mb-1">
                       <span>2026</span>
-                      <span className="text-primary font-black">40%</span>
+                      <span className="text-primary font-black"><AnimatedCounter target={40} suffix="%" /></span>
                     </div>
                     <div className="h-4 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: "40%" }} />
+                      <motion.div 
+                        initial={{ width: "0%" }}
+                        whileInView={{ width: "40%" }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.4, ease: "easeOut" }}
+                        className="h-full bg-primary rounded-full" 
+                      />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-bold text-gray-600 mb-1">
                       <span>2027 (proj.)</span>
-                      <span>~55%</span>
+                      <span><AnimatedCounter target={55} prefix="~" suffix="%" /></span>
                     </div>
                     <div className="h-4 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full bg-primary-dark rounded-full" style={{ width: "55%" }} />
+                      <motion.div 
+                        initial={{ width: "0%" }}
+                        whileInView={{ width: "55%" }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.6, ease: "easeOut" }}
+                        className="h-full bg-primary-dark rounded-full" 
+                      />
                     </div>
                   </div>
                 </div>
@@ -487,40 +558,64 @@ export default function WhatAreConversationalAiAgentsGuide() {
                   <div>
                     <div className="flex justify-between text-xs font-bold text-gray-700 mb-1">
                       <span>Spring</span>
-                      <span>55</span>
+                      <span><AnimatedCounter target={55} /></span>
                     </div>
                     <div className="h-4 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full bg-blue-400 rounded-full" style={{ width: "55%" }} />
+                      <motion.div 
+                        initial={{ width: "0%" }}
+                        whileInView={{ width: "55%" }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.2, ease: "easeOut" }}
+                        className="h-full bg-blue-400 rounded-full" 
+                      />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-bold text-gray-700 mb-1">
                       <span>Summer (Tourist)</span>
-                      <span>78</span>
+                      <span><AnimatedCounter target={78} /></span>
                     </div>
                     <div className="h-4 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full bg-cyan-500 rounded-full" style={{ width: "78%" }} />
+                      <motion.div 
+                        initial={{ width: "0%" }}
+                        whileInView={{ width: "78%" }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.4, ease: "easeOut" }}
+                        className="h-full bg-cyan-500 rounded-full" 
+                      />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-bold text-thunder-black mb-1">
                       <span>Hurricane Season</span>
-                      <span className="text-primary font-black">92</span>
+                      <span className="text-primary font-black"><AnimatedCounter target={92} /></span>
                     </div>
                     <div className="h-4 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: "92%" }} />
+                      <motion.div 
+                        initial={{ width: "0%" }}
+                        whileInView={{ width: "92%" }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.6, ease: "easeOut" }}
+                        className="h-full bg-primary rounded-full" 
+                      />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-bold text-gray-700 mb-1">
                       <span>Winter (Snowbird)</span>
-                      <span>70</span>
+                      <span><AnimatedCounter target={70} /></span>
                     </div>
                     <div className="h-4 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full bg-indigo-500 rounded-full" style={{ width: "70%" }} />
+                      <motion.div 
+                        initial={{ width: "0%" }}
+                        whileInView={{ width: "70%" }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
+                        className="h-full bg-indigo-500 rounded-full" 
+                      />
                     </div>
                   </div>
                 </div>
