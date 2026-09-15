@@ -21,6 +21,7 @@ export function PlanCard({
   direction = "same",
   priceDiff = null,
   renewalDate = null,
+  isInTrial = false,
 }: {
   plan: DisplayPlan;
   displayName: string;
@@ -38,6 +39,11 @@ export function PlanCard({
   priceDiff?: number | null;
   /** Current period's end date, shown for downgrade's "takes effect on" copy. */
   renewalDate?: string | null;
+  /** True while the CURRENT subscription is still in its free trial —
+   *  switching plans then ends the trial immediately and charges this
+   *  plan's FULL price (never a diff, since nothing's been paid yet), no
+   *  matter whether the target plan costs more or less than the current one. */
+  isInTrial?: boolean;
 }) {
   const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
 
@@ -75,13 +81,19 @@ export function PlanCard({
         </p>
       )}
 
-      {!isCurrent && !isContactOnly && direction === "upgrade" && (
+      {!isCurrent && !isContactOnly && isInTrial && (
+        <p className="mt-2 text-xs font-medium text-amber-600">
+          Ends your free trial immediately — charged the full ${price} now,
+          not a difference.
+        </p>
+      )}
+      {!isCurrent && !isContactOnly && !isInTrial && direction === "upgrade" && (
         <p className="mt-2 text-xs text-gray-500">
           Charged{priceDiff != null ? ` $${priceDiff}` : ""} immediately — your
           renewal date doesn&apos;t change.
         </p>
       )}
-      {!isCurrent && !isContactOnly && direction === "downgrade" && (
+      {!isCurrent && !isContactOnly && !isInTrial && direction === "downgrade" && (
         <p className="mt-2 text-xs text-gray-500">
           Takes effect on {formatShortDate(renewalDate)}. No refund for the
           current period.
@@ -125,11 +137,13 @@ export function PlanCard({
               ? "Processing…"
               : isCurrent
                 ? `Switch to ${isYearly ? "Yearly" : "Monthly"}`
-                : direction === "upgrade"
-                  ? `Upgrade & Pay${priceDiff != null ? ` $${priceDiff}` : ""} Now`
-                  : direction === "downgrade"
-                    ? "Switch at Renewal"
-                    : "Switch & Pay"}
+                : isInTrial
+                  ? `End Trial & Pay $${price} Now`
+                  : direction === "upgrade"
+                    ? `Upgrade & Pay${priceDiff != null ? ` $${priceDiff}` : ""} Now`
+                    : direction === "downgrade"
+                      ? "Switch at Renewal"
+                      : "Switch & Pay"}
         </button>
       )}
     </div>

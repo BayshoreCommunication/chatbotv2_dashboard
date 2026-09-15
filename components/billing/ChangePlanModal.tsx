@@ -23,6 +23,7 @@ export function ChangePlanModal({
   currentBillingCycle,
   currentPeriodEnd,
   hasPaymentMethod,
+  isInTrial = false,
   onClose,
   onChanged,
 }: {
@@ -32,6 +33,10 @@ export function ChangePlanModal({
   currentPeriodEnd?: string | null;
   /** True if a card is already on file — switches plan directly with no payment form. */
   hasPaymentMethod: boolean;
+  /** True while the current subscription is still trialing — every plan
+   *  switch during a trial ends it immediately and charges the target
+   *  plan's FULL price (never a diff), regardless of up/down direction. */
+  isInTrial?: boolean;
   onClose: () => void;
   onChanged: () => void;
 }) {
@@ -40,12 +45,38 @@ export function ChangePlanModal({
   const [error, setError] = useState<string | null>(null);
   const [pendingPayment, setPendingPayment] = useState<string | null>(null);
   const [pendingIntentKind, setPendingIntentKind] = useState<"payment" | "setup">("payment");
+  // Shown in the payment form so the amount about to be charged is never a
+  // surprise — computed the same way describeSilentSwitch works out what a
+  // silent charge actually did.
+  const [pendingPlanName, setPendingPlanName] = useState<string>("");
+  const [pendingAmount, setPendingAmount] = useState<number | null>(null);
+  const [successInfo, setSuccessInfo] = useState<{ planName: string; amount: number | null } | null>(null);
 
   const selectedCycle: BillingCycle = isYearly ? "annual" : "monthly";
 
   const displayPlans: DisplayPlan[] = pricingPlans.filter(
     (plan) => plan.id !== "trial",
   );
+
+  /** What a silent (requires_payment: false) plan switch actually did —
+   *  used to show a clear confirmation instead of just closing the modal,
+   *  since a saved card can get charged with zero other feedback otherwise. */
+  const describeSilentSwitch = (tier: string) => {
+    const planName = pricingPlans.find((p) => p.id === tier)?.name ?? tier;
+    if (isInTrial) {
+      return { planName, amount: getPlanPrice(tier, selectedCycle), scheduled: false };
+    }
+    const currentPrice = getPlanPrice(currentPlanId, currentBillingCycle);
+    const targetPrice = getPlanPrice(tier, selectedCycle);
+    if (currentPrice != null && targetPrice != null && targetPrice < currentPrice) {
+      return { planName, amount: null, scheduled: true }; // downgrade — nothing charged now
+    }
+    const amount =
+      currentPrice != null && targetPrice != null && targetPrice > currentPrice
+        ? targetPrice - currentPrice // upgrade — flat top-up diff
+        : targetPrice; // same price / edge case — full price
+    return { planName, amount, scheduled: false };
+  };
 
   const handleSwitchPlan = async (planId: string) => {
     setError(null);
@@ -66,12 +97,23 @@ export function ChangePlanModal({
         }
 
         if (!result.data.requires_payment) {
+          const { planName, amount, scheduled } = describeSilentSwitch(tier);
           onChanged();
-          onClose();
+          setSwitchingPlanId(null);
+          setSuccessInfo({ planName, amount: scheduled ? null : amount });
           return;
         }
 
         if (result.data.client_secret) {
+          // This path only ever ends up here for the upgrade branch (a full
+          // price charge during trial or a downgrade never returns
+          // requires_payment: true), so the diff/full-price split from
+          // describeSilentSwitch doesn't apply — the amount due is always
+          // whatever the confirm screen's own describeSilentSwitch(tier)
+          // amount would be for an upgrade or trial-ending switch.
+          const { planName, amount } = describeSilentSwitch(tier);
+          setPendingPlanName(planName);
+          setPendingAmount(amount);
           setPendingPayment(result.data.client_secret);
           setPendingIntentKind(result.data.intent_kind ?? "payment");
         } else {
@@ -98,6 +140,12 @@ export function ChangePlanModal({
       }
 
       if (result.data.client_secret) {
+        setPendingPlanName(pricingPlans.find((p) => p.id === tier)?.name ?? tier);
+        // intent_kind "setup" means this is a genuine new trial (no charge
+        // yet) — otherwise it's a real signup charge for the full price.
+        setPendingAmount(
+          result.data.intent_kind === "setup" ? 0 : getPlanPrice(tier, selectedCycle),
+        );
         setPendingPayment(result.data.client_secret);
         setPendingIntentKind(result.data.intent_kind ?? "payment");
       } else {
@@ -111,9 +159,9 @@ export function ChangePlanModal({
   };
 
   const handlePaymentSuccess = () => {
-    setPendingPayment(null);
     onChanged();
-    onClose();
+    setSuccessInfo({ planName: pendingPlanName, amount: pendingAmount });
+    setPendingPayment(null);
   };
 
   return (
@@ -138,7 +186,26 @@ export function ChangePlanModal({
             </div>
           )}
 
-          {pendingPayment ? (
+          {successInfo ? (
+            <div className="mx-auto max-w-md rounded-xl border border-green-200 bg-green-50 p-5 text-center">
+              <p className="font-semibold text-green-800">
+                You&apos;re now on {successInfo.planName}
+              </p>
+              <p className="mt-1 text-sm text-green-700">
+                {successInfo.amount === null
+                  ? "No charge today — this takes effect at your next renewal, no refund for the current period."
+                  : successInfo.amount === 0
+                    ? "$0.00 charged today."
+                    : `$${successInfo.amount} charged to your card on file just now.`}
+              </p>
+              <button
+                onClick={onClose}
+                className="mt-4 rounded-lg bg-thunder-black px-4 py-2 text-sm font-semibold text-white hover:bg-thunder-black/90"
+              >
+                Done
+              </button>
+            </div>
+          ) : pendingPayment ? (
             <div className="mx-auto max-w-md">
               <p className="mb-4 text-sm text-gray-600">
                 Enter your card details to complete the subscription.
@@ -156,6 +223,10 @@ export function ChangePlanModal({
                       ? window.location.href
                       : "/dashboard/settings"
                   }
+                  isTrial={pendingIntentKind === "setup"}
+                  planName={pendingPlanName}
+                  price={pendingAmount ?? undefined}
+                  billingCycle={selectedCycle}
                 />
               </StripeElementsProvider>
             </div>
@@ -203,6 +274,7 @@ export function ChangePlanModal({
                           : null
                       }
                       renewalDate={currentPeriodEnd ?? null}
+                      isInTrial={isInTrial}
                     />
                   );
                 })}

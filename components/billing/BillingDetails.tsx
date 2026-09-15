@@ -424,6 +424,7 @@ const BillingDetails = () => {
           currentBillingCycle={subscription.billing_cycle}
           currentPeriodEnd={subscription.current_period_end}
           hasPaymentMethod={cards.length > 0}
+          isInTrial={subscription.is_in_trial}
           onClose={() => setIsPlanModalOpen(false)}
           onChanged={() => void loadAll()}
         />
