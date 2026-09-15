@@ -11,15 +11,25 @@ import { BeforeConfirmResult, SignupPaymentForm } from "./SignupPaymentForm";
 import { StripeElementsProvider } from "./StripeElementsProvider";
 import { BillingCycle, DisplayPlan } from "./types";
 
+/** Price for a plan id at a given cycle, or null for custom-priced plans. */
+function getPlanPrice(planId: string, cycle: BillingCycle): number | null {
+  const plan = pricingPlans.find((p) => p.id === planId);
+  if (!plan || plan.isCustomPricing) return null;
+  return cycle === "annual" ? plan.yearlyPrice : plan.monthlyPrice;
+}
+
 export function ChangePlanModal({
   currentPlanId,
   currentBillingCycle,
+  currentPeriodEnd,
   hasPaymentMethod,
   onClose,
   onChanged,
 }: {
   currentPlanId: string;
   currentBillingCycle: BillingCycle;
+  /** ISO date string — when a downgrade to a lower tier would take effect. */
+  currentPeriodEnd?: string | null;
   /** True if a card is already on file — switches plan directly with no payment form. */
   hasPaymentMethod: boolean;
   onClose: () => void;
@@ -159,6 +169,21 @@ export function ChangePlanModal({
                   const isCurrent = !isContactOnly && plan.id === currentPlanId;
                   const isExactMatch = isCurrent && selectedCycle === currentBillingCycle;
 
+                  // Direction compared the same way the backend decides it:
+                  // the currently-billed price (at currentBillingCycle) vs.
+                  // the target price at the cycle being selected here — not
+                  // hasPaymentMethod-only "Switch & Pay" copy from before.
+                  const currentPrice = getPlanPrice(currentPlanId, currentBillingCycle);
+                  const targetPrice = getPlanPrice(plan.id, selectedCycle);
+                  const direction: "upgrade" | "downgrade" | "same" =
+                    isContactOnly || currentPrice == null || targetPrice == null
+                      ? "same"
+                      : targetPrice > currentPrice
+                        ? "upgrade"
+                        : targetPrice < currentPrice
+                          ? "downgrade"
+                          : "same";
+
                   return (
                     <PlanCard
                       key={plan.id}
@@ -171,6 +196,13 @@ export function ChangePlanModal({
                       currentBillingCycle={currentBillingCycle}
                       switchingPlanId={switchingPlanId}
                       onSwitchPlan={handleSwitchPlan}
+                      direction={isCurrent ? "same" : direction}
+                      priceDiff={
+                        currentPrice != null && targetPrice != null
+                          ? Math.abs(targetPrice - currentPrice)
+                          : null
+                      }
+                      renewalDate={currentPeriodEnd ?? null}
                     />
                   );
                 })}

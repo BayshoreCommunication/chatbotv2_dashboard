@@ -1,6 +1,13 @@
 import { BiCheck } from "react-icons/bi";
 import { BillingCycle, DisplayPlan } from "./types";
 
+function formatShortDate(iso: string | null | undefined): string {
+  if (!iso) return "your next billing date";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "your next billing date";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 export function PlanCard({
   plan,
   displayName,
@@ -11,6 +18,9 @@ export function PlanCard({
   currentBillingCycle,
   switchingPlanId,
   onSwitchPlan,
+  direction = "same",
+  priceDiff = null,
+  renewalDate = null,
 }: {
   plan: DisplayPlan;
   displayName: string;
@@ -21,6 +31,13 @@ export function PlanCard({
   currentBillingCycle: BillingCycle;
   switchingPlanId: string | null;
   onSwitchPlan: (planId: string) => void;
+  /** How this plan's price compares to the currently-billed plan. */
+  direction?: "upgrade" | "downgrade" | "same";
+  /** Absolute dollar difference vs. the current plan, for display only —
+   *  the real charge is always computed server-side from live Stripe prices. */
+  priceDiff?: number | null;
+  /** Current period's end date, shown for downgrade's "takes effect on" copy. */
+  renewalDate?: string | null;
 }) {
   const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
 
@@ -55,6 +72,19 @@ export function PlanCard({
       {isCurrent && !isExactMatch && (
         <p className="mt-2 text-xs font-medium text-primary-dark">
           Currently on {currentBillingCycle === "annual" ? "yearly" : "monthly"} billing
+        </p>
+      )}
+
+      {!isCurrent && !isContactOnly && direction === "upgrade" && (
+        <p className="mt-2 text-xs text-gray-500">
+          Charged{priceDiff != null ? ` $${priceDiff}` : ""} immediately — your
+          renewal date doesn&apos;t change.
+        </p>
+      )}
+      {!isCurrent && !isContactOnly && direction === "downgrade" && (
+        <p className="mt-2 text-xs text-gray-500">
+          Takes effect on {formatShortDate(renewalDate)}. No refund for the
+          current period.
         </p>
       )}
 
@@ -95,7 +125,11 @@ export function PlanCard({
               ? "Processing…"
               : isCurrent
                 ? `Switch to ${isYearly ? "Yearly" : "Monthly"}`
-                : "Switch & Pay"}
+                : direction === "upgrade"
+                  ? `Upgrade & Pay${priceDiff != null ? ` $${priceDiff}` : ""} Now`
+                  : direction === "downgrade"
+                    ? "Switch at Renewal"
+                    : "Switch & Pay"}
         </button>
       )}
     </div>

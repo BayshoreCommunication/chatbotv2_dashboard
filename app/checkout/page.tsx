@@ -6,6 +6,7 @@ import {
   getIsSubscribedAction,
   getSessionInfoAction,
   getSubscriptionAction,
+  SubscriptionData,
 } from "@/app/actions/subscriptions";
 import { invalidateUserProfileCacheAction } from "@/app/actions/user";
 import { getWidgetSettingsAction } from "@/app/actions/widgetSettings";
@@ -124,47 +125,76 @@ function CheckoutContent() {
     getSessionInfoAction().then((info) => setUserEmail(info.email));
   }, []);
 
+  // Fetched once on mount and reused by both the trial-mode decision below
+  // and handleBeforeConfirm on submit — undefined means "still loading".
+  // This has to be known BEFORE Stripe Elements mounts: Elements is created
+  // in "setup" mode whenever the plan nominally offers a trial, but a
+  // company that already burned its one-time trial gets charged immediately
+  // instead (the backend won't grant a second one). If Elements mounted in
+  // "setup" mode while the backend actually returns a PaymentIntent, Stripe.js
+  // throws "collected in `setup` mode... cannot be confirmed with a Payment
+  // Intent" — so the mode shown here must already reflect real eligibility.
+  const [existingSub, setExistingSub] = useState<SubscriptionData | null | undefined>(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSubscriptionAction().then((res) => {
+      if (cancelled) return;
+      setExistingSub(res.ok && res.data ? res.data : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const hasActivePaidSub =
+    !!existingSub &&
+    existingSub.subscription_tier !== "free" &&
+    (existingSub.subscription_status === "active" ||
+      existingSub.subscription_status === "trialing");
+
   const [trialEndDate, setTrialEndDate] = useState<string | null>(null);
 
   // Date.now() is impure — compute the trial end date in an effect rather
   // than inline during render (React purity rule).
+  // Only offer trial framing when the plan has one AND this company hasn't
+  // already burned its one-time trial AND isn't already an active paying
+  // subscriber (change-plan never grants a trial either) — same eligibility
+  // rule create_subscription_intent enforces server-side.
+  const canStillTrial = !!plan.trialDays && !hasActivePaidSub && !existingSub?.free_trial_used;
+
   useEffect(() => {
-    if (!plan.trialDays) {
+    if (!canStillTrial) {
       setTrialEndDate(null);
       return;
     }
     setTrialEndDate(
-      new Date(Date.now() + plan.trialDays * 24 * 60 * 60 * 1000).toLocaleDateString(
+      new Date(Date.now() + plan.trialDays! * 24 * 60 * 60 * 1000).toLocaleDateString(
         "en-US",
         { month: "long", day: "numeric", year: "numeric" }
       )
     );
-  }, [plan.trialDays]);
+  }, [canStillTrial, plan.trialDays]);
 
   const tier = plan.id === "trial"
     ? "free"
     : (plan.id as "free" | "professional" | "advanced" | "enterprise");
 
-  const isTrial      = !!plan.trialDays;
+  const isTrial      = canStillTrial;
   const price        = billingCycle === "annual" ? plan.yearlyPrice : plan.monthlyPrice;
   const cycleLabel   = billingCycle === "annual" ? "year" : "month";
 
   // Deferred Elements mode: "setup" collects a card for future billing (trial),
-  // "payment" collects a card for immediate charge (no trial).
+  // "payment" collects a card for immediate charge (no trial). existingSub is
+  // still loading (undefined) is handled by the render gate below — Elements
+  // never mounts until eligibility is known, so this can't race.
   const elementsMode   = isTrial ? ("setup" as const) : ("payment" as const);
   const elementsAmount = isTrial ? 0 : Math.round(price * 100);
 
   // Called only when the user clicks the submit button — no subscription is
-  // created or modified until this point.
+  // created or modified until this point. Reuses the same existingSub fetched
+  // on mount (used above to decide the Elements mode) rather than re-fetching.
   const handleBeforeConfirm = async (): Promise<BeforeConfirmResult> => {
-    const existingSub = await getSubscriptionAction();
-    const hasActivePaidSub =
-      existingSub.ok &&
-      existingSub.data &&
-      existingSub.data.subscription_tier !== "free" &&
-      (existingSub.data.subscription_status === "active" ||
-        existingSub.data.subscription_status === "trialing");
-
     if (hasActivePaidSub) {
       const result = await changeSubscriptionPlanAction(tier, billingCycle);
       if (!result.ok || !result.data)
@@ -237,23 +267,34 @@ function CheckoutContent() {
               </div>
 
               {/* Payment form — Elements mounted in deferred mode; no Stripe
-                  subscription is created until the user clicks submit. */}
-              <StripeElementsProvider
-                mode={elementsMode}
-                amount={elementsAmount}
-                currency="usd"
-              >
-                <SignupPaymentForm
-                  onBeforeConfirm={handleBeforeConfirm}
-                  onSuccess={handlePaymentSuccess}
-                  returnUrl={returnUrl}
-                  isTrial={isTrial}
-                  planName={plan.name}
-                  trialDays={plan.trialDays}
-                  price={price}
-                  billingCycle={billingCycle}
-                />
-              </StripeElementsProvider>
+                  subscription is created until the user clicks submit.
+                  Held back until existingSub resolves so it never mounts in
+                  the wrong mode (setup vs. payment) for this company's real
+                  trial eligibility — see the isTrial/canStillTrial comment
+                  above for why that mismatch would break confirmation. */}
+              {existingSub === undefined ? (
+                <div className="flex items-center justify-center gap-2 py-10 text-sm text-gray-400">
+                  <BiLoaderAlt className="animate-spin" size={16} />
+                  Loading…
+                </div>
+              ) : (
+                <StripeElementsProvider
+                  mode={elementsMode}
+                  amount={elementsAmount}
+                  currency="usd"
+                >
+                  <SignupPaymentForm
+                    onBeforeConfirm={handleBeforeConfirm}
+                    onSuccess={handlePaymentSuccess}
+                    returnUrl={returnUrl}
+                    isTrial={isTrial}
+                    planName={plan.name}
+                    trialDays={plan.trialDays}
+                    price={price}
+                    billingCycle={billingCycle}
+                  />
+                </StripeElementsProvider>
+              )}
 
               {confirming && (
                 <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-gray-500">

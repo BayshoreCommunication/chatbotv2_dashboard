@@ -128,6 +128,10 @@ export async function proxy(request: NextRequest) {
       // safely wait out — double-gating it here only fights that logic and
       // bounces users mid-poll.
       "/widget-settings",
+      // A company must always be able to reach /billing to fix a failed
+      // payment (past_due / overdue) — never bounce it away to "/" before
+      // it gets a chance to see the Payment Due / Overdue banner and pay.
+      "/billing",
     ];
 
     if (subscriptionExemptPaths.some((path) => pathname.startsWith(path))) {

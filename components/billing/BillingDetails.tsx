@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/billing";
 import {
   getSubscriptionAction,
+  retryPaymentAction,
   SubscriptionData,
 } from "@/app/actions/subscriptions";
 import { useCallback, useEffect, useState } from "react";
@@ -18,6 +19,7 @@ import {
   BiCheckCircle,
   BiCreditCard,
   BiDownload,
+  BiErrorCircle,
   BiGift,
   BiPlus,
   BiRefresh,
@@ -28,7 +30,9 @@ import {
 import { BsFileEarmarkText, BsLightningCharge } from "react-icons/bs";
 import { ChangePlanModal } from "./ChangePlanModal";
 import { PaymentMethodsModal } from "./PaymentMethodsModal";
+import { BeforeConfirmResult, SignupPaymentForm } from "./SignupPaymentForm";
 import { StatusBadge } from "./StatusBadge";
+import { StripeElementsProvider } from "./StripeElementsProvider";
 import { Invoice, InvoiceKind, PaymentCard } from "./types";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -167,6 +171,11 @@ const BillingDetails = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
 
+  const [payNowSecret, setPayNowSecret] = useState<string | null>(null);
+  const [payNowIntentKind, setPayNowIntentKind] = useState<"payment" | "setup">("payment");
+  const [payNowError, setPayNowError] = useState<string | null>(null);
+  const [payNowLoading, setPayNowLoading] = useState(false);
+
   const loadAll = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -223,6 +232,39 @@ const BillingDetails = () => {
     if (!res.ok) setCards(prevCards);
   };
 
+  const handlePayNow = async () => {
+    setPayNowError(null);
+    setPayNowLoading(true);
+    try {
+      const res = await retryPaymentAction();
+      if (!res.ok || !res.data) {
+        setPayNowError(res.error || "Failed to start payment.");
+        return;
+      }
+      if (!res.data.requires_payment) {
+        // Already paid (e.g. Stripe's own retry succeeded moments ago) —
+        // just refresh so the banner clears.
+        void loadAll();
+        return;
+      }
+      if (!res.data.client_secret) {
+        setPayNowError("Failed to start payment.");
+        return;
+      }
+      setPayNowSecret(res.data.client_secret);
+      setPayNowIntentKind(res.data.intent_kind ?? "payment");
+    } catch {
+      setPayNowError("An unexpected error occurred.");
+    } finally {
+      setPayNowLoading(false);
+    }
+  };
+
+  const handlePayNowSuccess = () => {
+    setPayNowSecret(null);
+    void loadAll();
+  };
+
   // Summary stats
   const totalPaid = invoices
     .filter((inv) => inv.status === "paid" && inv.kind !== "trial")
@@ -242,27 +284,43 @@ const BillingDetails = () => {
         },
         {
           title: "Status",
-          value: subscription.is_in_trial
-            ? "Free Trial"
-            : subscription.is_active
-              ? "Active"
-              : subscription.subscription_status,
-          subtitle: subscription.is_in_trial
-            ? `Ends ${formatIsoDate(subscription.trial_end)}`
-            : subscription.is_active
-              ? "Subscription in good standing"
-              : "Action may be needed",
+          value: subscription.is_overdue
+            ? "Overdue"
+            : subscription.subscription_status === "past_due"
+              ? "Payment Due"
+              : subscription.is_in_trial
+                ? "Free Trial"
+                : subscription.is_active
+                  ? "Active"
+                  : subscription.subscription_status,
+          subtitle: subscription.is_overdue
+            ? "Chatbot paused — pay to resume"
+            : subscription.subscription_status === "past_due"
+              ? `Pay by ${formatIsoDate(subscription.grace_period_end)}`
+              : subscription.is_in_trial
+                ? `Ends ${formatIsoDate(subscription.trial_end)}`
+                : subscription.is_active
+                  ? "Subscription in good standing"
+                  : "Action may be needed",
           icon: <BiCheckCircle size={20} />,
-          bg: subscription.is_in_trial
-            ? "bg-purple-50"
-            : subscription.is_active
-              ? "bg-green-50"
-              : "bg-yellow-50",
-          iconColor: subscription.is_in_trial
-            ? "text-purple-600"
-            : subscription.is_active
-              ? "text-green-600"
-              : "text-yellow-600",
+          bg: subscription.is_overdue
+            ? "bg-red-50"
+            : subscription.subscription_status === "past_due"
+              ? "bg-amber-50"
+              : subscription.is_in_trial
+                ? "bg-purple-50"
+                : subscription.is_active
+                  ? "bg-green-50"
+                  : "bg-yellow-50",
+          iconColor: subscription.is_overdue
+            ? "text-red-600"
+            : subscription.subscription_status === "past_due"
+              ? "text-amber-600"
+              : subscription.is_in_trial
+                ? "text-purple-600"
+                : subscription.is_active
+                  ? "text-green-600"
+                  : "text-yellow-600",
         },
         {
           title: "Billing Cycle",
@@ -364,6 +422,7 @@ const BillingDetails = () => {
         <ChangePlanModal
           currentPlanId={subscription.subscription_tier}
           currentBillingCycle={subscription.billing_cycle}
+          currentPeriodEnd={subscription.current_period_end}
           hasPaymentMethod={cards.length > 0}
           onClose={() => setIsPlanModalOpen(false)}
           onChanged={() => void loadAll()}
@@ -414,6 +473,105 @@ const BillingDetails = () => {
               saved card will be charged automatically when it ends — cancel any
               time before then at no cost.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Pending downgrade banner ─────────────────────────────────────── */}
+      {subscription?.pending_downgrade_tier && (
+        <div className="flex items-start gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-4">
+          <BiTransfer size={20} className="mt-0.5 shrink-0 text-indigo-600" />
+          <div className="min-w-0">
+            <p className="font-semibold text-indigo-800">
+              Downgrading to {tierDisplayName(subscription.pending_downgrade_tier)}
+            </p>
+            <p className="mt-0.5 text-sm text-indigo-700">
+              You&apos;ll keep your current plan&apos;s features until{" "}
+              <strong>{formatIsoDate(subscription.pending_downgrade_effective_at)}</strong>,
+              then it switches automatically — no charge, no refund for the
+              current period.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Payment Due banner (grace period) ───────────────────────────── */}
+      {subscription?.subscription_status === "past_due" && !subscription.is_overdue && (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+          <BiErrorCircle size={20} className="mt-0.5 shrink-0 text-amber-600" />
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-amber-800">
+              Your payment didn&apos;t go through
+            </p>
+            <p className="mt-0.5 text-sm text-amber-700">
+              Please update your payment method by{" "}
+              <strong>{formatIsoDate(subscription.grace_period_end)}</strong> — if
+              payment isn&apos;t received by then, your chatbot will stop
+              answering your visitors&apos; questions.
+            </p>
+          </div>
+          <button
+            onClick={handlePayNow}
+            disabled={payNowLoading}
+            className="shrink-0 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-60"
+          >
+            {payNowLoading ? "Loading…" : "Pay Now"}
+          </button>
+        </div>
+      )}
+
+      {/* ── Overdue banner (grace period lapsed) ────────────────────────── */}
+      {subscription?.is_overdue && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+          <BiErrorCircle size={20} className="mt-0.5 shrink-0 text-red-600" />
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-red-800">
+              Your chatbot is currently paused
+            </p>
+            <p className="mt-0.5 text-sm text-red-700">
+              Payment is overdue, so your chatbot has stopped answering
+              visitor questions. Your dashboard and data are safe — pay now
+              to turn it back on immediately.
+            </p>
+          </div>
+          <button
+            onClick={handlePayNow}
+            disabled={payNowLoading}
+            className="shrink-0 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+          >
+            {payNowLoading ? "Loading…" : "Pay Now"}
+          </button>
+        </div>
+      )}
+
+      {payNowError && !payNowSecret && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm text-red-700">
+          {payNowError}
+        </div>
+      )}
+
+      {/* ── Pay Now form ─────────────────────────────────────────────────── */}
+      {payNowSecret && (
+        <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <p className="mb-4 text-sm font-semibold text-gray-900">
+            Update payment and pay outstanding balance
+          </p>
+          <div className="mx-auto max-w-md">
+            <StripeElementsProvider clientSecret={payNowSecret}>
+              <SignupPaymentForm
+                onSuccess={handlePayNowSuccess}
+                onBeforeConfirm={async (): Promise<BeforeConfirmResult> => ({
+                  clientSecret: payNowSecret,
+                  intentKind: payNowIntentKind,
+                  requiresPayment: true,
+                })}
+                returnUrl={
+                  typeof window !== "undefined"
+                    ? window.location.href
+                    : "/dashboard/billing"
+                }
+              />
+            </StripeElementsProvider>
           </div>
         </div>
       )}

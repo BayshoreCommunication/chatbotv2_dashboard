@@ -99,6 +99,18 @@ export function StripeElementsProvider({
         // "automatic payment methods … cannot be confirmed through the API
         // configured with payment_method_types".
         payment_method_types: ["card"],
+        // Every subscription this app creates uses
+        // payment_settings.save_default_payment_method: "on_subscription"
+        // server-side, which makes Stripe set setup_future_usage="off_session"
+        // on the invoice's real PaymentIntent. In deferred mode ("payment"
+        // here, no clientSecret yet), Elements has no way to know that ahead
+        // of time and defaults to null — confirming against a PaymentIntent
+        // whose setup_future_usage doesn't match what Elements was told then
+        // fails with "provided setup_future_usage (off_session) does not
+        // match the expected setup_future_usage (null)". Declaring it here
+        // keeps the two in sync. Not applicable to mode "setup" (a SetupIntent
+        // is inherently for future/off-session usage, no separate flag).
+        ...(mode === "payment" ? { setup_future_usage: "off_session" } : {}),
         appearance: APPEARANCE,
       } as any);
 

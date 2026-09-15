@@ -11,6 +11,10 @@ interface ChatbotPreviewProps {
 const ChatbotPreview = ({ data }: ChatbotPreviewProps) => {
   const primaryColor = data.theme.primary_color || "#474747";
   const fontFamily = data.theme.font_family || "Inter";
+  // Mirrors the real on-page widget: only an explicit "bottom-left" moves it
+  // left — anything else (including missing/unrecognized data) stays right,
+  // same default used everywhere else (backend model, settings.json fallback).
+  const isLeft = data.launcher.position === "bottom-left";
 
   useEffect(() => {
     if (!fontFamily || fontFamily === "Inter") return;
@@ -28,10 +32,10 @@ const ChatbotPreview = ({ data }: ChatbotPreviewProps) => {
     <div className="flex h-full w-full flex-col gap-4 overflow-y-auto" style={{ fontFamily }}>
 
       {/* Chat Window Preview */}
-      <div className="flex justify-center px-2 pt-2">
+      <div className={`flex px-2 pt-2 ${isLeft ? "justify-start" : "justify-end"}`}>
         <div
           className="flex h-[600px] w-[380px] shrink-0 flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
-          style={{ transformOrigin: "bottom right" }}
+          style={{ transformOrigin: isLeft ? "bottom left" : "bottom right" }}
         >
           {/* Header */}
           <div

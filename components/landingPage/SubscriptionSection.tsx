@@ -30,11 +30,14 @@ const SubscriptionSection = ({
   const [loading, setLoading] = useState<string | null>(null);
   const [currentTier, setCurrentTier] = useState<string | null>(null);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [freeTrialUsed, setFreeTrialUsed] = useState(false);
   const router = useRouter();
 
   // The session never carries real subscription state (no has_paid_subscription
   // field is populated upstream) — check the real subscription from the backend
-  // instead. Also gives us the current tier, needed for Upgrade/Downgrade labels.
+  // instead. Also gives us the current tier (for Upgrade/Downgrade labels) and
+  // whether this company has already burned its one-time trial (so the card
+  // never dangles a second "Start N-Day Free Trial" in front of them).
   useEffect(() => {
     if (!isAuthenticated) return;
     let cancelled = false;
@@ -43,6 +46,7 @@ const SubscriptionSection = ({
       if (res.ok && res.data) {
         setCurrentTier(res.data.subscription_tier);
         setHasActiveSubscription(res.data.is_active);
+        setFreeTrialUsed(res.data.free_trial_used);
       }
     });
     return () => {
@@ -156,6 +160,7 @@ const SubscriptionSection = ({
               isYearly={isYearly}
               hasActiveSubscription={hasActiveSubscription}
               currentTier={currentTier}
+              freeTrialUsed={freeTrialUsed}
             />
           ))}
         </motion.div>

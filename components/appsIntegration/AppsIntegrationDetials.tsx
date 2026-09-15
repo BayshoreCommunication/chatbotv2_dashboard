@@ -176,6 +176,7 @@ const AppsIntegrationDetials = () => {
     };
     load();
   }, [checkingAccess, hasAdvancedAccess]);
+    
 
   // Picks up where the backend's OAuth callback left off: it redirects the
   // browser back here with either ?selection_id=... (pick which Page(s) to

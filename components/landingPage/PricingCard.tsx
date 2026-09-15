@@ -26,6 +26,8 @@ interface PricingCardProps {
   /** Real subscription state from the backend — has_paid_subscription on the session is never populated, don't rely on it. */
   hasActiveSubscription?: boolean;
   currentTier?: string | null;
+  /** True once this company has ever started a trial — they can never get another one. */
+  freeTrialUsed?: boolean;
 }
 
 // "trial" (this plan's id) and "free" (the backend tier name for it) refer
@@ -47,6 +49,7 @@ export const PricingCard = memo(
     isYearly,
     hasActiveSubscription = false,
     currentTier = null,
+    freeTrialUsed = false,
   }: PricingCardProps) => {
     const router = useRouter();
     const [showEnterpriseModal, setShowEnterpriseModal] = useState(false);
@@ -61,6 +64,12 @@ export const PricingCard = memo(
       hasPaidPlan && TIER_RANK[plan.id] === TIER_RANK[currentTier!];
     const isUpgrade =
       hasPaidPlan && !isCurrentPlan && TIER_RANK[plan.id] > TIER_RANK[currentTier!];
+
+    // Only dangle the trial offer when there's actually one left to give —
+    // a company that has ever started a trial (even a long-since-expired
+    // one) can never get another, so neither the badge nor the button
+    // should imply otherwise.
+    const showTrialOffer = !!plan.trialDays && !isCurrentPlan && !freeTrialUsed;
 
     return (
       <motion.div
@@ -116,7 +125,7 @@ export const PricingCard = memo(
                 <p className="mt-1 text-sm text-gray-500">
                   {isYearly ? `Billed $${price} annually` : "Billed monthly"}
                 </p>
-                {plan.trialDays && !isCurrentPlan && (
+                {showTrialOffer && (
                   <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
                     {plan.trialDays}-day free trial — then billed automatically
                   </span>
@@ -184,7 +193,7 @@ export const PricingCard = memo(
                             ? isUpgrade
                               ? `Upgrade to ${plan.name}`
                               : `Downgrade to ${plan.name}`
-                            : plan.trialDays
+                            : showTrialOffer
                               ? `Start ${plan.trialDays}-Day Free Trial`
                               : "Get Started"}
                       <BsArrowRight className="h-5 w-5" />

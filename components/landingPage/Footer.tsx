@@ -114,6 +114,7 @@ const Footer = () => {
                 const Icon = social.icon;
                 return (
                   <motion.a
+                    target="_blank"
                     key={social.label}
                     href={social.href}
                     aria-label={social.label}
@@ -156,14 +157,14 @@ const Footer = () => {
           </span>
           <span className="text-gray-400">
             Product by{" "}
-            <a
+            <Link
               href="https://www.bayshorecommunication.com/"
               target="_blank"
               rel="noreferrer"
               className="text-gray-400 underline-offset-2 transition-colors hover:text-white hover:underline"
             >
               Bayshore Communication
-            </a>
+            </Link>
           </span>
         </div>
       </div>

@@ -35,6 +35,17 @@ export type SubscriptionData = {
   conversation_limit: number | null;
   conversations_used: number;
   free_trial_used: boolean;
+  /** Set the moment a charge fails (post-trial or any renewal). */
+  past_due_since: string | null;
+  /** past_due_since + the grace period — when the chatbot will/did turn off. */
+  grace_period_end: string | null;
+  /** True once the grace period has lapsed with no successful payment — the
+   *  chatbot has stopped answering visitors (dashboard access is unaffected). */
+  is_overdue: boolean;
+  /** Set when a downgrade is scheduled — the tier it'll switch to at renewal. */
+  pending_downgrade_tier: SubscriptionTier | null;
+  /** When the scheduled downgrade above takes effect. */
+  pending_downgrade_effective_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -191,6 +202,31 @@ export async function changeSubscriptionPlanAction(
       body: JSON.stringify({ tier, billing_cycle: billingCycle }),
     }
   );
+}
+
+/**
+ * POST /api/v1/subscription/retry-payment/{companyId}
+ * For a past_due/overdue subscription's "Pay Now" button — returns a
+ * client_secret for the same Stripe Elements confirm flow used everywhere
+ * else (SignupPaymentForm), letting the customer reuse their saved card or
+ * enter a new one to clear the open invoice.
+ */
+export async function retryPaymentAction(): Promise<
+  ActionResponse<{
+    ok: boolean;
+    requires_payment: boolean;
+    client_secret: string | null;
+    intent_kind?: "payment" | "setup" | null;
+  }>
+> {
+  const { token, companyId } = await getSession();
+  if (!token || !companyId)
+    return { ok: false, error: "You must be logged in." };
+
+  return apiFetch(`/api/v1/subscription/retry-payment/${companyId}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 /**

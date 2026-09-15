@@ -4,7 +4,7 @@ import { otpSigninAction, requestLoginOtpAction } from "@/app/actions/auth";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { BiEnvelope, BiLogIn, BiShield, BiX } from "react-icons/bi";
 
 const SigninPage = () => {
@@ -22,6 +22,7 @@ const SigninPage = () => {
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpTimer, setOtpTimer] = useState(0);
+  const otpIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [state, formAction, isPending] = useActionState(otpSigninAction, {
     ok: false,
@@ -37,15 +38,29 @@ const SigninPage = () => {
   }, [state.ok, state.redirectTo, callbackUrl]);
 
   const startOtpCountdown = () => {
-    const interval = setInterval(() => {
+    if (otpIntervalRef.current) clearInterval(otpIntervalRef.current);
+    otpIntervalRef.current = setInterval(() => {
       setOtpTimer((prev) => {
         if (prev <= 1) {
-          clearInterval(interval);
+          if (otpIntervalRef.current) clearInterval(otpIntervalRef.current);
+          otpIntervalRef.current = null;
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (otpIntervalRef.current) clearInterval(otpIntervalRef.current);
+    };
+  }, []);
+
+  const closeOtpModal = () => {
+    if (otpIntervalRef.current) clearInterval(otpIntervalRef.current);
+    otpIntervalRef.current = null;
+    setShowOTPModal(false);
   };
 
   const formatTime = (seconds: number) => {
@@ -227,7 +242,7 @@ const SigninPage = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-              onClick={() => !isPending && setShowOTPModal(false)}
+              onClick={() => !isPending && closeOtpModal()}
             />
 
             <motion.div
@@ -242,7 +257,7 @@ const SigninPage = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
-                  onClick={() => !isPending && setShowOTPModal(false)}
+                  onClick={() => !isPending && closeOtpModal()}
                   disabled={isPending}
                   className="absolute right-4 top-4 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
                 >
