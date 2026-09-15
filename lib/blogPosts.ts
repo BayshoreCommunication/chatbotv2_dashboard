@@ -30,20 +30,48 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "ai-lead-qualification-vs-manual-lead-scoring",
+    tag: "Strategy & Tech",
+    title: "AI Lead Qualification vs Manual Lead Scoring Which Is Better",
+    description:
+      "Compare AI lead qualification with manual lead scoring to see which approach is better for your business. Discover how Go Converto helps you achieve faster results, higher accuracy, increased conversions, and scalable growth.",
+    author: "Go Converto Team",
+    authorRole: "Editorial Team",
+    authorBio: "",
+    initials: "GC",
+    avatarColor: "bg-blue-600",
+    date: "September 15, 2026",
+    readTime: "8 min read",
+    gradient: "from-blue-700 via-blue-600 to-blue-400",
+    image: "/assets/static-blog/ai-lead-qualification-vs-manual-lead-scoring.webp",
+    intro:
+      "AI lead qualification beats manual scoring on nearly every measurable front in 2026. Manual scoring runs on static fields and averages 15% to 25% accuracy. AI systems that read live behavior and conversation reach 40% to 60%, and they never sleep, stall, or forget to follow up.",
+    sections: [
+      {
+        heading: "What Is Manual Lead Scoring, Really?",
+        body: "Manual lead scoring assigns points to a lead based on fields a human decided mattered months ago. Job title gets 10 points. Company size gets 15. Downloaded a whitepaper? Add 5 more.",
+      },
+    ],
+    outro: {
+      heading: "The takeaway",
+      body: "For the 95% of Florida businesses fielding website inquiries, speed and consistency win. An AI system doesn't call in sick, forget to update the spreadsheet, or wait until Monday.",
+    },
+  },
+  {
     slug: "what-are-conversational-ai-agents-guide",
     tag: "Strategy",
     title: "What Are Conversational AI Agents?",
     description:
       "Conversational AI agents handle customer chats and book leads automatically. Learn the secret strategy capturing 8pm Tampa buyers today.",
-    author: "",
-    authorRole: "",
+    author: "Go Converto Team",
+    authorRole: "Editorial Team",
     authorBio: "",
-    initials: "",
+    initials: "GC",
     avatarColor: "bg-blue-600",
     date: "Sep 8, 2026",
     readTime: "8 min read",
     gradient: "from-blue-700 via-blue-600 to-blue-400",
-    image: "/assets/blog/what-are-conversational-ai-agents-guide.webp",
+    image: "/assets/static-blog/what-are-conversational-ai-agents-guide.webp",
     intro:
       "Conversational AI agents are the next logical evolution of computer proxies, allowing systems to interpret natural human conversations, delegating tasks such as lead qualification or scheduling that previously required human intervention.",
     sections: [

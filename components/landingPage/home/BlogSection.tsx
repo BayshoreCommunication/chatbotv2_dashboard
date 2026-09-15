@@ -64,16 +64,16 @@ const BlogSection = () => {
             className="grid grid-cols-1 overflow-hidden rounded-2xl border border-gray-200 transition-shadow hover:shadow-lg md:grid-cols-2"
           >
             <div
-              className={`relative min-h-[220px] bg-gradient-to-br ${FEATURED_POST.gradient} md:min-h-[320px]`}
+              className={`relative min-h-[240px] bg-slate-50 md:min-h-[320px] overflow-hidden flex items-center justify-center p-2 border-b border-gray-100 md:border-b-0 md:border-r`}
             >
               <Image
                 src={FEATURED_POST.image}
                 alt={FEATURED_POST.title}
                 fill
                 sizes="(min-width: 768px) 50vw, 100vw"
-                className="object-cover"
+                className="object-contain p-1"
               />
-              <span className="absolute left-5 top-5 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-wide text-gray-900">
+              <span className="absolute right-4 top-4 z-10 rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-wide text-gray-900 shadow-md border border-gray-100">
                 Featured
               </span>
             </div>
@@ -122,16 +122,16 @@ const BlogSection = () => {
                 className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 transition-shadow hover:shadow-lg"
               >
                 <div
-                  className={`relative h-40 bg-gradient-to-br ${post.gradient}`}
+                  className={`relative h-48 sm:h-52 bg-slate-50 overflow-hidden flex items-center justify-center p-2 border-b border-gray-100`}
                 >
                   <Image
                     src={post.image}
                     alt={post.title}
                     fill
                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover"
+                    className="object-contain p-1"
                   />
-                  <span className="absolute bottom-3 left-3 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-gray-900">
+                  <span className="absolute bottom-3 left-3 z-10 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-gray-900 shadow-md border border-gray-100">
                     {post.tag}
                   </span>
                 </div>
