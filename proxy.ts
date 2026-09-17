@@ -98,6 +98,21 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
+    // --- HOMEPAGE REDIRECT for already-subscribed signed-in users ---
+    // Signed in + active subscription hitting "/" → straight to the
+    // dashboard, no need to see the marketing homepage again. Signed in but
+    // NOT subscribed stays on "/" (this is deliberately the opposite of the
+    // is_subscribed check further down, which redirects an unsubscribed user
+    // AWAY from protected pages and back to "/" — so this must never redirect
+    // that same user right back to /dashboard, or the two would loop).
+    if (session?.user && pathname === "/") {
+      const token = (session.user as { accessToken?: string }).accessToken;
+      const user = token ? await fetchUserProfile(token) : null;
+      if (user?.is_subscribed) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+    }
+
     // Allow other public paths (including SEO service landing pages)
     if (
       publicPaths.some(

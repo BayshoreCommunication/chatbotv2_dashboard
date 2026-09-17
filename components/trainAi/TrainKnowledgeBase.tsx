@@ -76,9 +76,49 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+// ── Website URL normalization ───────────────────────────────────────────────
+// Accepts "example.com", "www.example.com", or a full "https://example.com"
+// and returns a valid, normalized https:// URL — or null if it's not a
+// plausible domain at all.
+
+const DOMAIN_RE =
+  /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
+
+function normalizeWebsiteUrl(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  const withProtocol = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : `https://${trimmed}`;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(withProtocol);
+  } catch {
+    return null;
+  }
+
+  if (!DOMAIN_RE.test(parsed.hostname)) return null;
+
+  // Drop a bare trailing slash so "site.com" doesn't become "site.com/"
+  const clean =
+    parsed.pathname === "/" && !parsed.search && !parsed.hash
+      ? `${parsed.origin}`
+      : parsed.toString();
+
+  return clean;
+}
+
+const GENERIC_SOURCE_LABELS = new Set([
+  "web_search",
+  "structured_data",
+  "page_content",
+]);
+
 function buildFoundLine(item: FoundItem): string {
   return `✓ Found ${item.category}${item.label ? ` — ${item.label}` : ""}${
-    item.source_url && item.source_url !== "web_search"
+    item.source_url && !GENERIC_SOURCE_LABELS.has(item.source_url)
       ? ` on ${item.source_url}`
       : ""
   }`;
@@ -304,6 +344,221 @@ function MissingInfoPanel({
   );
 }
 
+// Live progress card + findings feed — shared by both the first-time
+// training flow and a retrain (rendered at the bottom of the trained view).
+function TrainingProgressPanel({
+  companyName,
+  companyType,
+  websiteUrl,
+  hasLiveData,
+  trainPercent,
+  trainElapsed,
+  trainMessage,
+  trainFound,
+  typedCount,
+}: {
+  companyName: string;
+  companyType: string;
+  websiteUrl: string;
+  hasLiveData: boolean;
+  trainPercent: number;
+  trainElapsed: number;
+  trainMessage: string | null;
+  trainFound: FoundItem[];
+  typedCount: number;
+}) {
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_0.75fr]">
+      {/* Left — data rows + progress card */}
+      <div className="space-y-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+          Loaded from your details
+        </p>
+
+        <div className="divide-y divide-gray-100 roundedborder border-gray-200 bg-white">
+          {[
+            { label: "Company name", value: companyName },
+            { label: "Company type", value: formatCompanyType(companyType) },
+            { label: "Website URL", value: websiteUrl },
+          ]
+            .filter((r) => r.value)
+            .map((row) => (
+              <div
+                key={row.label}
+                className="flex items-center justify-between gap-3 px-4 py-3.5"
+              >
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <BiCheckCircle className="h-4 w-4 shrink-0 text-green-500" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-400">{row.label}</p>
+                    <p className="truncate text-sm font-medium text-gray-900">
+                      {row.value}
+                    </p>
+                  </div>
+                </div>
+                <span className="shrink-0 text-xs font-medium text-gray-400">
+                  Loaded
+                </span>
+              </div>
+            ))}
+        </div>
+
+        {/* Progress card */}
+        <div className="roundedborder border-gray-200 bg-white p-6">
+          {!hasLiveData ? (
+            <div className="animate-pulse space-y-3">
+              <div className="mx-auto h-4 w-40 rounded bg-gray-100" />
+              <div className="h-1.5 w-full rounded-full bg-gray-100" />
+              <div className="flex justify-between">
+                <div className="h-3 w-16 rounded bg-gray-100" />
+                <div className="h-3 w-20 rounded bg-gray-100" />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-3 flex items-center justify-center gap-2 text-sm font-semibold text-gray-900">
+                <BiLoaderAlt className="h-4 w-4 animate-spin text-gray-400" />
+                Training… {trainPercent}%
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+                <div
+                  className="h-full rounded-full bg-gray-900 transition-all duration-500 ease-out"
+                  style={{ width: `${trainPercent}%` }}
+                />
+              </div>
+              <div className="mt-2.5 flex items-center justify-between text-xs text-gray-400">
+                <span>{formatTime(trainElapsed)} elapsed</span>
+                <span>{estimateRemaining(trainElapsed, trainPercent)}</span>
+              </div>
+              {trainMessage && (
+                <p className="mt-3 text-center text-xs leading-relaxed text-gray-400">
+                  {trainMessage}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Right — live findings feed */}
+      <div className="flex flex-col roundedborder border-gray-200 bg-white shadow-sm">
+        <div className="flex items-center gap-2 border-b border-gray-100 px-5 py-4">
+          <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            Scanning your website
+          </p>
+        </div>
+
+        <div
+          className="flex-1 overflow-y-auto px-5 py-4"
+          style={{ minHeight: "280px", maxHeight: "360px" }}
+        >
+          {trainFound.length === 0 ? (
+            <div className="flex flex-col gap-2.5 pt-1">
+              {["w-5/6", "w-full", "w-2/3", "w-full", "w-3/4", "w-1/2"].map(
+                (w, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08, duration: 0.3 }}
+                    className={`relative h-2.5 overflow-hidden rounded bg-gray-100 ${w}`}
+                  >
+                    <motion.div
+                      className="absolute inset-0 bg-linear-to-r from-transparent via-white/80 to-transparent"
+                      animate={{ x: ["-100%", "100%"] }}
+                      transition={{
+                        duration: 1.2,
+                        repeat: Infinity,
+                        ease: "linear",
+                        delay: i * 0.12,
+                      }}
+                    />
+                  </motion.div>
+                ),
+              )}
+            </div>
+          ) : (
+            <AnimatePresence initial={false}>
+              {trainFound.slice(0, typedCount).map((item, i) => (
+                <motion.p
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="mb-2 whitespace-pre-wrap wrap-break-word text-xs leading-relaxed text-gray-600"
+                >
+                  {buildFoundLine(item)}
+                </motion.p>
+              ))}
+            </AnimatePresence>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Confirmation modal — used before starting a retrain, since it consumes
+// one of the account's limited retrain runs.
+function ConfirmModal({
+  title,
+  description,
+  confirmLabel,
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+        onClick={onCancel}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 12 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      >
+        <div
+          className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-gray-500">
+            {description}
+          </p>
+          <div className="mt-6 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700"
+            >
+              {confirmLabel}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function TrainKnowledgeBase({
@@ -318,6 +573,8 @@ export default function TrainKnowledgeBase({
     websiteUrl,
   });
   const [error, setError] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [showRetrainConfirm, setShowRetrainConfirm] = useState(false);
   const [profileNotice, setProfileNotice] = useState<string | null>(null);
   const [trainResult, setTrainResult] = useState<TrainResult | null>(null);
   const [status, setStatus] = useState<TrainStatus | null>(null);
@@ -414,6 +671,21 @@ export default function TrainKnowledgeBase({
 
   const handleFieldChange = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    if (field === "websiteUrl") setUrlError(null);
+  };
+
+  // Accepts "site.com" / "www.site.com" / "https://site.com" — just
+  // validates on blur, flagging it if it's not a plausible domain at all.
+  // The field keeps showing exactly what the user typed; normalization to
+  // a full https:// URL happens only right before it's sent to the API
+  // (see handleTrain), so the UI never rewrites their input.
+  const handleWebsiteBlur = () => {
+    if (!form.websiteUrl.trim()) return;
+    setUrlError(
+      normalizeWebsiteUrl(form.websiteUrl)
+        ? null
+        : "That doesn't look like a valid website — try something like example.com.",
+    );
   };
 
   const stopPolling = () => {
@@ -436,6 +708,7 @@ export default function TrainKnowledgeBase({
 
   const handleTrain = async () => {
     setError(null);
+    setUrlError(null);
     setTrainResult(null);
 
     if (!form.companyName.trim()) {
@@ -443,15 +716,19 @@ export default function TrainKnowledgeBase({
       return;
     }
     if (!form.websiteUrl.trim()) {
-      setError("Website URL is required.");
+      setUrlError("Website URL is required.");
       return;
     }
-    try {
-      new URL(form.websiteUrl.trim());
-    } catch {
-      setError("Please enter a valid website URL, e.g. https://example.com.");
+    const normalizedUrl = normalizeWebsiteUrl(form.websiteUrl);
+    if (!normalizedUrl) {
+      setUrlError(
+        "That doesn't look like a valid website — try something like example.com.",
+      );
       return;
     }
+    // Note: form.websiteUrl is intentionally left as-is (whatever the user
+    // typed) — normalizedUrl is only used for the actual API call below, so
+    // the field/summary never shows a rewritten "https://..." value.
 
     // Reset live progress counters
     setTrainPercent(0);
@@ -481,7 +758,7 @@ export default function TrainKnowledgeBase({
 
     const res = await trainKnowledgeBaseAction(
       companyId,
-      form.websiteUrl.trim(),
+      normalizedUrl,
       form.companyName.trim(),
       form.companyType || "other",
     );
@@ -565,7 +842,7 @@ export default function TrainKnowledgeBase({
               <ScoreBadge score={status?.quality_score ?? 0} />
               <button
                 type="button"
-                onClick={handleTrain}
+                onClick={() => setShowRetrainConfirm(true)}
                 disabled={
                   isTraining || (updatesLeft !== null && updatesLeft <= 0)
                 }
@@ -575,6 +852,21 @@ export default function TrainKnowledgeBase({
                 {isTraining ? "Retraining…" : "Retrain"}
               </button>
             </div>
+          )}
+
+          {showRetrainConfirm && (
+            <ConfirmModal
+              title="Retrain your knowledge base?"
+              description={`This re-crawls your website and rebuilds your AI's knowledge. It uses 1 of your ${
+                updatesLeft ?? 0
+              } remaining retrain${updatesLeft === 1 ? "" : "s"}.`}
+              confirmLabel="Yes, retrain"
+              onConfirm={() => {
+                setShowRetrainConfirm(false);
+                handleTrain();
+              }}
+              onCancel={() => setShowRetrainConfirm(false)}
+            />
           )}
         </div>
 
@@ -590,150 +882,17 @@ export default function TrainKnowledgeBase({
         !trainResult &&
         (isTraining ? (
           /* ── Training in progress ── */
-          <div className="grid gap-6 lg:grid-cols-[1fr_0.75fr]">
-            {/* Left — data rows + progress card (mirrors free-trial layout) */}
-            <div className="space-y-4">
-              {/* Section label */}
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                Loaded from your details
-              </p>
-
-              {/* Data rows */}
-              <div className="divide-y divide-gray-100 roundedborder border-gray-200 bg-white">
-                {[
-                  { label: "Company name", value: form.companyName },
-                  {
-                    label: "Company type",
-                    value: formatCompanyType(form.companyType),
-                  },
-                  { label: "Website URL", value: form.websiteUrl },
-                ]
-                  .filter((r) => r.value)
-                  .map((row) => (
-                    <div
-                      key={row.label}
-                      className="flex items-center justify-between gap-3 px-4 py-3.5"
-                    >
-                      <div className="flex items-center gap-3 overflow-hidden">
-                        <BiCheckCircle className="h-4 w-4 shrink-0 text-green-500" />
-                        <div className="min-w-0">
-                          <p className="text-xs text-gray-400">{row.label}</p>
-                          <p className="truncate text-sm font-medium text-gray-900">
-                            {row.value}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="shrink-0 text-xs font-medium text-gray-400">
-                        Loaded
-                      </span>
-                    </div>
-                  ))}
-              </div>
-
-              {/* Progress card */}
-              <div className="roundedborder border-gray-200 bg-white p-6">
-                {!hasLiveData ? (
-                  <div className="animate-pulse space-y-3">
-                    <div className="mx-auto h-4 w-40 rounded bg-gray-100" />
-                    <div className="h-1.5 w-full rounded-full bg-gray-100" />
-                    <div className="flex justify-between">
-                      <div className="h-3 w-16 rounded bg-gray-100" />
-                      <div className="h-3 w-20 rounded bg-gray-100" />
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="mb-3 flex items-center justify-center gap-2 text-sm font-semibold text-gray-900">
-                      <BiLoaderAlt className="h-4 w-4 animate-spin text-gray-400" />
-                      Training… {trainPercent}%
-                    </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
-                      <div
-                        className="h-full rounded-full bg-gray-900 transition-all duration-500 ease-out"
-                        style={{ width: `${trainPercent}%` }}
-                      />
-                    </div>
-                    <div className="mt-2.5 flex items-center justify-between text-xs text-gray-400">
-                      <span>{formatTime(trainElapsed)} elapsed</span>
-                      <span>
-                        {estimateRemaining(trainElapsed, trainPercent)}
-                      </span>
-                    </div>
-                    {trainMessage && (
-                      <p className="mt-3 text-center text-xs leading-relaxed text-gray-400">
-                        {trainMessage}
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Right — live findings feed (mirrors free-trial right panel, no phone) */}
-            <div className="flex flex-col roundedborder border-gray-200 bg-white shadow-sm">
-              {/* Card header */}
-              <div className="flex items-center gap-2 border-b border-gray-100 px-5 py-4">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                  Scanning your website
-                </p>
-              </div>
-
-              {/* Feed area */}
-              <div
-                className="flex-1 overflow-y-auto px-5 py-4"
-                style={{ minHeight: "280px", maxHeight: "360px" }}
-              >
-                {trainFound.length === 0 ? (
-                  /* Shimmer stays until the first real finding lands */
-                  <div className="flex flex-col gap-2.5 pt-1">
-                    {[
-                      "w-5/6",
-                      "w-full",
-                      "w-2/3",
-                      "w-full",
-                      "w-3/4",
-                      "w-1/2",
-                    ].map((w, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.08, duration: 0.3 }}
-                        className={`relative h-2.5 overflow-hidden rounded bg-gray-100 ${w}`}
-                      >
-                        <motion.div
-                          className="absolute inset-0 bg-linear-to-r from-transparent via-white/80 to-transparent"
-                          animate={{ x: ["-100%", "100%"] }}
-                          transition={{
-                            duration: 1.2,
-                            repeat: Infinity,
-                            ease: "linear",
-                            delay: i * 0.12,
-                          }}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  /* Findings revealed one at a time */
-                  <AnimatePresence initial={false}>
-                    {trainFound.slice(0, typedCount).map((item, i) => (
-                      <motion.p
-                        key={i}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25, ease: "easeOut" }}
-                        className="mb-2 whitespace-pre-wrap wrap-break-word text-xs leading-relaxed text-gray-600"
-                      >
-                        {buildFoundLine(item)}
-                      </motion.p>
-                    ))}
-                  </AnimatePresence>
-                )}
-              </div>
-            </div>
-          </div>
+          <TrainingProgressPanel
+            companyName={form.companyName}
+            companyType={form.companyType}
+            websiteUrl={form.websiteUrl}
+            hasLiveData={hasLiveData}
+            trainPercent={trainPercent}
+            trainElapsed={trainElapsed}
+            trainMessage={trainMessage}
+            trainFound={trainFound}
+            typedCount={typedCount}
+          />
         ) : (
           /* Training form */
           <div className="space-y-6">
@@ -800,16 +959,32 @@ export default function TrainKnowledgeBase({
                     icon={<BiGlobe size={15} />}
                   >
                     <input
-                      type="url"
+                      type="text"
+                      inputMode="url"
                       value={form.websiteUrl}
                       onChange={(e) =>
                         handleFieldChange("websiteUrl", e.target.value)
                       }
-                      placeholder="https://example.com"
+                      onBlur={handleWebsiteBlur}
+                      placeholder="example.com or https://example.com"
                       disabled={isTraining}
-                      className={inputClass}
+                      aria-invalid={!!urlError}
+                      className={`${inputClass} ${
+                        urlError
+                          ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                          : ""
+                      }`}
                     />
                   </FieldShell>
+                  {urlError ? (
+                    <p className="mt-1.5 text-xs font-medium text-red-600">
+                      {urlError}
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 text-xs text-gray-400">
+                      You can type just the domain — we&apos;ll figure out the rest.
+                    </p>
+                  )}
                 </div>
 
                 {error ? (
@@ -1007,6 +1182,27 @@ export default function TrainKnowledgeBase({
               </div>
             ) : null}
           </div>
+
+          {/* ── Retrain in progress — shown below the existing status card so
+              current data stays visible while the new run completes ── */}
+          {isTraining && (
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                Retraining in progress
+              </p>
+              <TrainingProgressPanel
+                companyName={form.companyName}
+                companyType={form.companyType}
+                websiteUrl={form.websiteUrl}
+                hasLiveData={hasLiveData}
+                trainPercent={trainPercent}
+                trainElapsed={trainElapsed}
+                trainMessage={trainMessage}
+                trainFound={trainFound}
+                typedCount={typedCount}
+              />
+            </div>
+          )}
         </div>
       )}
 

@@ -20,7 +20,7 @@ import { getIsSubscribedAction } from "@/app/actions/subscriptions";
 import { getUserData } from "@/app/actions/user";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BiBuilding,
   BiCategory,
@@ -213,6 +213,12 @@ const TrainLeftSideForm = ({
   >(session?.user ? "form" : "training-form");
   const [logs, setLogs] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
+  // Normalized (https://...) website URL, kept out of visible state so the
+  // input/summary always show exactly what the user typed. Set once at
+  // submit time and reused by the later OTP verify/resend steps, which
+  // don't have a fresh "submit" moment of their own to re-normalize from.
+  const normalizedWebsiteRef = useRef<string>("");
   const [success, setSuccess] = useState<string | null>(null);
   const [existingKB, setExistingKB] = useState<any>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -277,10 +283,25 @@ const TrainLeftSideForm = ({
   // input is now plain text (not type="url") so that's accepted instead of
   // blocked by the browser's native "Please enter a URL" validation, and
   // this fills in https:// before the value is used anywhere downstream.
-  const normalizeWebsiteUrl = (value: string): string => {
+  // Returns null if it's not a plausible domain at all (e.g. random text),
+  // so garbage never reaches signup/training.
+  const DOMAIN_RE = /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
+  const normalizeWebsiteUrl = (value: string): string | null => {
     const trimmed = value.trim();
-    if (!trimmed) return trimmed;
-    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    if (!trimmed) return null;
+    const withProtocol = /^https?:\/\//i.test(trimmed)
+      ? trimmed
+      : `https://${trimmed}`;
+    let parsed: URL;
+    try {
+      parsed = new URL(withProtocol);
+    } catch {
+      return null;
+    }
+    if (!DOMAIN_RE.test(parsed.hostname)) return null;
+    return parsed.pathname === "/" && !parsed.search && !parsed.hash
+      ? parsed.origin
+      : parsed.toString();
   };
 
   // Shared field styles — matches the site-wide form look used on the
@@ -474,9 +495,16 @@ const TrainLeftSideForm = ({
     }
 
     const normalizedWebsite = normalizeWebsiteUrl(website);
-    setWebsite(normalizedWebsite);
+    if (!normalizedWebsite) {
+      setUrlError(
+        "That doesn't look like a valid website — try something like example.com.",
+      );
+      return;
+    }
+    normalizedWebsiteRef.current = normalizedWebsite;
 
     setError(null);
+    setUrlError(null);
     setSuccess(null);
 
     if (!isUserLoggedIn) {
@@ -627,7 +655,12 @@ const TrainLeftSideForm = ({
         return;
       }
 
-      await startTraining(cid, website, companyName, companyType);
+      await startTraining(
+        cid,
+        normalizedWebsiteRef.current || website,
+        companyName,
+        companyType,
+      );
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to verify OTP");
     } finally {
@@ -657,7 +690,7 @@ const TrainLeftSideForm = ({
       const result = await signupAction({
         company_name: companyName,
         company_type: companyType,
-        company_website: website,
+        company_website: normalizedWebsiteRef.current || website,
         phone_number: phoneNumber,
         email,
         password,
@@ -981,12 +1014,25 @@ const TrainLeftSideForm = ({
                 type="text"
                 inputMode="url"
                 value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                onBlur={(e) => setWebsite(normalizeWebsiteUrl(e.target.value))}
+                onChange={(e) => {
+                  setWebsite(e.target.value);
+                  setUrlError(null);
+                }}
+                onBlur={(e) => {
+                  if (!e.target.value.trim()) return;
+                  setUrlError(
+                    normalizeWebsiteUrl(e.target.value)
+                      ? null
+                      : "That doesn't look like a valid website — try something like example.com.",
+                  );
+                }}
                 placeholder="example.com"
-                className={inputClasses}
+                className={`${inputClasses} ${urlError ? "border-red-300 focus:border-red-400 focus:ring-red-100" : ""}`}
                 required
               />
+              {urlError && (
+                <p className="text-xs font-medium text-red-600">{urlError}</p>
+              )}
             </div>
 
             {/* Email & Phone Number — pre-filled from the account when logged in */}

@@ -98,9 +98,15 @@ const TypewriterText = ({
 };
 
 // --- Helper Function: Build a "found" line for the live feed ---
+const GENERIC_SOURCE_LABELS = new Set([
+  "web_search",
+  "structured_data",
+  "page_content",
+]);
+
 const buildFoundLine = (item: FoundItem): string =>
   `✓ Found ${item.category}${item.label ? ` — ${item.label}` : ""}${
-    item.source_url && item.source_url !== "web_search"
+    item.source_url && !GENERIC_SOURCE_LABELS.has(item.source_url)
       ? ` on ${item.source_url}`
       : ""
   }`;

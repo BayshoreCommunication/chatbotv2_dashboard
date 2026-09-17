@@ -7,6 +7,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { useState } from "react";
 import { BiLock, BiLoaderAlt } from "react-icons/bi";
+import toast from "react-hot-toast";
 
 export type BeforeConfirmResult = {
   clientSecret: string | null;
@@ -50,7 +51,9 @@ export function SignupPaymentForm({
     if (!stripe || !elements) return;
 
     if (!agreed) {
-      setError("Please agree to the Terms of Service to continue.");
+      const msg = "Please agree to the Terms of Service to continue.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -62,7 +65,9 @@ export function SignupPaymentForm({
     try {
       confirmResult = await onBeforeConfirm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start subscription.");
+      const msg = err instanceof Error ? err.message : "Failed to start subscription.";
+      setError(msg);
+      toast.error(msg);
       setSubmitting(false);
       return;
     }
@@ -71,12 +76,15 @@ export function SignupPaymentForm({
 
     // 2. Existing subscriber whose saved card was auto-charged — nothing more to do.
     if (!requiresPayment) {
+      toast.success("Subscription updated successfully.");
       onSuccess();
       return;
     }
 
     if (!clientSecret) {
-      setError("Failed to start subscription.");
+      const msg = "Failed to start subscription.";
+      setError(msg);
+      toast.error(msg);
       setSubmitting(false);
       return;
     }
@@ -84,7 +92,9 @@ export function SignupPaymentForm({
     // 3. Validate card fields before confirming (required for deferred intents).
     const { error: submitError } = await elements.submit();
     if (submitError) {
-      setError(submitError.message ?? "Please check your card details.");
+      const msg = submitError.message ?? "Please check your card details.";
+      setError(msg);
+      toast.error(msg);
       setSubmitting(false);
       return;
     }
@@ -106,11 +116,14 @@ export function SignupPaymentForm({
           });
 
     if (confirmError) {
-      setError(confirmError.message ?? "Payment failed.");
+      const msg = confirmError.message ?? "Payment failed.";
+      setError(msg);
+      toast.error(msg);
       setSubmitting(false);
       return;
     }
 
+    toast.success("Payment successful.");
     onSuccess();
   };
 

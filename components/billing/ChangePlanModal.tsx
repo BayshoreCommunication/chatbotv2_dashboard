@@ -5,6 +5,7 @@ import {
 import { pricingPlans } from "@/config/pricing";
 import { useState } from "react";
 import { BiX } from "react-icons/bi";
+import toast from "react-hot-toast";
 import { BillingCycleToggle } from "./BillingCycleToggle";
 import { PlanCard } from "./PlanCard";
 import { BeforeConfirmResult, SignupPaymentForm } from "./SignupPaymentForm";
@@ -91,7 +92,9 @@ export function ChangePlanModal({
         // showing the payment form below.
         const result = await changeSubscriptionPlanAction(tier, selectedCycle);
         if (!result.ok || !result.data) {
-          setError(result.error || "Failed to switch plan.");
+          const msg = result.error || "Failed to switch plan.";
+          setError(msg);
+          toast.error(msg);
           setSwitchingPlanId(null);
           return;
         }
@@ -101,6 +104,11 @@ export function ChangePlanModal({
           onChanged();
           setSwitchingPlanId(null);
           setSuccessInfo({ planName, amount: scheduled ? null : amount });
+          toast.success(
+            scheduled
+              ? `Switching to ${planName} at your next renewal.`
+              : `You're now on ${planName}.`,
+          );
           return;
         }
 
@@ -117,7 +125,9 @@ export function ChangePlanModal({
           setPendingPayment(result.data.client_secret);
           setPendingIntentKind(result.data.intent_kind ?? "payment");
         } else {
-          setError("Failed to switch plan.");
+          const msg = "Failed to switch plan.";
+          setError(msg);
+          toast.error(msg);
           setSwitchingPlanId(null);
         }
         return;
@@ -127,13 +137,16 @@ export function ChangePlanModal({
       // form right here, no redirect to Stripe Checkout.
       const result = await createSubscriptionIntentAction(tier, selectedCycle);
       if (!result.ok || !result.data) {
-        setError(result.error || "Failed to start signup.");
+        const msg = result.error || "Failed to start signup.";
+        setError(msg);
+        toast.error(msg);
         setSwitchingPlanId(null);
         return;
       }
 
       if (!result.data.requires_payment) {
         // Free plan — nothing to charge, subscription is already active.
+        toast.success("Subscription updated successfully.");
         onChanged();
         onClose();
         return;
@@ -149,11 +162,15 @@ export function ChangePlanModal({
         setPendingPayment(result.data.client_secret);
         setPendingIntentKind(result.data.intent_kind ?? "payment");
       } else {
-        setError("Failed to start signup.");
+        const msg = "Failed to start signup.";
+        setError(msg);
+        toast.error(msg);
         setSwitchingPlanId(null);
       }
     } catch {
-      setError("An unexpected error occurred.");
+      const msg = "An unexpected error occurred.";
+      setError(msg);
+      toast.error(msg);
       setSwitchingPlanId(null);
     }
   };
