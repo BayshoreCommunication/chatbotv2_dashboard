@@ -30,6 +30,34 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-ai-identifies-high-intent-leads-automatically",
+    tag: "Strategy & Tech",
+    title: "How AI Identifies High-Intent Leads Automatically",
+    description:
+      "Learn how AI identifies high-intent leads automatically with Go Converto. Discover how analyzing behavior, detecting buying intent, and qualifying leads in real time delivers higher ROI and greater business growth.",
+    author: "Go Converto Team",
+    authorRole: "Editorial Team",
+    authorBio: "",
+    initials: "GC",
+    avatarColor: "bg-blue-600",
+    date: "September 22, 2026",
+    readTime: "8 min read",
+    gradient: "from-blue-700 via-blue-600 to-blue-400",
+    image: "/assets/blog/how-ai-identifies-high-intent-leads-automatically.webp",
+    intro:
+      "AI identifies high-intent leads by reading two things at once. What a visitor does on your site and what they actually say while engaging with it. It scores behavioral signals like page depth and return visits against conversational cues, such as budget mentions and urgency language. It's a live, changing score that tells your sales team who to call first.",
+    sections: [
+      {
+        heading: "How Does AI Actually Score Lead Intent?",
+        body: "Artificial Intelligence looks at what a visitor is doing right now. Then it checks that against thousands of past leads who actually bought. If the visitor acts a lot like those past buyers, the score goes up. If not, it stays low. That's it. The AI isn't guessing. It's comparing patterns.",
+      },
+    ],
+    outro: {
+      heading: "The takeaway",
+      body: "Speed used to be a nice-to-have in sales conversations. In 2026, most people covering conversational commerce agree it's become the entire field.",
+    },
+  },
+  {
     slug: "ai-lead-qualification-vs-manual-lead-scoring",
     tag: "Strategy & Tech",
     title: "AI Lead Qualification vs Manual Lead Scoring Which Is Better",
