@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 export default function SocialProofSection() {
   return (
     <section className="relative bg-slate-900 py-16 sm:py-20 text-white overflow-hidden">
-      {/* Background glow effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00a8a0]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 relative z-10">
@@ -24,9 +23,13 @@ export default function SocialProofSection() {
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
           </div>
 
-          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto">
-            The professionals using Go Converto to drive volume
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto mb-4">
+            Support Teams Using Go Converto to Resolve Faster
           </h2>
+
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            When repetitive questions are handled automatically, support representatives can spend more of their time on customers who need their attention.
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -38,16 +41,16 @@ export default function SocialProofSection() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-7 rounded-3xl border border-slate-800 bg-slate-800/50 p-8 sm:p-10 backdrop-blur-sm relative"
           >
-            <div className="text-[#00a8a0] text-5xl font-serif mb-4">“</div>
+            <div className="text-[#00a8a0] text-5xl font-serif mb-4">&ldquo;</div>
             <p className="text-lg sm:text-xl font-medium text-slate-200 leading-relaxed italic mb-6">
-              &quot;I used to lose people all the time because I couldn&apos;t text back while I was touring homes. Now, every single question gets handled instantly, and my phone only rings when a buyer is actually pre-approved and ready to go.&quot;
+              &quot;Our department used to drown in the same fifteen questions daily. Today, those issues vanish instantly, allowing us to focus solely on the conversations that genuinely require human intellect.&quot;
             </p>
             <div>
               <div className="text-base sm:text-lg font-bold text-white">
-                Rachel Tanaka
+                James Diaz
               </div>
               <div className="text-sm text-[#00a8a0]">
-                Realtor, Prestige Realty Group
+                Director of Client Services, Fitly
               </div>
             </div>
           </motion.div>
@@ -62,19 +65,19 @@ export default function SocialProofSection() {
           >
             <div className="rounded-3xl border border-slate-800 bg-slate-800/40 p-8 hover:border-[#00a8a0]/40 transition-all duration-300">
               <div className="text-4xl sm:text-5xl font-black text-[#00a8a0] mb-2 tracking-tight">
-                3.2×
+                -46%
               </div>
               <div className="text-base text-slate-300 font-medium">
-                more tour requests over 60 days
+                Fewer cases reaching staff.
               </div>
             </div>
 
             <div className="rounded-3xl border border-slate-800 bg-slate-800/40 p-8 hover:border-[#00a8a0]/40 transition-all duration-300">
               <div className="text-4xl sm:text-5xl font-black text-[#00a8a0] mb-2 tracking-tight">
-                10 hours
+                9 hrs
               </div>
               <div className="text-base text-slate-300 font-medium">
-                saved every week avoiding dead-end leads
+                Reclaimed per employee each week.
               </div>
             </div>
           </motion.div>

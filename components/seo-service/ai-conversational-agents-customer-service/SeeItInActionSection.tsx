@@ -4,11 +4,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
-  BiCalendarEvent,
+  BiCheckShield,
   BiChat,
   BiFullscreen,
   BiPause,
-  BiTargetLock,
   BiVolumeFull,
 } from "react-icons/bi";
 import { FiSettings } from "react-icons/fi";
@@ -30,9 +29,10 @@ export default function SeeItInActionSection() {
     return () => clearInterval(interval);
   }, []);
 
-  const seconds = Math.floor((progressPercent / 100) * 49);
   const videoStep =
     progressPercent < 15 ? 0 : progressPercent < 45 ? 1 : progressPercent < 75 ? 2 : 3;
+
+  const seconds = Math.floor((progressPercent / 100) * 52);
 
   return (
     <section className="relative py-6 lg:py-8 bg-white">
@@ -75,9 +75,9 @@ export default function SeeItInActionSection() {
 
                   <div className="z-20 max-w-[45%]">
                     <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-tight">
-                      Watch a live <br />
-                      <span className="text-[#00a8a0]">property inquiry</span> <br />
-                      get resolved
+                      A Real Support <br />
+                      <span className="text-[#00a8a0]">Conversation</span> <br />
+                      Resolved Live
                     </h3>
                   </div>
 
@@ -91,7 +91,7 @@ export default function SeeItInActionSection() {
                     <div>
                       <div className="mb-3 flex items-center gap-1.5 border-b border-gray-100 pb-2 text-[10px] text-gray-500 font-mono">
                         <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>live on 128mapleave.com</span>
+                        <span>Live Support Ticket #4821</span>
                       </div>
 
                       <div className="space-y-2.5 text-[11px]">
@@ -104,7 +104,7 @@ export default function SeeItInActionSection() {
                               className="flex justify-end"
                             >
                               <div className="max-w-[88%] rounded-xl bg-[#f5f3ee] p-2.5 text-gray-800 shadow-2xs">
-                                Hoping to be in a new place within two months, and yes, I&apos;ve got pre-approval.
+                                My package is delayed by five days. Order number 4821.
                               </div>
                             </motion.div>
                           )}
@@ -124,7 +124,7 @@ export default function SeeItInActionSection() {
                                 className="h-6 w-6 shrink-0 rounded-full object-contain"
                               />
                               <div className="max-w-[88%] rounded-xl bg-[#edf5ff] p-2.5 text-gray-800 shadow-2xs">
-                                Perfect! Let&apos;s get a showing scheduled for Saturday afternoon.
+                                Checked order 4821. Moved to priority shipping, going out today!
                               </div>
                             </motion.div>
                           )}
@@ -133,7 +133,7 @@ export default function SeeItInActionSection() {
                     </div>
 
                     <div className="mt-3 flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700">
-                      <span>✓ Showing booked on agent calendar</span>
+                      <span>✓ Issue resolved without support ticket</span>
                     </div>
                   </div>
                 </div>
@@ -144,7 +144,7 @@ export default function SeeItInActionSection() {
                       <BiPause className="h-5 w-5" />
                     </button>
                     <span className="font-mono text-[11px] text-gray-300">
-                      0:{seconds < 10 ? `0${seconds}` : seconds} / 0:44
+                      0:{seconds < 10 ? `0${seconds}` : seconds} / 0:52
                     </span>
                   </div>
 
@@ -190,42 +190,43 @@ export default function SeeItInActionSection() {
               </div>
 
               <h2 className="mb-5 text-xl font-extrabold tracking-tight text-gray-900 sm:text-2xl md:text-3xl lg:text-[34px] xl:text-[38px] leading-snug">
-                Watch a casual browser turn into a confirmed appointment
+                Go Converto Handle a Real Support Request
               </h2>
 
               <p className="mb-8 text-sm leading-relaxed text-gray-600 sm:text-base md:text-lg">
-                This is raw, unedited footage of Go Converto fielding a real buyer&apos;s questions from their very first message straight through to locking in a tour.
+                See how Go Converto handles a customer issue from the first message through resolution, using available order information and bringing in a team member when necessary.
               </p>
 
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#00a8a0]/10 text-[#00a8a0]">
+                    <BiCheckShield className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-800 sm:text-base">
+                    Pulls genuine order and profile data rather than guessing
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#00a8a0]/10 text-[#00a8a0]">
                     <BiChat className="h-5 w-5" />
                   </div>
                   <span className="text-sm font-semibold text-gray-800 sm:text-base">
-                    Delivers accurate answers to home-specific questions.
+                    Resolves supported issues directly in the chat
                   </span>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#00a8a0]/10 text-[#00a8a0]">
-                    <BiTargetLock className="h-5 w-5" />
+                    <BiCheckShield className="h-5 w-5" />
                   </div>
                   <span className="text-sm font-semibold text-gray-800 sm:text-base">
-                    Checks the buyer&apos;s purchasing timeline and intent.
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#00a8a0]/10 text-[#00a8a0]">
-                    <BiCalendarEvent className="h-5 w-5" />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-800 sm:text-base">
-                    Wraps up by putting an appointment on your calendar.
+                    Escalates to staff when human assistance is needed
                   </span>
                 </div>
               </div>
             </motion.div>
+
           </div>
         </div>
       </div>

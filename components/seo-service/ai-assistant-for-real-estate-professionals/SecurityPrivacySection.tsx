@@ -46,7 +46,7 @@ export default function SecurityPrivacySection() {
           </div>
 
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl leading-[1.18] max-w-3xl mx-auto">
-            Keeping your buyers' data locked down
+            Keeping your buyers&apos; data locked down
           </h2>
         </motion.div>
 
@@ -96,10 +96,10 @@ export default function SecurityPrivacySection() {
               14-Day Free Trial
             </span>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
-              Try it out & Cancel whenever you don’t need it
+              Try it out &amp; Cancel whenever you don&apos;t need it
             </h3>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Every tier starts with a full two-week trial. No hidden fees, no credit card tricks, and zero long-term commitments. If this tool doesn't put more qualified buyers on your calendar than your current setup, just cancel with a single click before you are ever charged.
+              Every tier starts with a full two-week trial. No hidden fees, no credit card tricks, and zero long-term commitments. If this tool doesn&apos;t put more qualified buyers on your calendar than your current setup, just cancel with a single click before you are ever charged.
             </p>
           </div>
         </motion.div>

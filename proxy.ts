@@ -32,6 +32,7 @@ export async function proxy(request: NextRequest) {
     "/user-guide",
     "/ai-chatbot-law-firm-website",
     "/ai-assistant-for-real-estate-professionals",
+    "/ai-conversational-agents-customer-service",
   ];
 
   // 2. STATIC ASSETS + NEXTAUTH INTERNALS: Always allow.
