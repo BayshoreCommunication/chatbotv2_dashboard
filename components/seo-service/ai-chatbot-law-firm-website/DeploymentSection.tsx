@@ -83,26 +83,26 @@ const deploymentCards = [
   {
     id: "01",
     icon: WebsiteWidgetIcon,
-    title: "Website widget",
-    description: "Capture leads in real time with a seamless chat experience.",
+    title: "Web widget",
+    description: "Place AI assistant directly on your firm's website. Visitors can start an intake conversation from a practice area page, service page, attorney page or other selected location. They do not need to search for contact details before starting.",
   },
   {
     id: "02",
     icon: SocialLogosIcon,
-    title: "Facebook & Instagram",
-    description: "Answer inquiries from the world's largest social platforms.",
+    title: "Social media",
+    description: "Use supported social channels for inbound inquiries from prospective clients. AI assistant can follow a defined intake process instead of leaving every message for manual handling. Channel availability depends on available integration.",
   },
   {
     id: "03",
     icon: TextMessagingIcon,
-    title: "Text messaging",
-    description: "Connect instantly via SMS and never miss a potential new client.",
+    title: "SMS",
+    description: "Offer text based intake for firms using SMS as part of their client communication process. Visitors can respond through a familiar messaging format while the configured workflow collects required details.",
   },
   {
     id: "04",
     icon: MobileAppIcon,
     title: "Mobile app",
-    description: "Manage leads and respond on the go from anywhere, anytime.",
+    description: "Give your team access to conversations through a supported mobile experience. Staff can review inquiries and step into conversations when a lead needs direct attention. Availability depends on the product setup and supported integrations.",
   },
 ];
 
@@ -125,20 +125,19 @@ export default function DeploymentSection() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-0.5 w-6 sm:w-10 bg-primary-dark/80" />
             <span className="text-xs font-bold uppercase tracking-wider text-primary-dark sm:text-sm">
-              DEPLOYMENT
+              - Deployment
             </span>
             <span className="h-0.5 w-6 sm:w-10 bg-primary-dark/80" />
           </div>
 
           {/* Headline */}
           <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-tight sm:leading-tight max-w-3xl mx-auto">
-            Meet prospective clients <br className="hidden sm:inline" />
-            wherever they <span className="text-primary-dark">reach out.</span>
+            Give prospective clients a place to start the conversation.
           </h2>
 
           {/* Subtitle Description */}
           <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg font-normal">
-            Email, text, and live chat—our omnichannel system works across every channel people use to find your firm.
+            A website may be the first contact point, but once installed, it does not have to be only one. Same trained assistant works on every channel people use to find your firm.
           </p>
         </motion.div>
 

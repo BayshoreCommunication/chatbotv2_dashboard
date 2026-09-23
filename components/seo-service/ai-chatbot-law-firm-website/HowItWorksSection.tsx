@@ -9,23 +9,23 @@ const steps = [
   {
     id: "01",
     icon: FiGlobe,
-    title: "Scan",
+    title: "Connect",
     description:
-      "Go Converto crawls your practice area pages, attorney bios, and FAQs to build its own knowledge base.",
+      "Add your firm's website URL to begin the setup. Go Converto reviews available website content and identifies information about your practice areas, legal services, attorneys, FAQs and firm details. This gives AI assistant a starting knowledge base for visitor conversations.",
   },
   {
     id: "02",
     icon: BsFileEarmarkPerson,
-    title: "Train",
+    title: "Review and configure",
     description:
-      "It's trained on your practice areas and set up with the intake questions your firm actually asks.",
+      "Check the information before going live. Add or adjust intake questions based on your firm's screening process. You decide the information for AI assistant to collect and the point for human intervention.",
   },
   {
     id: "03",
     icon: FiMessageSquare,
-    title: "Screen",
+    title: "Start screening",
     description:
-      "It engages every new inquiry, screens for fit, and books consultations automatically.",
+      "Add the website widget to your firm's site after configuration is complete. Visitors can start a conversation without waiting for office hours or searching for a phone number. AI chatbot assistant can ask screening questions, collect contact details and prepare inquiry for your intake workflow.",
   },
 ];
 
@@ -48,20 +48,18 @@ export default function HowItWorksSection() {
           <div className="mb-4 flex items-center justify-center gap-2">
             <span className="h-0.5 w-5 bg-primary" />
             <span className="text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
-              HOW IT WORKS
+              - How it works
             </span>
           </div>
 
           {/* Main Headline */}
           <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl md:text-4xl lg:text-[42px] leading-snug sm:leading-tight">
-            Live in three steps. <br className="hidden sm:inline" />
-            No developer required<span className="text-primary">.</span>
+            Start with your website. Build &amp; Live the intake flow in 3 steps.
           </h2>
 
           {/* Subtitle Paragraph */}
           <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg">
-            Paste your firm&apos;s website URL. Go Converto learns your practice areas <br className="hidden sm:inline" />
-            and starts screening intake the same day.
+            No coding required to build an AI system from scratch. Copy Paste in your firm&apos;s website URL. Go Converto learns your practice areas and starts screening cases same day.
           </p>
         </motion.div>
 
@@ -158,10 +156,10 @@ export default function HowItWorksSection() {
               </div>
               <div>
                 <h4 className="text-sm font-bold text-gray-900 sm:text-base mb-1">
-                  Setup in minutes
+                  Quick setup
                 </h4>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  Skip the dev queue — go live the same day you sign up.
+                  Start with your existing website and intake process than building everything from scratch.
                 </p>
               </div>
             </div>
@@ -173,10 +171,10 @@ export default function HowItWorksSection() {
               </div>
               <div>
                 <h4 className="text-sm font-bold text-gray-900 sm:text-base mb-1">
-                  Every inquiry engaged
+                  24/7 first response
                 </h4>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  No caller waits on hold or lands in a voicemail box.
+                  Visitors can start a conversation at night, during weekends or on holidays.
                 </p>
               </div>
             </div>
@@ -188,10 +186,10 @@ export default function HowItWorksSection() {
               </div>
               <div>
                 <h4 className="text-sm font-bold text-gray-900 sm:text-base mb-1">
-                  Better-fit consultations
+                  Better evaluation
                 </h4>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  Intake spends time on cases that actually match your practice.
+                  Your intake team can receive case context instead of a bare name and phone number.
                 </p>
               </div>
             </div>

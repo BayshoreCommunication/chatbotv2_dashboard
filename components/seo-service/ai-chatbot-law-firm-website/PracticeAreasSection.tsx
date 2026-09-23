@@ -67,30 +67,79 @@ const practiceCards = [
   {
     id: "01",
     icon: PersonalInjuryIcon,
-    title: "Personal injury",
+    title: "Personal Injury",
     description:
-      "Captures accident details and timelines, flags urgent statute-of-limitations matters, and books consultations.",
+      "Collect incident date, accident type, location, injuries, medical treatment, insurance involvement and current claim status. These details can help your team understand the basic facts before a consultation. Contact information can be collected during the same conversation.",
   },
   {
     id: "02",
-    icon: FamilyLawIcon,
-    title: "Family law",
+    icon: PersonalInjuryIcon,
+    title: "Criminal Defense",
     description:
-      "Screens sensitive intake conversations with care, collects case context, and routes to the right attorney.",
+      "Ask about the alleged offense, arrest details, incident location, charges, court involvement and upcoming hearing dates. The workflow can also collect current legal status and contact information. Time sensitive court matters can be flagged for faster review based on your firm's rules.",
   },
   {
     id: "03",
-    icon: ImmigrationIcon,
-    title: "Immigration",
+    icon: FamilyLawIcon,
+    title: "Family Law",
     description:
-      "Answers common process questions and screens visa or case type before booking a consultation.",
+      "Screen for the primary legal issue, such as divorce, child custody, child support, adoption or domestic disputes. Additional questions can collect information about existing cases, court dates, children involved or current orders. Your team can then route the inquiry to appropriate family law workflow.",
   },
   {
     id: "04",
-    icon: EstatePlanningIcon,
-    title: "Estate planning",
+    icon: ImmigrationIcon,
+    title: "Immigration Law",
     description:
-      "Handles routine questions about wills and trusts, and books consultations without a callback delay.",
+      "Ask about current immigration status, visa type, past filings, pending applications, intended immigration outcome and relevant filing deadlines. The workflow can separate common immigration matters such as family petitions, employment cases, status changes and naturalization inquiries.",
+  },
+  {
+    id: "05",
+    icon: EstatePlanningIcon,
+    title: "Real Estate Law",
+    description:
+      "Identify whether the matter involves a purchase or sale, contract review, title problem, landlord tenant dispute, foreclosure, zoning issue or other property matter. AI chatbot assistant can also collect key dates and information about the parties involved.",
+  },
+  {
+    id: "06",
+    icon: EstatePlanningIcon,
+    title: "Business Law",
+    description:
+      "Screen for business formation, operating agreements, partnership disputes, commercial contracts, employment matters, mergers and acquisitions or other corporate needs. Early intake questions can help identify the type of business matter before attorney review.",
+  },
+  {
+    id: "07",
+    icon: EstatePlanningIcon,
+    title: "Tax Law",
+    description:
+      "Collect information about tax audits, unpaid balances, collection notices, tax liens, IRS correspondence, state tax issues or formal disputes. The workflow can ask about notice dates and response deadlines to help your team identify time sensitive matters.",
+  },
+  {
+    id: "08",
+    icon: EstatePlanningIcon,
+    title: "Contract Law",
+    description:
+      "Ask for basic information about agreement, parties involved, contract type, alleged breach, disputed terms, important dates and desired outcome. This information can help an attorney understand the dispute before first consultation.",
+  },
+  {
+    id: "09",
+    icon: FamilyLawIcon,
+    title: "Juvenile Law",
+    description:
+      "Collect information about alleged offense, arrest or referral, court involvement, scheduled hearings and parent or guardian contact information. The workflow can focus on he facts needed for an initial case review while routing urgent court matters appropriately.",
+  },
+  {
+    id: "10",
+    icon: PersonalInjuryIcon,
+    title: "Insurance Law",
+    description:
+      "Ask about the insurance policy, underlying accident or loss, claim details, denial notices, insurer communications and current dispute status. Dates, written notices and claim decisions can help your team assess the next intake step.",
+  },
+  {
+    id: "11",
+    icon: EstatePlanningIcon,
+    title: "Appeals & Administrative Law",
+    description:
+      "Appellate and administrative matters often involve strict filing periods. Intake can collect the issuing court or agency, decision date, notice date order received, current status and upcoming deadline. Your team can use these details to identify matters requiring immediate review.",
   },
 ];
 
@@ -127,15 +176,14 @@ export default function PracticeAreasSection() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-0.5 w-6 sm:w-10 bg-primary-dark/80" />
             <span className="text-xs font-bold uppercase tracking-wider text-primary-dark sm:text-sm">
-              PRACTICE AREAS
+              - Legal practice areas
             </span>
             <span className="h-0.5 w-6 sm:w-10 bg-primary-dark/80" />
           </div>
 
           {/* Main Headline */}
           <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-tight sm:leading-tight max-w-3xl mx-auto">
-            Built for how your firm <br className="hidden sm:inline" />
-            actually screens cases
+            Use different intake questions for different types of cases.
           </h2>
 
           {/* Decorative 3 Dots */}
@@ -147,17 +195,16 @@ export default function PracticeAreasSection() {
 
           {/* Subtitle Description */}
           <p className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg font-normal">
-            Go Converto picks up your practice areas and intake language on day one — <br className="hidden sm:inline" />
-            no scripts to write.
+            Your personal injury intake process may look very different from your immigration or family law intake process. Law firm AI agent can be configured around those differences.
           </p>
         </motion.div>
 
         {/* ========================================================================= */}
-        {/* 4 PRACTICE AREA CARDS ROW WITH CURVED DOTTED CONNECTORS */}
+        {/* PRACTICE AREA CARDS GRID */}
         {/* ========================================================================= */}
-        <div className="relative mx-auto max-w-6xl">
+        <div className="relative mx-auto max-w-7xl">
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 items-stretch relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 items-stretch relative z-10">
             {practiceCards.map((card, index) => {
               const Icon = card.icon;
               return (
@@ -166,46 +213,13 @@ export default function PracticeAreasSection() {
                   initial={{ opacity: 0, y: 25 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
                   whileHover={{ y: -5 }}
-                  className="group relative flex flex-col items-center justify-between text-center rounded-2xl sm:rounded-3xl border border-gray-100/90 bg-white p-7 sm:p-8 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)] hover:shadow-xl hover:border-gray-200 transition-all duration-300"
+                  className="group relative flex flex-col items-center justify-between text-center rounded-2xl sm:rounded-3xl border border-gray-100/90 bg-white p-6 sm:p-7 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)] hover:shadow-xl hover:border-gray-200 transition-all duration-300"
                 >
-                  {/* Curved Dotted Node Connector to Next Card (Desktop) */}
-                  {index < 3 && (
-                    <div className="hidden lg:block pointer-events-none absolute -right-[24px] xl:-right-[32px] top-19 sm:top-20 -translate-y-1/2 w-[48px] xl:w-[64px] z-30 overflow-visible">
-                      <svg className="w-full h-8 overflow-visible" viewBox="0 0 64 32">
-                        <defs>
-                          <style>{`
-                            @keyframes flowPracticeDash {
-                              0% { stroke-dashoffset: 24; }
-                              100% { stroke-dashoffset: 0; }
-                            }
-                            .animated-practice-line {
-                              animation: flowPracticeDash 1.6s linear infinite;
-                            }
-                          `}</style>
-                        </defs>
-                        {/* Curved Dotted Wave Path */}
-                        <path
-                          d="M 6 16 Q 32 4 58 16"
-                          stroke="#00b2ad"
-                          strokeWidth="2"
-                          strokeDasharray="4 4"
-                          fill="none"
-                          className="animated-practice-line opacity-90"
-                        />
-                        {/* Left Node Ring Dot */}
-                        <circle cx="6" cy="16" r="3.5" fill="white" stroke="#00b2ad" strokeWidth="2" />
-                        {/* Right Node Arrow Head Circle */}
-                        <circle cx="58" cy="16" r="4.5" fill="#00b2ad" />
-                        <path d="M56 16L59 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                    </div>
-                  )}
-
                   {/* Top Icon Circle */}
                   <div className="relative mb-5 flex flex-col items-center">
-                    <div className="flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-[#edf8f8] border border-teal-100/60 shadow-2xs transition-transform duration-300 group-hover:scale-105">
+                    <div className="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-[#edf8f8] border border-teal-100/60 shadow-2xs transition-transform duration-300 group-hover:scale-105">
                       <Icon />
                     </div>
 
@@ -214,7 +228,7 @@ export default function PracticeAreasSection() {
                   </div>
 
                   {/* Title & Description */}
-                  <div className="flex-1 flex flex-col justify-start mb-6">
+                  <div className="flex-1 flex flex-col justify-start mb-4">
                     <h3 className="mb-2 text-lg font-bold text-gray-900 sm:text-xl leading-snug group-hover:text-primary-dark transition-colors duration-300">
                       {card.title}
                     </h3>
@@ -226,7 +240,7 @@ export default function PracticeAreasSection() {
 
                   {/* Bottom "Learn more ->" Pill Button */}
                   <div className="w-full flex justify-center pt-2">
-                    <button className="inline-flex items-center gap-1.5 rounded-full border border-primary-dark/40 bg-white px-5 py-2 text-xs sm:text-sm font-semibold text-primary-dark shadow-2xs transition-all duration-300 group-hover:bg-primary-dark group-hover:text-white group-hover:shadow-md">
+                    <button className="inline-flex items-center gap-1.5 rounded-full border border-primary-dark/40 bg-white px-4 py-1.5 text-xs font-semibold text-primary-dark shadow-2xs transition-all duration-300 group-hover:bg-primary-dark group-hover:text-white group-hover:shadow-md">
                       <span>Learn more</span>
                       <BiRightArrowAlt className="h-4 w-4" />
                     </button>

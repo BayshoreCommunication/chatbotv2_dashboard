@@ -8,30 +8,30 @@ const problemCards = [
   {
     id: "01",
     icon: BsTelephoneInbound,
-    title: "Callers reach voicemail",
+    title: "Unanswered after hours calls",
     description:
-      "After hours or during a busy day, inquiries go straight to voicemail — and most don't leave one.",
+      "An after hours call often reaches voicemail instead of a member of your intake team. The caller may leave a message yet many legal prospects contact several firms for help. A delayed callback can give another firm a chance to respond first. An AI chatbot can provide an initial response, collect basic case information and create a lead for follow up outside office hours.",
   },
   {
     id: "02",
     icon: BsFileEarmarkText,
-    title: "Forms collect no context",
+    title: "Contact forms fail to screen case",
     description:
-      "A name and email tells intake nothing about the case, the practice area, or the urgency.",
+      "A standard contact form usually asks for basic details such as name, phone number, email and a short message. Those fields may not give your intake team enough information to judge case type, urgency or fit. Some visitors also leave before completing a long form. A conversational intake process can collect core details step by step without asking visitors to complete a static form.",
   },
   {
     id: "03",
     icon: BsClock,
-    title: "Intake time is wasted",
+    title: "Unscreened intake waste paralegal time",
     description:
-      "Staff spend hours screening inquiries that were never a fit for your practice areas.",
+      "Paralegals and intake staff may spend time asking same basic questions during every first contact. They may need to confirm legal issue, incident date, location, existing claims, deadlines and contact details before an attorney can review the matter. An AI assistant can collect routine intake information first, so staff can start with a clearer case summary.",
   },
   {
     id: "04",
     icon: BsPeople,
-    title: "Competing firms respond first",
+    title: "Late replies drive client to fast responders",
     description:
-      "The firm that answers fastest often wins the client — regardless of who's actually the better fit.",
+      "A qualified lead may contact your firm after finding several local attorneys online. A reply several hours later can reduce the chance of a consultation, especially for urgent matters. Faster initial engagement gives visitor a clear response while inquiry is still fresh. Your team can then review collected information and continue the conversation.",
   },
 ];
 
@@ -60,20 +60,18 @@ export default function ProblemSection() {
           <div className="mb-4 flex items-center gap-2">
             <span className="h-0.5 w-5 bg-primary" />
             <span className="text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
-              THE PROBLEM
+              - The Problem
             </span>
           </div>
 
           {/* Headline */}
           <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl md:text-4xl lg:text-[42px] leading-snug sm:leading-tight">
-            Most legal inquiries never <br className="hidden sm:inline" />
-            make it past the contact form<span className="text-primary">.</span>
+            Most legal inquiries end at the contact form. Why?
           </h2>
 
           {/* Subtitle Paragraph */}
           <p className="text-sm leading-relaxed text-gray-600 sm:text-base md:text-lg max-w-3xl">
-            Someone searching for a lawyer is usually in a stressful moment. <br className="hidden sm:inline" />
-            If your site doesn&apos;t respond immediately, they call the next firm on the list.
+            When someone is searching for a lawyer they are already going through bad time. If your site takes too long to answer, they just call the next name on the list.
           </p>
         </motion.div>
 
@@ -139,9 +137,8 @@ export default function ProblemSection() {
           </div>
 
           {/* Banner Text */}
-          <p className="text-sm sm:text-base md:text-[17px] leading-relaxed text-gray-700">
-            <strong className="font-bold text-gray-900">Here&apos;s the fix:</strong>{" "}
-            an assistant that engages every inquiry immediately, screens it by practice area, and hands your intake team a ready-to-book case.
+          <p className="text-sm sm:text-base md:text-[17px] leading-relaxed text-gray-700 font-medium">
+            An assistant that answers every inquiry right away, checks it with your practice areas and proceeds to booking a case.
           </p>
         </motion.div>
       </div>

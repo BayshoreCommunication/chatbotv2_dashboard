@@ -6,32 +6,49 @@ import { BsCheck, BsLightningCharge, BsX } from "react-icons/bs";
 import { FiFrown, FiSmile } from "react-icons/fi";
 
 const beforeItems = [
-  "Inquiry lands after hours and goes to voicemail",
-  "Contact form gets abandoned halfway through",
-  "Intake calls back a day later, case has cooled or hired elsewhere",
-  "Staff spend time screening cases outside your practice areas",
+  "A visitor arrives after office hours.",
+  "They see a contact form.",
+  "They start entering information.",
+  "They have a question but cannot get an answer.",
+  "They leave the page.",
+  "Your team discovers the missed opportunity the next morning.",
 ];
 
 const afterItems = [
   {
     icon: BsLightningCharge,
-    boldText: "Inquiry gets an answer",
-    lightText: "in under 2 seconds, any hour",
+    boldText: "A visitor arrives after office hours.",
+    lightText: "",
   },
   {
     icon: BiChat,
-    boldText: "Chatbot collects case details",
-    lightText: "in the same conversation",
+    boldText: "AI assistant opens a conversation.",
+    lightText: "",
   },
   {
-    icon: BiCalendarCheck,
-    boldText: "Consultation is booked instantly",
-    lightText: "while urgency is high",
+    icon: BiChat,
+    boldText: "The visitor explains the legal issue.",
+    lightText: "",
   },
   {
     icon: BiTargetLock,
-    boldText: "Intake only follows up",
-    lightText: "with cases that are a real fit",
+    boldText: "AI assistant asks approved screening questions.",
+    lightText: "",
+  },
+  {
+    icon: BiTargetLock,
+    boldText: "Basic contact and case information are collected.",
+    lightText: "",
+  },
+  {
+    icon: BiCalendarCheck,
+    boldText: "The visitor can request a consultation or receive the next available instruction.",
+    lightText: "",
+  },
+  {
+    icon: BiCalendarCheck,
+    boldText: "Your team can review the conversation later.",
+    lightText: "",
   },
 ];
 
@@ -54,21 +71,19 @@ export default function DifferenceSection() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-0.5 w-6 sm:w-10 bg-primary-dark/80" />
             <span className="text-xs font-bold uppercase tracking-wider text-primary-dark sm:text-sm">
-              THE DIFFERENCE
+              - Before and after
             </span>
             <span className="h-0.5 w-6 sm:w-10 bg-primary-dark/80" />
           </div>
 
           {/* Headline */}
           <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-tight sm:leading-tight max-w-3xl mx-auto">
-            What changes when you <br className="hidden sm:inline" />
-            add <span className="text-primary-dark">Go Converto</span>
+            What changes when you add Go Converto?
           </h2>
 
           {/* Subtitle Description */}
           <div className="mx-auto max-w-2xl text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg font-normal space-y-1">
-            <p>From missed opportunities to booked consultations.</p>
-            <p>See the difference an AI intake assistant makes.</p>
+            <p>See the difference between a form and an active intake conversation.</p>
           </div>
         </motion.div>
 
@@ -100,19 +115,16 @@ export default function DifferenceSection() {
                   <FiFrown className="h-6 w-6" />
                 </div>
                 <div>
-                  <span className="block text-xs font-bold uppercase tracking-wider text-rose-500">
-                    BEFORE
-                  </span>
-                  <h3 className="text-base font-bold text-gray-900 sm:text-lg leading-snug">
-                    Leads slip away. Revenue is lost.
+                  <h3 className="text-xl font-extrabold text-gray-900 leading-snug">
+                    Before
                   </h3>
                 </div>
               </div>
 
-              {/* 4 Item Rows */}
+              {/* 6 Item Rows */}
               <div className="divide-y divide-gray-100">
                 {beforeItems.map((text, idx) => (
-                  <div key={idx} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+                  <div key={idx} className="flex items-center gap-4 py-3.5 first:pt-0 last:pb-0">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-500 font-bold text-xs border border-rose-100">
                       <BsX className="h-4 w-4 stroke-[1]" />
                     </div>
@@ -140,39 +152,27 @@ export default function DifferenceSection() {
                   <FiSmile className="h-6 w-6" />
                 </div>
                 <div>
-                  <span className="block text-xs font-bold uppercase tracking-wider text-primary-dark">
-                    AFTER
-                  </span>
-                  <h3 className="text-base font-bold text-gray-900 sm:text-lg leading-snug">
-                    More good cases. Less manual work.
+                  <h3 className="text-xl font-extrabold text-gray-900 leading-snug">
+                    After
                   </h3>
                 </div>
               </div>
 
-              {/* 4 Item Rows */}
+              {/* 7 Item Rows */}
               <div className="divide-y divide-teal-100/70">
-                {afterItems.map((item, idx) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={idx} className="flex items-center gap-3.5 py-3.5 first:pt-0 last:pb-0">
-                      {/* Checkmark Circle */}
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-100/90 text-primary-dark font-bold text-xs border border-teal-200/80">
-                        <BsCheck className="h-4 w-4 stroke-[1]" />
-                      </div>
-
-                      {/* Feature Icon Badge Box */}
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-teal-100/80 text-primary-dark shadow-2xs">
-                        <Icon className="h-5 w-5 text-primary-dark" />
-                      </div>
-
-                      {/* Text Copy */}
-                      <p className="text-xs sm:text-sm leading-relaxed">
-                        <strong className="font-bold text-gray-900">{item.boldText}</strong>{" "}
-                        <span className="text-gray-400 font-normal">| {item.lightText}</span>
-                      </p>
+                {afterItems.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3.5 py-3 first:pt-0 last:pb-0">
+                    {/* Checkmark Circle */}
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-100/90 text-primary-dark font-bold text-xs border border-teal-200/80">
+                      <BsCheck className="h-4 w-4 stroke-[1]" />
                     </div>
-                  );
-                })}
+
+                    {/* Text Copy */}
+                    <p className="text-xs sm:text-sm text-gray-800 leading-relaxed font-medium">
+                      {item.boldText}
+                    </p>
+                  </div>
+                ))}
               </div>
             </motion.div>
 

@@ -75,28 +75,18 @@ export default function LawFirmHero() {
             <div className="mb-6 flex items-center gap-2">
               <span className="h-0.5 w-5 bg-primary" />
               <span className="text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
-                AI Chatbot for Law Firm Websites
+                law firm
               </span>
             </div>
 
             {/* Main Headline */}
             <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl md:text-4xl lg:text-[46px] xl:text-[52px] leading-snug sm:leading-tight lg:leading-[1.12]">
-              Every new inquiry, <br />
-              answered and <br />
-              screened{" "}
-              <span className="text-primary">
-                before intake <br />
-                ever picks up the <br />
-                phone.
-              </span>
+              Your intake team answers every inquiry before the caller even reaches for the phone.
             </h1>
 
             {/* Description Paragraph */}
             <p className="mb-8 max-w-lg text-sm leading-relaxed text-gray-600 sm:text-base md:text-lg">
-              Go Converto engages new legal inquiries the moment they land on
-              your site, collects the case details your intake team needs,
-              screens by practice area, and books consultations — 24/7, without
-              a missed call.
+              Go Converto talks to every new lead the second they land on your site. It asks the questions your intake team asks, checks the case against your practice areas and books the consultation. All night, every weekend, with nobody on call.
             </p>
 
             {/* Action Buttons */}
@@ -127,9 +117,9 @@ export default function LawFirmHero() {
               </div>
               <span className="font-bold text-gray-900">4.9/5</span>
               <span className="text-gray-300">·</span>
-              <span>trusted by law firms nationwide</span>
+              <span>law firms nationwide run on this</span>
               <span className="text-gray-300">·</span>
-              <span>14-day free trial</span>
+              <span>14 day free trial</span>
             </div>
           </motion.div>
 
@@ -180,8 +170,7 @@ export default function LawFirmHero() {
                         className="flex justify-end"
                       >
                         <div className="max-w-[85%] rounded-2xl bg-[#f5f3ee] p-3.5 text-xs text-gray-800 sm:text-sm shadow-2xs">
-                          I was in a car accident last week and the other driver&apos;s
-                          insurance is denying the claim. Can you help?
+                          Hi, I was in a car accident last week. And the other driver&apos;s insurance is denying the claim. Can you help me?
                         </div>
                       </motion.div>
                     )}
@@ -228,9 +217,7 @@ export default function LawFirmHero() {
                           className="h-8 w-8 shrink-0 rounded-full object-contain"
                         />
                         <div className="max-w-[85%] rounded-2xl bg-[#edf5ff] p-3.5 text-xs text-gray-800 sm:text-sm shadow-2xs">
-                          I&apos;m sorry to hear that — this is exactly what our
-                          personal injury team handles. Can I get a few quick
-                          details: when did the accident happen, and were you injured?
+                          Sorry to hear that. This is exactly what our personal injury team handles. When did the accident happen and were you hurt?
                         </div>
                       </motion.div>
                     )}
@@ -245,7 +232,7 @@ export default function LawFirmHero() {
                         className="flex justify-end"
                       >
                         <div className="max-w-[80%] rounded-2xl bg-[#f5f3ee] p-3.5 text-xs text-gray-800 sm:text-sm shadow-2xs">
-                          Yes, minor whiplash. It happened last Tuesday.
+                          It happened last Tuesday. Yes, I was hurt. It was minor whiplash.
                         </div>
                       </motion.div>
                     )}
@@ -292,8 +279,7 @@ export default function LawFirmHero() {
                           className="h-8 w-8 shrink-0 rounded-full object-contain"
                         />
                         <div className="max-w-[85%] rounded-2xl bg-[#edf5ff] p-3.5 text-xs text-gray-800 sm:text-sm shadow-2xs">
-                          Got it. I can get you a free consultation with an attorney
-                          this week — what&apos;s the best number to reach you?
+                          Got it. I can set you up with a free consultation this week. What&apos;s the best number to reach you?
                         </div>
                       </motion.div>
                     )}
@@ -306,7 +292,7 @@ export default function LawFirmHero() {
                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
                   ✓
                 </span>
-                <span>Case intake captured · routed to PI team</span>
+                <span>Case intake captured - Routed to PI team</span>
               </div>
 
             </div>

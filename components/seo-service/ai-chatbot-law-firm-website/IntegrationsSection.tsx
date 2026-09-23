@@ -215,19 +215,18 @@ export default function IntegrationsSection() {
             <div className="mb-4 flex items-center gap-2.5">
               <span className="h-0.5 w-6 bg-primary-dark" />
               <span className="text-xs font-bold uppercase tracking-wider text-primary-dark sm:text-sm">
-                INTEGRATIONS
+                - Integrations
               </span>
             </div>
 
             {/* Main Headline */}
             <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl md:text-5xl leading-tight sm:leading-tight">
-              Works with the tools <br className="hidden sm:inline" />
-              your firm <span className="text-primary-dark">already uses.</span>
+              Compatible with tools your team already relies on.
             </h2>
 
             {/* Subtitle Description */}
             <p className="text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg max-w-md font-normal">
-              Connect Go Converto to your existing stack and keep every case, message, and update in sync.
+              A legal chatbot should fit into your existing intake workflow instead of creating another disconnected system. Go Converto can connect with supported tools for scheduling, communication, case management and automation. Your team can keep using established systems while reducing repetitive intake work.
             </p>
           </motion.div>
 

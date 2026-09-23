@@ -100,38 +100,59 @@ function TealCheck({ text }: { text: string }) {
 const tableRows = [
   {
     icon: Clock247Icon,
-    capability: "24/7 availability",
-    contactForm: <RedNo />,
-    liveChat: <AmberWarning text="Only if staffed" />,
-    goConverto: <TealCheck text="Yes" />,
+    capability: "Available outside office hours",
+    contactForm: <span className="text-slate-600 font-medium text-xs sm:text-sm">usually no</span>,
+    liveChat: <span className="text-slate-600 font-medium text-xs sm:text-sm">depends on staffing</span>,
+    goConverto: <TealCheck text="designed for 24/7 availability" />,
   },
   {
     icon: LightningIcon,
-    capability: "Instant response",
+    capability: "Immediate first response",
     contactForm: <RedNo />,
-    liveChat: <AmberWarning text="Depends on staff" />,
-    goConverto: <TealCheck text="Under 2 seconds" />,
+    liveChat: <span className="text-slate-600 font-medium text-xs sm:text-sm">only when available</span>,
+    goConverto: <TealCheck text="yes" />,
   },
   {
     icon: UserCheckIcon,
-    capability: "Preliminary screening",
+    capability: "Conversational intake",
     contactForm: <RedNo />,
-    liveChat: <RedNo />,
-    goConverto: <TealCheck text="Yes" />,
+    liveChat: <span className="text-[#00a8a0] font-medium text-xs sm:text-sm">yes</span>,
+    goConverto: <TealCheck text="yes" />,
   },
   {
     icon: SetupClockIcon,
-    capability: "Setup time",
-    contactForm: <span className="text-slate-600 font-normal text-xs sm:text-sm">~ Minutes</span>,
-    liveChat: <span className="text-slate-600 font-normal text-xs sm:text-sm">~ Hours</span>,
-    goConverto: <TealCheck text="Minutes" />,
+    capability: "Practice area screening",
+    contactForm: <span className="text-slate-600 font-medium text-xs sm:text-sm">limited</span>,
+    liveChat: <span className="text-slate-600 font-medium text-xs sm:text-sm">staff dependent</span>,
+    goConverto: <TealCheck text="configurable" />,
   },
   {
     icon: PuzzleIcon,
-    capability: "Case management integration",
-    contactForm: <span className="text-rose-500 font-semibold text-xs sm:text-sm">Manual</span>,
-    liveChat: <span className="text-slate-600 font-normal text-xs sm:text-sm">Sometimes</span>,
-    goConverto: <TealCheck text="Built-in" />,
+    capability: "Case information captured",
+    contactForm: <span className="text-slate-600 font-medium text-xs sm:text-sm">basic</span>,
+    liveChat: <span className="text-slate-600 font-medium text-xs sm:text-sm">depends on agent</span>,
+    goConverto: <TealCheck text="configurable" />,
+  },
+  {
+    icon: Clock247Icon,
+    capability: "Consultation scheduling",
+    contactForm: <span className="text-slate-600 font-medium text-xs sm:text-sm">usually separate</span>,
+    liveChat: <span className="text-slate-600 font-medium text-xs sm:text-sm">depends on workflow</span>,
+    goConverto: <TealCheck text="available with supported scheduling setup" />,
+  },
+  {
+    icon: UserCheckIcon,
+    capability: "team takeover",
+    contactForm: <span className="text-slate-600 font-medium text-xs sm:text-sm">requires separate follow up</span>,
+    liveChat: <span className="text-slate-600 font-medium text-xs sm:text-sm">built in</span>,
+    goConverto: <TealCheck text="available" />,
+  },
+  {
+    icon: PuzzleIcon,
+    capability: "Case management connection",
+    contactForm: <span className="text-slate-600 font-medium text-xs sm:text-sm">often manual</span>,
+    liveChat: <span className="text-slate-600 font-medium text-xs sm:text-sm">varies</span>,
+    goConverto: <TealCheck text="available through supported integrations" />,
   },
 ];
 
@@ -154,20 +175,15 @@ export default function ComparisonSection() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00a8a0] sm:text-sm">
-              COMPARISON
+              - COMPARISON
             </span>
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
           </div>
 
           {/* Headline */}
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto">
-            Go Converto vs. traditional intake
+            Contact form vs. live chat vs. Go Converto
           </h2>
-
-          {/* Subtitle Description */}
-          <p className="mt-4 mx-auto max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base font-normal">
-            See how Go Converto delivers faster, smarter, and better results.
-          </p>
         </motion.div>
 
         {/* ========================================================================= */}
@@ -199,7 +215,7 @@ export default function ComparisonSection() {
                 </div>
                 <div className="col-span-2 text-center">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
-                    LIVE CHAT WIDGET
+                    STAFFED LIVE CHAT
                   </span>
                 </div>
               </div>

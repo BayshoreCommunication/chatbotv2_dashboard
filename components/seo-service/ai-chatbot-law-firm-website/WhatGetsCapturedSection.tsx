@@ -7,43 +7,43 @@ import { BsBriefcase, BsClock, BsPersonVcard, BsTag } from "react-icons/bs";
 const capturedDetails = [
   {
     id: "01",
-    tag: "CONTACT",
+    tag: "CONTACT INFORMATION",
     icon: BsPersonVcard,
-    line1: "Name, phone,",
-    line2: "email",
-    description: "Collected conversationally, never a blank form field.",
+    line1: "Contact",
+    line2: "information",
+    description: "Collect visitor's name, phone number, email address and preferred contact method during the conversation. Ai chatbot for law firm website can ask for contact information after visitor explains the reason for reaching out. This creates a usable lead record without forcing visitor to complete a separate form.",
   },
   {
     id: "02",
-    tag: "MATTER",
+    tag: "PRACTICE AREA",
     icon: BsBriefcase,
     line1: "Case type &",
     line2: "practice area",
-    description: "Screened against the practice areas your firm actually handles.",
+    description: "Ask visitor to describe the legal issue in simple terms. AI agent can use your firm's configured practice areas to identify type of inquiry. This helps your intake team separate personal injury, family law, immigration, criminal defense, business matters and other legal requests.",
   },
   {
     id: "03",
-    tag: "TIME",
+    tag: "TIMELINE",
     icon: BsClock,
     line1: "Incident",
     line2: "timeline",
-    description: "Key dates that matter for statutes of limitations and urgency.",
+    description: "Dates can affect urgency and case handling. Intake questions can collect incident date, notice date, filing deadline, court date, consultation date or other relevant timeline details. Your team can use information for faster review and appropriate follow up.",
   },
   {
     id: "04",
-    tag: "ACTION",
+    tag: "CONSULTATION",
     icon: BiCalendarCheck,
-    line1: "Booked",
-    line2: "consultations",
-    description: "Scheduled directly in the chat via automated calendar booking.",
+    line1: "Consultation",
+    line2: "request",
+    description: "A visitor may be ready to speak with an attorney instead of continuing through a long intake process. If your firm offers online scheduling, AI assistant can direct qualified visitors toward your consultation process. Intake questions can still collect basic information before scheduling.",
   },
   {
     id: "05",
-    tag: "FIT",
+    tag: "LEAD STATUS",
     icon: BsTag,
-    line1: "Qualified",
-    line2: "tag",
-    description: "Every inquiry arrives pre-labeled as a fit, referral, or not a match.",
+    line1: "Lead",
+    line2: "status",
+    description: "Your workflow can classify inquiries based on your firm's intake rules. A conversation may indicate a potential new case, an existing client request, a referral opportunity or a matter outside your services. Clear lead status can help staff decide how each inquiry should be handled.",
   },
 ];
 
@@ -66,21 +66,19 @@ export default function WhatGetsCapturedSection() {
           <div className="mb-4 flex items-center justify-center gap-2.5">
             <span className="h-0.5 w-6 bg-primary-dark" />
             <span className="text-xs font-bold uppercase tracking-wider text-primary-dark sm:text-sm">
-              WHAT GETS CAPTURED
+              - What AI assistant captured
             </span>
             <span className="h-0.5 w-6 bg-primary-dark" />
           </div>
 
           {/* Main Headline */}
           <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl md:text-4xl lg:text-[42px] leading-snug sm:leading-tight">
-            Every detail your intake team <br className="hidden sm:inline" />
-            actually needs<span className="text-primary-dark">.</span>
+            Every detail your intake team actually needs.
           </h2>
 
           {/* Subtitle Paragraph */}
           <p className="mx-auto max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg">
-            Not just a name and number — the case context that <br className="hidden sm:inline" />
-            determines what happens next.
+            A useful intake conversation collect enough context for your team to understand what visitor needs along with name and number. Based on context AI assistant setting up a follow up call.
           </p>
         </motion.div>
 

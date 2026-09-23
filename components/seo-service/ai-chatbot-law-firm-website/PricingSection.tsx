@@ -92,18 +92,18 @@ const plans = [
   {
     id: "professional",
     name: "Professional",
-    tagline: "Ideal for growing firms",
+    tagline: "For smaller or growing firms",
     price: "$42",
-    period: "/mo",
-    billingNote: "Billed $499 annually • 14-day free trial",
+    period: "/month",
+    billingNote: "Billed annually at $499 · 14 day free trial",
     badge: "Starter Choice",
     icon: BriefcaseIcon,
     features: [
-      "AI training in 5 minutes",
-      "1,000 conversations per month",
-      "AI & human takeover",
-      "AI case intake — no forms",
-      "Automated consultation scheduling",
+      "AI assistant setup",
+      "Up to 1,000 conversations per month",
+      "Human takeover",
+      "Conversational case intake",
+      "Consultation scheduling",
     ],
     ctaText: "Start free trial",
     ctaHref: "/start-free-trial",
@@ -111,17 +111,17 @@ const plans = [
   {
     id: "advanced",
     name: "Advanced",
-    tagline: "Maximum value for multi-attorney firms",
+    tagline: "For firms with larger intake teams",
     price: "$83",
-    period: "/mo",
-    billingNote: "Billed $999 annually • 14-day free trial",
+    period: "/month",
+    billingNote: "Billed annually at $999 · 14 day free trial",
     badge: "Most popular",
     icon: StarIcon,
     features: [
       "Everything in Professional",
-      "2,500 conversations per month",
-      "Team member access",
-      "Priority support & account manager",
+      "Up to 2,500 conversations per month",
+      "Multiple team members",
+      "Priority support",
       "Case management integrations",
     ],
     ctaText: "Start free trial",
@@ -130,17 +130,17 @@ const plans = [
   {
     id: "enterprise",
     name: "Enterprise",
-    tagline: "Custom solutions for large firms",
-    price: "Custom",
+    tagline: "For larger firms with custom requirements",
+    price: "Custom pricing",
     period: "",
-    billingNote: "Tailored to your usage",
+    billingNote: "Pricing based on usage, integrations, support and implementation requirements.",
     badge: "Custom Scale",
     icon: BuildingIcon,
     features: [
-      "Unlimited conversations",
-      "Fully custom AI training",
+      "Custom conversation volume",
+      "Custom AI configuration",
       "Custom integrations",
-      "Custom SLA & onboarding",
+      "Custom onboarding and support terms",
     ],
     ctaText: "Contact sales",
     ctaHref: "/contact-sales",
@@ -169,20 +169,22 @@ export default function PricingSection() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00a8a0] sm:text-sm">
-              PRICING
+              - PRICING
             </span>
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
           </div>
 
           {/* Headline */}
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto">
-            Start screening cases in a <br className="hidden sm:inline" />
-            14-day free trial
+            Choose pricing plan based on your firm&apos;s intake volume.
           </h2>
 
           {/* Subtitle */}
           <p className="mt-4 mx-auto max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base md:text-lg font-normal">
-            No long-term contract. Cancel whenever you want.
+            14 day free trial. Review current plan terms before purchase
+          </p>
+          <p className="mt-2 mx-auto max-w-xl text-xs sm:text-sm leading-relaxed text-slate-500 font-normal">
+            Start with the plan matching your expected conversation volume and team size. Move to a higher plan as your intake needs grow.
           </p>
         </motion.div>
 

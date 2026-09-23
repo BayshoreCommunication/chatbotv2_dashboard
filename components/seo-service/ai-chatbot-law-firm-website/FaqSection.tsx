@@ -59,37 +59,51 @@ const faqItems = [
   {
     id: "faq-1",
     icon: SpeechBubbleIcon,
-    question: "How does the chatbot screen cases without forms?",
+    question: "How can an AI chatbot screen a legal inquiry without using a long form?",
     answer:
-      "It asks the same intake questions your team would ask — case type, incident details, urgency — and qualifies the visitor in a natural way. It's conversational, intake-focused, and built to surface the right cases.",
+      "Visitor answers questions during a conversation. For example, a personal injury flow may ask about accident date, injuries, insurance involvement and contact information. Answers can then be organized for intake review. The exact questions depend on your firm's configured workflow.",
   },
   {
     id: "faq-2",
     icon: PuzzleIcon,
-    question: "Can it integrate with our case management system?",
+    question: "Can Go Converto connect with our case management system?",
     answer:
-      "Yes. Go Converto integrates seamlessly with leading legal CRM and case management platforms like Clio, LawPay, Salesforce, and custom webhooks.",
+      "Supported integrations can send intake information into connected tools. Current options may include Clio, MyCase, Zapier and other supported platforms. Confirm the current integration list before selecting a plan.",
   },
   {
     id: "faq-3",
     icon: ClockIcon,
-    question: "Does it work outside business hours?",
+    question: "Does the chatbot work after our office closes?",
     answer:
-      "Absolutely. Go Converto operates 24/7/365, engaging after-hours website traffic, capturing case details, and booking consultations on your calendar automatically.",
+      "AI chatbot agent is designed for 24/7 availability. A visitor can start a conversation during evenings, weekends and holidays without waiting for office staff. Your firm's response and escalation rules still determine what happens after conversation.",
   },
   {
     id: "faq-4",
     icon: SlidersIcon,
-    question: "Can I customize the intake questions it asks?",
+    question: "Can we change the intake questions?",
     answer:
-      "Yes. You can tailor every question, qualifying rule, and practice area workflow to match how your firm qualifies prospective clients.",
+      "Yes. Your firm can configure questions used during screening so the conversation follows your actual intake process. Review questions regularly as practice areas, qualification rules and internal procedures change.",
   },
   {
     id: "faq-5",
     icon: ShieldLockIcon,
-    question: "Is client information handled confidentially?",
+    question: "Can a staff member take over the conversation?",
     answer:
-      "Yes. All client conversation data is encrypted in transit and at rest with enterprise-grade security standards and GDPR alignment.",
+      "Yes, where selected plan and current product configuration support human takeover. Human intervention is especially useful for sensitive questions, unusual matters or visitors needing assistance beyond the configured workflow.",
+  },
+  {
+    id: "faq-6",
+    icon: SpeechBubbleIcon,
+    question: "Does the chatbot give legal advice?",
+    answer:
+      "AI assistant should be configured for intake, general information and approved firm content rather than acting as a substitute for an attorney. For legal questions requiring professional judgment, the conversation should move toward appropriate human review.",
+  },
+  {
+    id: "faq-7",
+    icon: ShieldLockIcon,
+    question: "How should our firm handle confidential information?",
+    answer:
+      "Before launch, review product's privacy terms, data storage practices, access controls, retention rules, encryption standards and third party service relationships. Only publish specific security or compliance claims supported by current product documentation.",
   },
 ];
 
@@ -112,26 +126,21 @@ export default function FaqSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-left mb-12 sm:mb-14"
+          className="text-center mb-12 sm:mb-16"
         >
           {/* Top Line Kicker Badge */}
-          <div className="mb-4 flex items-center justify-start gap-3">
+          <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00a8a0] sm:text-sm">
-              FAQ
+              - FAQs
             </span>
+            <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
           </div>
 
           {/* Headline */}
-          <h2 className="text-3xl font-serif font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] mb-4">
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto">
             Frequently asked questions
           </h2>
-
-          {/* Subtitle Description */}
-          <p className="max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base font-normal">
-            Everything you need to know about Go Converto and <br className="hidden sm:inline" />
-            how it helps your firm capture more qualified clients.
-          </p>
         </motion.div>
 
         {/* ========================================================================= */}

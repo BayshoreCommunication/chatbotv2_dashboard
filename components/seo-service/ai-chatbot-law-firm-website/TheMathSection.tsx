@@ -134,30 +134,34 @@ const mathCards = [
   {
     id: "01",
     icon: SpeedLightningIcon,
-    renderCounter: () => <AnimatedCounter from={0} to={2} suffix=" sec" />,
+    title: "Response in 2 Seconds",
+    renderCounter: () => <AnimatedCounter from={0} to={2} suffix=" Seconds" />,
     description:
-      "Average response time, versus voicemail or next-day callback",
+      "AI chatbot assistant can respond without waiting for office staff to become available.",
   },
   {
     id: "02",
     icon: Calendar247Icon,
-    renderCounter: () => <AnimatedCounter from={0} to={24} suffix="/7" />,
-    description: "Coverage, including nights, weekends, and holidays",
+    title: "24/7 coverage",
+    renderCounter: () => <span>24/7 coverage</span>,
+    description:
+      "Visitors can start an intake conversation outside normal business hours.",
   },
   {
     id: "03",
     icon: UserZeroMissedIcon,
-    renderCounter: () => <AnimatedCounter from={10} to={0} suffix=" missed" />,
-    description: "After-hours inquiries lost to a slow follow-up",
+    title: "0 repetitive screening",
+    renderCounter: () => <span>0 repetitive screening</span>,
+    description:
+      "Your intake team can spend less time collecting basic information already captured during initial conversation.",
   },
   {
     id: "04",
     icon: PieChartSavedIcon,
-    renderCounter: () => (
-      <AnimatedCounter from={0} to={15} suffix="+ hrs saved" />
-    ),
+    title: "More context per inquiry",
+    renderCounter: () => <span>More context per inquiry</span>,
     description:
-      "Intake staff time no longer spent screening unqualified calls",
+      "Staff can review the visitor's answers before deciding how to follow up.",
   },
 ];
 
@@ -205,21 +209,19 @@ export default function TheMathSection() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00a8a0] sm:text-sm">
-              THE MATH
+              - RESPONSE TIME
             </span>
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
           </div>
 
           {/* Headline */}
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto">
-            What faster response <br className="hidden sm:inline" />
-            actually <span className="text-[#00a8a0]">adds up to</span>
+            Quicker responses gives your team better chance to interact.
           </h2>
 
           {/* Subtitle */}
           <p className="mt-4 mx-auto max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base md:text-lg font-normal">
-            Every second matters. Here’s what law firms gain with instant, 24/7
-            intake.
+            An immediate conversation can keep the visitor engaged long enough to explain the situation and request next step.
           </p>
         </motion.div>
 

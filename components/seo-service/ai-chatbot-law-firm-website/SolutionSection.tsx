@@ -75,14 +75,13 @@ export default function SolutionSection() {
               <div className="mb-4 flex items-center gap-2">
                 <span className="h-0.5 w-5 bg-primary" />
                 <span className="text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
-                  THE SOLUTION
+                  - We have The Solution
                 </span>
               </div>
 
               {/* Main Headline */}
               <h2 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl md:text-4xl lg:text-[42px] leading-snug sm:leading-tight">
-                Meet your firm&apos;s <br />
-                AI intake assistant<span className="text-primary">.</span>
+                Meet the AI chatbot for your law firm website.
               </h2>
 
               {/* Headline Teal Underline Accent Bar */}
@@ -91,10 +90,10 @@ export default function SolutionSection() {
               {/* Paragraphs */}
               <div className="mb-8 space-y-4 text-sm leading-relaxed text-gray-600 sm:text-base md:text-lg max-w-xl">
                 <p>
-                  Go Converto reads your website — practice areas, attorney bios, FAQs — and turns it into a live assistant that talks to new inquiries like a member of your intake team.
+                  Go Converto reads your website first. Practice areas, attorney bios, FAQs, all of it. Then it turns into a live assistant and talks to new inquiries like a member of your intake team.
                 </p>
                 <p>
-                  Instead of a static contact form, every visitor gets a real conversation. It collects case details, screens for practice-area fit, and books a consultation directly — all while the inquiry is still warm.
+                  No more dependency on static contact forms. Every visitor gets an actual conversation. It gathers case details, checks for practice area fit and books consultation while lead is still active.
                 </p>
               </div>
 
@@ -246,7 +245,7 @@ export default function SolutionSection() {
                           className="h-8 w-8 shrink-0 rounded-full object-contain"
                         />
                         <div className="max-w-[86%] rounded-2xl rounded-tl-xs bg-[#eef7f7] p-4 text-xs sm:text-sm text-gray-800 leading-relaxed shadow-2xs">
-                          This sounds like a workers&apos; comp matter, which is outside our practice areas — I can point you to a firm that specializes in that if it helps.
+                          Based on what you just described, that&apos;s actually a workers&apos; comp issue. We don&apos;t take on workplace injury cases here, but I can give you contact info for a firm that specializes in them.
                         </div>
                       </motion.div>
                     )}
@@ -261,7 +260,7 @@ export default function SolutionSection() {
                         className="flex items-start justify-end gap-2.5"
                       >
                         <div className="max-w-[82%] rounded-2xl rounded-tr-xs bg-[#061328] p-3.5 px-4 text-xs sm:text-sm text-white leading-relaxed shadow-2xs">
-                          That would be great, thank you
+                          Ah, okay, got it. Yeah, that&apos;d be really helpful, thank you.
                         </div>
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-600 text-xs mt-0.5">
                           <FiUser className="h-3.5 w-3.5" />
@@ -280,7 +279,7 @@ export default function SolutionSection() {
                       >
                         <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-200/80 bg-emerald-50/90 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-2xs">
                           <BsCheckCircle className="h-3.5 w-3.5 text-emerald-600" />
-                          <span>Screened out · referral offered</span>
+                          <span>Screened out - referral offered</span>
                         </div>
                       </motion.div>
                     )}

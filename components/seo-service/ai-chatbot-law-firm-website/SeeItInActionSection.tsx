@@ -300,21 +300,18 @@ export default function SeeItInActionSection() {
               <div className="mb-4 flex items-center gap-2">
                 <span className="h-0.5 w-5 bg-primary" />
                 <span className="text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
-                  SEE IT IN ACTION
+                  - Real Results of Go Converto
                 </span>
               </div>
 
               {/* Headline */}
               <h2 className="mb-5 text-xl font-extrabold tracking-tight text-gray-900 sm:text-2xl md:text-3xl lg:text-[34px] xl:text-[38px] leading-snug sm:leading-tight lg:leading-[1.18]">
-                Watch a visitor become <br />
-                a screened, booked <br />
-                consultation
+                Watch a visitor turn into a booked and screened consultation.
               </h2>
 
               {/* Subtext */}
               <p className="mb-8 text-sm leading-relaxed text-gray-600 sm:text-base md:text-lg">
-                An unedited recording of Go Converto handling a real personal
-                injury inquiry — from first message to a booked consultation.
+                See how ai chatbot for law firm website can convert real personal injury inquiry leads to a consultation on the calendar. This is our unedited record of Go Converto handling visitor&apos;s query.
               </p>
 
               {/* Feature Points List */}
@@ -326,7 +323,7 @@ export default function SeeItInActionSection() {
                     <BiChat className="h-5 w-5" />
                   </div>
                   <span className="text-sm font-semibold text-gray-800 sm:text-base">
-                    Asks the actual intake questions your team uses
+                    Asks the same questions your intake team asks.
                   </span>
                 </div>
 
@@ -336,7 +333,7 @@ export default function SeeItInActionSection() {
                     <BiTargetLock className="h-5 w-5" />
                   </div>
                   <span className="text-sm font-semibold text-gray-800 sm:text-base">
-                    Screens by practice area automatically
+                    Checks the case against your practice areas.
                   </span>
                 </div>
 
@@ -346,7 +343,7 @@ export default function SeeItInActionSection() {
                     <BiCalendarEvent className="h-5 w-5" />
                   </div>
                   <span className="text-sm font-semibold text-gray-800 sm:text-base">
-                    Ends with a consultation on the calendar
+                    Ends with a consultation booked instead of callback.
                   </span>
                 </div>
 

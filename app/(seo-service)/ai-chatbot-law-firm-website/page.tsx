@@ -28,7 +28,7 @@ import {
 export const metadata: Metadata = {
   title: "AI Chatbot for Law Firm Websites | Go Converto",
   description:
-    "Go Converto engages new legal inquiries the moment they land on your site, collects case details, screens by practice area, and books consultations 24/7.",
+    "Capture, screen and qualify legal inquiries 24/7 with an AI chatbot for law firm websites. Automate intake, route leads and book consultations.",
   alternates: { canonical: "/ai-chatbot-law-firm-website" },
 };
 
@@ -55,11 +55,8 @@ export default function LawFirmSeoPage() {
       <PricingSection />
       <CommonQuestionsSection />
       <ComparisonSection />
-      <ResourcesSection />
       <FaqSection />
       <CtaSection />
     </div>
-
-
   );
 }

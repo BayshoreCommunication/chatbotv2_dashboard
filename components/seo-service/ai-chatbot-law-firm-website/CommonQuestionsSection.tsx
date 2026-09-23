@@ -79,23 +79,23 @@ const faqItems = [
   {
     id: "question-1",
     icon: SpeechBubbleIcon,
-    question: '"I already have a contact form."',
+    question: '"We already have a contact form."',
     answer:
-      "Forms still leave a gap after hours and lose most visitors before they submit. Go Converto works alongside your form, capturing the inquiries that would otherwise leave without acting.",
+      "Keep it. A chatbot does not need to replace your existing form. It can give visitors another way to start a conversation, especially when they have questions before they are ready to submit their information.",
   },
   {
     id: "question-2",
     icon: ShieldCheckIcon,
-    question: '"Legal intake is too sensitive for a chatbot."',
+    question: '"Legal intake feels too sensitive for a chatbot."',
     answer:
-      "Go Converto is trained on your own practice area content, not a generic script, and can be configured to hand off sensitive matters to a human immediately if you prefer.",
+      "Your firm controls intake questions and the point for human intervention. For sensitive matters, AI assistant can collect only the information your firm approves and direct visitor toward a human team member when needed. Do not configure AI assistant to provide legal advice beyond your firm's approved content and workflow.",
   },
   {
     id: "question-3",
     icon: ClockIcon,
-    question: '"I don’t have time to set this up."',
+    question: '"Our team does not have time for another setup."',
     answer:
-      "Setup is one URL and a few minutes. No developer, no code, no intake script to write manually.",
+      "Start with your website and existing intake process. The setup process should focus on reviewing Ai chatbot assistant's information, configuring questions, testing sample conversations and placing widget on the site.",
   },
 ];
 
@@ -132,21 +132,15 @@ export default function CommonQuestionsSection() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00a8a0] sm:text-sm">
-              NOT SURE YET?
+              - NOT SURE YET?
             </span>
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
           </div>
 
           {/* Headline */}
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto">
-            Common questions before switching
+            Questions law firms often ask before adding AI to intake.
           </h2>
-
-          {/* Subtitle */}
-          <p className="mt-4 mx-auto max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base font-normal">
-            Straight answers to the questions we hear most from law firms <br className="hidden sm:inline" />
-            considering Go Converto.
-          </p>
         </motion.div>
 
         {/* ========================================================================= */}

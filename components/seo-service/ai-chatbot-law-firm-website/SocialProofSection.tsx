@@ -51,21 +51,15 @@ export default function SocialProofSection() {
           <div className="mb-4 flex items-center justify-center gap-2.5">
             <span className="h-0.5 w-6 bg-primary" />
             <span className="text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
-              SOCIAL PROOF
+              - Client feedback
             </span>
             <span className="h-0.5 w-6 bg-primary" />
           </div>
 
           {/* Main Title */}
           <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl md:text-4xl lg:text-[42px] leading-snug sm:leading-tight">
-            Firms using Go Converto <br className="hidden sm:inline" />
-            to screen and book more cases
+            Firms using Go Converto to screen and book more cases.
           </h2>
-
-          {/* Subtitle */}
-          <p className="text-base text-gray-500 sm:text-lg">
-            Real results from real law firms.
-          </p>
         </div>
 
         {/* Main Grid: Left Testimonial Card, Right Stat Cards */}
@@ -89,9 +83,7 @@ export default function SocialProofSection() {
 
               {/* Quote Text */}
               <blockquote className="mb-8 text-base font-medium leading-relaxed text-gray-800 sm:text-lg md:text-xl">
-                &ldquo;We used to lose after-hours inquiries completely. Now
-                every visitor gets screened by practice area automatically, and
-                intake only follows up with cases that are actually a fit.&rdquo;
+                &ldquo;We used to lose every after hours inquiry, full stop. Now each visitor gets screened by practice area on its own and intake only follows up on cases that are actually a fit.&rdquo;
               </blockquote>
             </div>
 

@@ -7,51 +7,51 @@ import { FiBookOpen, FiCode, FiGlobe, FiMessageSquare } from "react-icons/fi";
 const onboardingSteps = [
   {
     id: "01",
-    time: "MINUTE 1",
+    time: "FIRST FEW MINUTES",
     icon: FiGlobe,
-    title: "Paste your website URL",
+    title: "Connect your website",
     description:
-      "Go Converto starts scanning your practice areas and attorney pages immediately.",
+      "Enter your firm's website address and start connection process. The system reviews public practice area pages, service descriptions, attorney information and other available content. Your team can use this information as the starting point for chatbot responses and intake conversations.",
     align: "left",
     hasDot: true,
   },
   {
     id: "02",
-    time: "MINUTE 5",
+    time: "NEXT",
     icon: FiBookOpen,
-    title: "Review your assistant's knowledge base",
+    title: "Review the information",
     description:
-      "See exactly what it learned and correct anything before it goes live.",
+      "Review AI assistant's available knowledge before using it with real visitors. Check practice area descriptions, attorney information, service details and common questions. Correct outdated information and remove content outside your firm's preferred intake scope.",
     align: "right",
     hasDot: false,
   },
   {
     id: "03",
-    time: "MINUTE 8",
+    time: "THEN",
     icon: FiMessageSquare,
-    title: "Set your intake questions",
+    title: "Configure intake questions",
     description:
-      "Use the defaults or customize them to match how your firm screens new cases.",
+      "Add questions your team already uses during a first call. Questions can cover the legal matter, incident date, location, opposing party, prior insurance contact, court dates, filing deadlines or preferred contact method. Different practice areas can use different questions based on information required for an initial review.",
     align: "left",
     hasDot: true,
   },
   {
     id: "04",
-    time: "MINUTE 10",
+    time: "AFTER SETUP",
     icon: FiCode,
-    title: "Install the widget",
+    title: "Add the widget",
     description:
-      "Copy one snippet into your site — no developer needed.",
+      "Place the provided website snippet on your site to make AI assistant available to visitors. Your team does not need to build the chat interface from scratch. Widget can appear on selected pages after installation based on your website setup.",
     align: "right",
     hasDot: false,
   },
   {
     id: "05",
-    time: "SAME DAY",
+    time: "BEFORE GOING LIVE",
     icon: BiCalendarCheck,
-    title: "First case screened",
+    title: "Test the conversation",
     description:
-      "Most firms see their first qualified consultation booked within hours of going live.",
+      "Run sample conversations before sending real visitors into the intake flow. Test a strong fit case, a poor fit case, an urgent inquiry and a visitor asking a general legal question. Check responses, intake fields, routing rules and human takeover process before launch.",
     align: "left",
     hasDot: true,
   },
@@ -76,19 +76,18 @@ export default function OnboardingSection() {
           <div className="mb-4 flex items-center justify-center gap-2">
             <span className="h-0.5 w-5 bg-primary" />
             <span className="text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
-              ONBOARDING
+              - Onboarding
             </span>
           </div>
 
           {/* Main Headline */}
           <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl md:text-4xl lg:text-[42px] leading-snug sm:leading-tight">
-            What actually happens after you sign up<span className="text-primary">.</span>
+            What happens after you sign up?
           </h2>
 
           {/* Subtitle Paragraph */}
           <p className="mx-auto max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg">
-            No lengthy implementation. Here&apos;s the real timeline <br className="hidden sm:inline" />
-            from signup to your first screened case.
+            The setup process is quite simple enough for a law firm administrator or marketing manager to handle without waiting for a developer.
           </p>
         </motion.div>
 
@@ -140,13 +139,13 @@ export default function OnboardingSection() {
               </div>
               <div>
                 <span className="block mb-0.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-primary">
-                  MINUTE 1
+                  {onboardingSteps[0].time}
                 </span>
                 <h3 className="mb-1 text-base font-bold text-gray-900 sm:text-lg leading-snug">
-                  Paste your website URL
+                  {onboardingSteps[0].title}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  Go Converto starts scanning your practice areas and attorney pages immediately.
+                  {onboardingSteps[0].description}
                 </p>
               </div>
             </motion.div>
@@ -194,13 +193,13 @@ export default function OnboardingSection() {
               </div>
               <div>
                 <span className="block mb-0.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-primary">
-                  MINUTE 5
+                  {onboardingSteps[1].time}
                 </span>
                 <h3 className="mb-1 text-base font-bold text-gray-900 sm:text-lg leading-snug">
-                  Review your assistant&apos;s knowledge base
+                  {onboardingSteps[1].title}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  See exactly what it learned and correct anything before it goes live.
+                  {onboardingSteps[1].description}
                 </p>
               </div>
             </motion.div>
@@ -238,13 +237,13 @@ export default function OnboardingSection() {
               </div>
               <div>
                 <span className="block mb-0.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-primary">
-                  MINUTE 8
+                  {onboardingSteps[2].time}
                 </span>
                 <h3 className="mb-1 text-base font-bold text-gray-900 sm:text-lg leading-snug">
-                  Set your intake questions
+                  {onboardingSteps[2].title}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  Use the defaults or customize them to match how your firm screens new cases.
+                  {onboardingSteps[2].description}
                 </p>
               </div>
             </motion.div>
@@ -281,13 +280,13 @@ export default function OnboardingSection() {
               </div>
               <div>
                 <span className="block mb-0.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-primary">
-                  MINUTE 10
+                  {onboardingSteps[3].time}
                 </span>
                 <h3 className="mb-1 text-base font-bold text-gray-900 sm:text-lg leading-snug">
-                  Install the widget
+                  {onboardingSteps[3].title}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  Copy one snippet into your site — no developer needed.
+                  {onboardingSteps[3].description}
                 </p>
               </div>
             </motion.div>
@@ -311,13 +310,13 @@ export default function OnboardingSection() {
               </div>
               <div>
                 <span className="block mb-0.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-primary">
-                  SAME DAY
+                  {onboardingSteps[4].time}
                 </span>
                 <h3 className="mb-1 text-base font-bold text-gray-900 sm:text-lg leading-snug">
-                  First case screened
+                  {onboardingSteps[4].title}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  Most firms see their first qualified consultation booked within hours of going live.
+                  {onboardingSteps[4].description}
                 </p>
               </div>
             </motion.div>

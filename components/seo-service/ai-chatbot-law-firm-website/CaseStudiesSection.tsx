@@ -130,35 +130,35 @@ function CourthouseIcon() {
 const caseStudies = [
   {
     id: "01",
-    category: "PERSONAL INJURY",
+    category: "Personal injury",
     icon: ShieldUserIcon,
     renderStat: () => <AnimatedStat from={0} to={41} prefix="+" suffix="%" />,
     description:
-      "Increase in booked consultations after replacing the intake form with Go Converto.",
+      "More booked consultations after swapping the intake form for Go Converto.",
     firmName: "Carter Injury Law",
-    launchTime: "90 days post-launch",
+    launchTime: "90 days post launch",
   },
   {
     id: "02",
-    category: "FAMILY LAW",
+    category: "Family law",
     icon: FamilyGroupIcon,
     renderStat: () => (
       <AnimatedStat from={0} to={3.1} decimals={1} suffix="×" />
     ),
     description:
-      "More after-hours inquiries captured and booked into next-day consultations.",
+      "More after hours inquiries captured and booked into next day consultations.",
     firmName: "Melamed Law",
-    launchTime: "60 days post-launch",
+    launchTime: "60 days post launch",
   },
   {
     id: "03",
-    category: "GENERAL PRACTICE",
+    category: "General practice",
     icon: GeneralBriefcaseIcon,
     renderStat: () => <AnimatedStat from={0} to={52} prefix="-" suffix="%" />,
     description:
-      "Reduction in intake time spent screening cases outside the firm's practice areas.",
+      "Less intake time spent screening cases outside the firm's practice areas.",
     firmName: "McCulloch Law",
-    launchTime: "45 days post-launch",
+    launchTime: "45 days post launch",
   },
 ];
 
@@ -176,26 +176,10 @@ export default function CaseStudiesSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 sm:mb-16"
         >
-          {/* Kicker Badge */}
-          <div className="mb-4 flex items-center justify-center gap-3">
-            <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00a8a0] sm:text-sm">
-              CASE STUDIES
-            </span>
-            <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
-          </div>
-
           {/* Main Title */}
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto">
-            Results across different <br className="hidden sm:inline" />
-            practice areas
+            Results across different practice areas
           </h2>
-
-          {/* Subtitle */}
-          <p className="mt-4 mx-auto max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base md:text-lg font-normal">
-            Real law firms. Real results. <br />
-            Measurable impact with Go Converto.
-          </p>
         </motion.div>
 
         {/* ========================================================================= */}

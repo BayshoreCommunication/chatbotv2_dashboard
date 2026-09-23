@@ -98,28 +98,28 @@ const customizationCards = [
     icon: SpeechBubbleIcon,
     title: "Matches your firm's tone",
     description:
-      "Trained on your own content, so it sounds like your intake team — not a template.",
+      "Use language consistent with your firm's website and client communications. Keep the wording professional, direct and appropriate for legal inquiries. Practice specific terms can be added where they help visitors understand the questions.",
   },
   {
     id: "02",
     icon: EditableDocIcon,
     title: "Editable intake questions",
     description:
-      "Review and adjust the screening flow to fit your actual intake process.",
+      "Add, remove or revise questions based on your firm's current screening process. You can ask different questions for different practice areas and adjust the flow as your team changes its intake requirements.",
   },
   {
     id: "03",
     icon: HeadsetIcon,
-    title: "Human takeover, anytime",
+    title: "Human control anytime",
     description:
-      "Step into a live conversation whenever a case needs a personal touch.",
+      "Give staff a clear way to take over a conversation when personal assistance is needed. Human intervention can support complex inquiries, existing clients, urgent situations or conversations outside the chatbot's configured scope.",
   },
   {
     id: "04",
     icon: WidgetIcon,
-    title: "Widget matches your site",
+    title: "Website styling",
     description:
-      "Colors, position, and styling adapt to your existing design — looks like it's always been there.",
+      "Match AI chatbot widget with your website's visual style. Consistent branding can make the assistant feel like part of your firm's online experience instead of a separate tool. Available styling options depend on the product configuration.",
   },
 ];
 
@@ -141,20 +141,19 @@ export default function CustomizationSection() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00a8a0] sm:text-sm">
-              CUSTOMIZATION
+              - Customization
             </span>
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
           </div>
 
           {/* Main Headline */}
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto">
-            Your firm’s voice, <br className="hidden sm:inline" />
-            your <span className="text-[#00a8a0]">intake process</span>
+            Adjust intake process to sound more like your firm.
           </h2>
 
           {/* Subtitle Description */}
           <p className="mt-4 mx-auto max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base md:text-lg font-normal">
-            This isn’t a generic, robotic script. Every conversation reflects how your firm actually talks to prospective clients.
+            No generic script here. Every conversation feels like how your firm actually talks to clients.
           </p>
         </motion.div>
 

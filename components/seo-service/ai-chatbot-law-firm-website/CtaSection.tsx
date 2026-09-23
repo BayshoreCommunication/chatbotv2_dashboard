@@ -81,14 +81,13 @@ export default function CtaSection() {
             </div>
 
             {/* Main Headline */}
-            <h2 className="text-3xl font-serif font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[50px] leading-[1.12]">
-              Stop losing cases to <br className="hidden sm:inline" />
-              a <span className="text-[#00a8a0]">slower</span> firm’s callback.
+            <h2 className="text-3xl font-serif font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.12]">
+              What happens when your next potential client visits after hours?
             </h2>
 
             {/* Subtitle */}
             <p className="mt-4 text-sm sm:text-base md:text-lg text-slate-600 max-w-lg font-normal leading-relaxed">
-              Start your 14-day free trial and watch Go Converto screen your first case today.
+              Give them a place to start. Go Converto can answer initial questions, collect basic intake information, screen for practice area fit and guide qualified visitors toward the next step.
             </p>
 
             {/* Action Buttons */}
@@ -97,22 +96,17 @@ export default function CtaSection() {
                 href="/start-free-trial"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a8a0] px-6 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:bg-[#00968f] hover:shadow-lg"
               >
-                <span>Start free trial</span>
+                <span>Start free trial today.</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </Link>
-
-              <Link
-                href="/contact-sales"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#00a8a0] bg-white px-6 py-3.5 text-sm font-bold text-[#00a8a0] transition-all hover:bg-[#00a8a0]/10"
-              >
-                <span>Talk to sales</span>
-                <svg className="w-4 h-4 text-[#00a8a0]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.02-.24c1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                </svg>
-              </Link>
             </div>
+
+            {/* Footer Text */}
+            <p className="mt-8 text-xs sm:text-sm text-slate-500 font-normal leading-relaxed max-w-lg border-t border-slate-200/80 pt-4">
+              <strong className="font-bold text-slate-700">Go Converto</strong> helps law firms handle the first stage of website intake with an AI assistant built around the firm&apos;s own content and screening process. 24/7 assistance.
+            </p>
           </motion.div>
 
           {/* ========================================================================= */}

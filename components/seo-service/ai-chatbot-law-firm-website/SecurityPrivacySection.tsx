@@ -120,30 +120,30 @@ const securityCards = [
   {
     id: "01",
     icon: LockIcon,
-    title: "Encrypted in transit",
+    title: "Encryption",
     description:
-      "AI conversations and case details are encrypted end to end.",
+      "State the exact encryption methods used by Go Converto for data in transit and at rest. Avoid broad claims such as end to end encryption unless the product architecture supports the claim. Security details should match documented product specifications.",
   },
   {
     id: "02",
     icon: SlashCircleIcon,
-    title: "No data resale",
+    title: "Data sharing",
     description:
-      "Prospective client information is never sold or shared with third parties.",
+      "Explain how conversation data is handled after collection. Include any sharing with service providers, hosting providers, model providers, analytics tools or other third parties. Your privacy disclosures should match the actual data flow used by the product.",
   },
   {
     id: "03",
-    icon: ShieldCheckIcon,
-    title: "Compliance-ready",
+    icon: UserCheckIcon,
+    title: "Privacy controls",
     description:
-      "Built with GDPR-aligned data handling for firms serving global clients.",
+      "Describe available controls for data retention, deletion, export, access and other privacy settings. Give firms clear information about the options available for managing captured intake information. Product documentation should define the exact controls supported.",
   },
   {
     id: "04",
-    icon: UserCheckIcon,
-    title: "You stay in control",
+    icon: ShieldCheckIcon,
+    title: "Compliance",
     description:
-      "Export or delete captured case data whenever you need to.",
+      "List only security standards, privacy frameworks or regulatory requirements Go Converto actually meets. Avoid general phrases such as \"compliance ready\" without supporting documentation. Legal firms should be able to review specific compliance information before using the chatbot for client intake.",
   },
 ];
 
@@ -168,20 +168,19 @@ export default function SecurityPrivacySection() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#00a8a0] sm:text-sm">
-              SECURITY & PRIVACY
+              - SECURITY & PRIVACY
             </span>
             <span className="h-[2px] w-6 sm:w-8 bg-[#00a8a0]" />
           </div>
 
           {/* Main Title */}
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl lg:text-[46px] leading-[1.15] max-w-3xl mx-auto">
-            Client information, protected
+            Go Converto protects clients&apos; sensitive information.
           </h2>
 
           {/* Subtitle */}
           <p className="mt-4 mx-auto max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base md:text-lg font-normal">
-            Built with security by design, so you can focus on what matters most — <br className="hidden sm:inline" />
-            your clients.
+            Your firm should actively determine how conversation data is collected, stored, accessed, and shared. Use only security and compliance claims supported by Go Converto&apos;s current technical documentation.
           </p>
         </motion.div>
 
@@ -277,11 +276,10 @@ export default function SecurityPrivacySection() {
           {/* Right Text Content */}
           <div className="flex-1 text-center sm:text-left">
             <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3 tracking-tight">
-              Try it free. Cancel anytime.
+              Start with a 14 day free trial
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal max-w-2xl">
-              Every plan starts with a full{" "}
-              <strong className="font-bold text-[#00a8a0]">14-day free trial</strong> — no credit card tricks, no long-term contract. If Go Converto doesn&apos;t capture more qualified consultations than your current intake process, cancel with one click before you&apos;re ever billed.
+              Every plan comes with a full 14 day free trial. No long term commitment is required during the trial period. If Go Converto doesn&apos;t book more qualified consultations than your current process, cancel with single click before paying bill. Review the available plan terms before publishing billing or cancellation promises.
             </p>
           </div>
         </motion.div>
