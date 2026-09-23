@@ -1,41 +1,43 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import {
-  RealEstateHero,
-  SeeItInActionSection,
-  ProblemSection,
-  SolutionSection,
-  HowItWorksSection,
-  OnboardingSection,
-  WhatGetsCapturedSection,
   CapabilitiesSection,
-  IntegrationsSection,
+  CaseStudiesSection,
+  ComparisonSection,
+  CtaSection,
+  CustomizationSection,
   DeploymentSection,
   DifferenceSection,
-  WhoCanBenefitSection,
-  CustomizationSection,
-  TheMathSection,
-  CaseStudiesSection,
-  SocialProofSection,
-  SecurityPrivacySection,
-  PricingSection,
-  CommonQuestionsSection,
-  ComparisonSection,
-  ResourcesSection,
   FaqSection,
-  CtaSection,
+  FenceQuestionsSection,
+  HowItWorksSection,
+  IntegrationsSection,
+  OnboardingSection,
+  PricingSection,
+  ProblemSection,
+  RealEstateHero,
+  ResourcesSection,
+  SecurityPrivacySection,
+  SeeItInActionSection,
+  SocialProofSection,
+  SolutionSection,
+  TheMathSection,
+  WhatGetsCapturedSection,
+  WhoCanBenefitSection,
 } from "@/components/seo-service/ai-assistant-for-real-estate-professionals";
 
 export const metadata: Metadata = {
   title: "AI Chatbot Real Estate Agents | Go Converto",
   description:
     "Capture and qualify real estate leads 24/7 with an AI chatbot that answers property questions, qualifies buyers, and books tours for you.",
+  alternates: { canonical: "/ai-assistant-for-real-estate-professionals" },
 };
 
-export default function AiAssistantRealEstatePage() {
+export default function RealEstateSeoPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <div className="pt-16">
       <RealEstateHero />
       <SeeItInActionSection />
+      <SocialProofSection />
       <ProblemSection />
       <SolutionSection />
       <HowItWorksSection />
@@ -49,14 +51,13 @@ export default function AiAssistantRealEstatePage() {
       <CustomizationSection />
       <TheMathSection />
       <CaseStudiesSection />
-      <SocialProofSection />
       <SecurityPrivacySection />
       <PricingSection />
-      <CommonQuestionsSection />
+      <FenceQuestionsSection />
       <ComparisonSection />
       <ResourcesSection />
       <FaqSection />
       <CtaSection />
-    </main>
+    </div>
   );
 }

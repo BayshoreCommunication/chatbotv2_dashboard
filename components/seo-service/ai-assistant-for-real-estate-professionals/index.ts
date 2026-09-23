@@ -1,3 +1,6 @@
+export { default as Header } from "./Header";
+export { default as Footer } from "./Footer";
+export { default as SeoPageWrapper } from "./SeoPageWrapper";
 export { default as RealEstateHero } from "./RealEstateHero";
 export { default as SeeItInActionSection } from "./SeeItInActionSection";
 export { default as SocialProofSection } from "./SocialProofSection";
@@ -16,7 +19,7 @@ export { default as TheMathSection } from "./TheMathSection";
 export { default as CaseStudiesSection } from "./CaseStudiesSection";
 export { default as SecurityPrivacySection } from "./SecurityPrivacySection";
 export { default as PricingSection } from "./PricingSection";
-export { default as CommonQuestionsSection } from "./CommonQuestionsSection";
+export { default as FenceQuestionsSection } from "./FenceQuestionsSection";
 export { default as ComparisonSection } from "./ComparisonSection";
 export { default as ResourcesSection } from "./ResourcesSection";
 export { default as FaqSection } from "./FaqSection";
