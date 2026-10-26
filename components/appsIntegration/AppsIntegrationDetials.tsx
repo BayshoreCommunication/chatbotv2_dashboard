@@ -500,9 +500,9 @@ const AppsIntegrationDetials = () => {
   if (!hasAdvancedAccess) {
     return (
       <div className="@container flex flex-col gap-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Apps &amp; Integrations</h1>
-          <p className="mt-0.5 text-sm text-gray-500">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h1 className="text-xl font-semibold tracking-tight text-gray-900">Apps &amp; Integrations</h1>
+          <p className="mt-1 text-sm leading-relaxed text-gray-500">
             Connect your AI assistant to the channels your customers already use
           </p>
         </div>
@@ -699,14 +699,14 @@ const AppsIntegrationDetials = () => {
   return (
     <div className="@container flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Apps &amp; Integrations</h1>
-          <p className="mt-0.5 text-sm text-gray-500">
+          <h1 className="text-xl font-semibold tracking-tight text-gray-900">Apps &amp; Integrations</h1>
+          <p className="mt-1 text-sm leading-relaxed text-gray-500">
             Connect your AI assistant to the channels your customers already use
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600">
+        <div className="flex w-fit shrink-0 items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600">
           <span
             className={`h-2 w-2 rounded-full ${connectedCount > 0 ? "bg-green-500" : "bg-gray-300"}`}
           />

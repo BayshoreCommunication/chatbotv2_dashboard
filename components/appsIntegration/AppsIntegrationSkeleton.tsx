@@ -9,8 +9,8 @@ function Bar({ className }: { className: string }) {
 export default function AppsIntegrationSkeleton() {
   return (
     <div className="flex flex-col gap-6" aria-busy="true" aria-label="Loading">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="space-y-2">
+      <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2.5">
           <Bar className="h-5 w-52" />
           <Bar className="h-3 w-80 max-w-full" />
         </div>
