@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
+const TOKEN_REFRESH_AFTER_MS = 24 * 60 * 60 * 1000;
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
@@ -109,6 +110,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       if (user) {
         token.id                   = user.id;
         token.accessToken          = user.accessToken;
+        token.accessTokenIssuedAt  = Date.now();
         token.role                 = user.role;
         token.companyName          = user.companyName;
         token.has_paid_subscription = user.has_paid_subscription ?? false;
@@ -116,6 +118,33 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         token.is_team_member       = user.is_team_member ?? false;
         token.team_member_email    = user.team_member_email ?? null;
         token.team_member_name     = user.team_member_name ?? null;
+        return token;
+      }
+
+      // Sliding session: while the user keeps using the app, swap the backend
+      // token for a fresh one at most once a day. Every session read also
+      // re-issues the cookie with a new 30-day expiry, so only 30 days of
+      // inactivity signs someone out. Tokens issued before this existed have
+      // no issue time and get refreshed on their next use.
+      const issuedAt = (token.accessTokenIssuedAt as number | undefined) ?? 0;
+      if (token.accessToken && Date.now() - issuedAt > TOKEN_REFRESH_AFTER_MS) {
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/v1/auth/refresh`, {
+            method:  "POST",
+            headers: { Authorization: `Bearer ${token.accessToken}` },
+            cache:   "no-store",
+          });
+          if (res.status === 401) return null; // expired, disabled or revoked — sign out
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.access_token) {
+              token.accessToken         = data.access_token;
+              token.accessTokenIssuedAt = Date.now();
+            }
+          }
+        } catch {
+          // Backend unreachable — keep the current token and try again later.
+        }
       }
       return token;
     },

@@ -2,6 +2,7 @@
 
 import Sidebar from '@/components/layout/Sidebar'
 import Topbar from '@/components/layout/Topbar'
+import SessionKeepAlive from '@/components/layout/SessionKeepAlive'
 import { SidebarProvider, useSidebarContext } from '@/lib/SidebarContext'
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
@@ -9,6 +10,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SessionKeepAlive />
       <Sidebar />
       <Topbar />
 
