@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -39,16 +40,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+  const isTeamMember = session?.user?.is_team_member ?? false;
+
   return (
     <div
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <LayoutWrapper>{children}</LayoutWrapper>
+      <LayoutWrapper isTeamMember={isTeamMember}>{children}</LayoutWrapper>
     </div>
   );
 }

@@ -31,7 +31,7 @@ type BillingReminder =
   | { kind: "trial"; days: number }
   | { kind: "ending"; days: number };
 
-const Sidebar = () => {
+const Sidebar = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
   const pathname = usePathname();
   const { isExpanded, toggleSidebar } = useSidebarContext();
   const [openMenus, setOpenMenus] = useState<string[]>([]);
@@ -41,6 +41,9 @@ const Sidebar = () => {
   // dashboard page, not just widget-settings. Two cases: still in the free
   // trial, or a paid plan that's canceled and about to lapse.
   useEffect(() => {
+    // Team members can't manage billing, so the reminder (which links to it)
+    // is only for the account owner.
+    if (isTeamMember) return;
     let active = true;
     getSubscriptionAction().then((res) => {
       if (!active || !res.ok || !res.data) return;
@@ -61,7 +64,7 @@ const Sidebar = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isTeamMember]);
 
   // Toggle sub-menu
   const toggleSubMenu = (itemId: string) => {

@@ -140,6 +140,22 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    // Billing belongs to the account owner. A team member's session carries
+    // the owner's id, so keep them off the billing/checkout pages entirely
+    // (the API refuses them too — this just gives a clear message).
+    const isTeamMember =
+      (session.user as { is_team_member?: boolean }).is_team_member === true;
+    if (
+      isTeamMember &&
+      ["/billing", "/checkout"].some(
+        (path) => pathname === path || pathname.startsWith(path + "/"),
+      )
+    ) {
+      const url = new URL("/dashboard", request.url);
+      url.searchParams.set("notice", "owner_only");
+      return NextResponse.redirect(url);
+    }
+
     // 2. Subscription Check logic
     // These paths require auth but are allowed WITHOUT an active subscription
     const subscriptionExemptPaths = [

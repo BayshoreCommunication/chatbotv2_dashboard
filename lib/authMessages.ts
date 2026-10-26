@@ -6,6 +6,8 @@ export const AUTH_NOTICES: Record<string, string> = {
     "Your session has expired. Please sign in again.",
   server_unavailable:
     "We couldn't reach the server. Please try again in a moment.",
+  owner_only:
+    "Billing is only available to the account owner.",
   subscription_required:
     "You need an active plan to open the dashboard. Start your free trial to continue.",
 };

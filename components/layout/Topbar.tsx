@@ -71,8 +71,10 @@ const Topbar = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
   const searchRef = useRef<HTMLDivElement>(null);
 
   const matchedPages = searchQuery.trim()
-    ? SEARCH_PAGES.filter((page) =>
-        page.label.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+    ? SEARCH_PAGES.filter(
+        (page) =>
+          !(isTeamMember && page.href === "/billing") &&
+          page.label.toLowerCase().includes(searchQuery.trim().toLowerCase()),
       )
     : [];
 
@@ -501,14 +503,16 @@ const Topbar = ({ isTeamMember = false }: { isTeamMember?: boolean }) => {
                 <BiUser className="mr-3 h-5 w-5 text-gray-400" />
                 Profile
               </Link>
-              <Link
-                href="/billing"
-                onClick={() => setIsDropdownOpen(false)}
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                <BiWallet className="mr-3 h-5 w-5 text-gray-400" />
-                Billing
-              </Link>
+              {!isTeamMember && (
+                <Link
+                  href="/billing"
+                  onClick={() => setIsDropdownOpen(false)}
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <BiWallet className="mr-3 h-5 w-5 text-gray-400" />
+                  Billing
+                </Link>
+              )}
               <button
                 onClick={handleSignOut}
                 className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

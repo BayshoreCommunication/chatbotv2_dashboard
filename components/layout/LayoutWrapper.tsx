@@ -5,14 +5,20 @@ import Topbar from '@/components/layout/Topbar'
 import SessionKeepAlive from '@/components/layout/SessionKeepAlive'
 import { SidebarProvider, useSidebarContext } from '@/lib/SidebarContext'
 
-function LayoutContent({ children }: { children: React.ReactNode }) {
+function LayoutContent({
+  children,
+  isTeamMember,
+}: {
+  children: React.ReactNode
+  isTeamMember: boolean
+}) {
   const { isExpanded } = useSidebarContext()
 
   return (
     <div className="min-h-screen bg-gray-50">
       <SessionKeepAlive />
-      <Sidebar />
-      <Topbar />
+      <Sidebar isTeamMember={isTeamMember} />
+      <Topbar isTeamMember={isTeamMember} />
 
       {/* Main content with proper spacing for fixed sidebar and topbar */}
       <main
@@ -27,12 +33,14 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function LayoutWrapper({
   children,
+  isTeamMember = false,
 }: {
   children: React.ReactNode;
+  isTeamMember?: boolean;
 }) {
   return (
     <SidebarProvider>
-      <LayoutContent>{children}</LayoutContent>
+      <LayoutContent isTeamMember={isTeamMember}>{children}</LayoutContent>
     </SidebarProvider>
   )
 }
