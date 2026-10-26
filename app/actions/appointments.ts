@@ -38,6 +38,8 @@ export interface CalendlySnapshot {
   stats: CalendlyStats;
   slots: CalendlySlot[];
   error?: string | null;
+  /** Non-fatal heads-up, e.g. booking tracking unavailable on a free Calendly plan. */
+  warning?: string | null;
 }
 
 type ActionSuccess<T> = { ok: true; data: T };

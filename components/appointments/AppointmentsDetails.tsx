@@ -73,7 +73,13 @@ const AppointmentsDetails = () => {
     };
 
     setHasSavedToken(tokenConfigured);
-    setSettings(normalizedSettings);
+    // The server only sends a placeholder for a saved token. If the saved one
+    // no longer works the field is open for editing, so start it empty.
+    setSettings(
+      tokenConfigured && !snapshot.connected
+        ? { ...normalizedSettings, calendly_access_token: "" }
+        : normalizedSettings,
+    );
     setSavedSettings(normalizedSettings);
     setEvents(snapshot.events || []);
     setStats(snapshot.stats || EMPTY_STATS);
@@ -81,6 +87,8 @@ const AppointmentsDetails = () => {
     setIsConnected(!!snapshot.connected);
     if (snapshot.error) {
       setMessage({ type: "error", text: snapshot.error });
+    } else if (snapshot.warning) {
+      setMessage({ type: "error", text: snapshot.warning });
     }
   };
 
@@ -173,10 +181,12 @@ const AppointmentsDetails = () => {
 
       applySnapshot(result.snapshot);
       setIsEditingToken(false);
-      setMessage({
-        type: "success",
-        text: "Calendly token saved and connected successfully.",
-      });
+      if (!result.snapshot.warning) {
+        setMessage({
+          type: "success",
+          text: "Calendly token saved and connected successfully.",
+        });
+      }
     } catch {
       setMessage({ type: "error", text: "Failed to save Calendly token" });
     } finally {
@@ -417,7 +427,10 @@ const AppointmentsDetails = () => {
 
                 {!isEditingToken && hasSavedToken && (
                   <button
-                    onClick={() => setIsEditingToken(true)}
+                    onClick={() => {
+                      setSettings((prev) => ({ ...prev, calendly_access_token: "" }));
+                      setIsEditingToken(true);
+                    }}
                     className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   >
                     <BiEdit className="h-4 w-4" />
