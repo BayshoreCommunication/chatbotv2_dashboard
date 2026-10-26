@@ -15,7 +15,7 @@ import { getSubscriptionAction } from "@/app/actions/subscriptions";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { IconType } from "react-icons";
-import { BiCheckCircle, BiErrorCircle, BiLoaderAlt, BiLockAlt, BiX } from "react-icons/bi";
+import { BiCheckCircle, BiErrorCircle, BiLoaderAlt, BiLockAlt, BiPlus, BiX } from "react-icons/bi";
 import { FaFacebookMessenger, FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 
@@ -97,6 +97,25 @@ const CHANNEL_LABEL: Record<ChannelType, string> = {
   messenger: "Messenger",
   instagram: "Instagram",
   whatsapp: "WhatsApp",
+};
+
+// Brand colour + copy for each channel card.
+const CHANNEL_META: Record<ChannelType, { color: string; description: string; hint: string }> = {
+  messenger: {
+    color: "#0084FF",
+    description: "Answer customers who message your Facebook Page, around the clock.",
+    hint: "Sign in with Facebook and pick the Page to connect.",
+  },
+  instagram: {
+    color: "#E1306C",
+    description: "Reply to Instagram DMs automatically from the same AI assistant.",
+    hint: "Connects automatically with the Instagram account linked to your Facebook Page.",
+  },
+  whatsapp: {
+    color: "#25D366",
+    description: "Chat with customers on WhatsApp using your business number.",
+    hint: "Set up your WhatsApp Business number in a quick guided popup.",
+  },
 };
 
 // Shown as a placeholder row for any channel with zero connections, so the
@@ -468,9 +487,14 @@ const AppsIntegrationDetials = () => {
     loadConnections();
   };
 
+  const connectedCount = CHANNEL_CHECKLIST.filter((channel) =>
+    connections.some((c) => c.channel === channel && c.status === "active"),
+  ).length;
+  const busy = startingOAuth || connectingWhatsApp;
+
   if (checkingAccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <BiLoaderAlt className="animate-spin text-gray-400" size={24} />
       </div>
     );
@@ -478,30 +502,32 @@ const AppsIntegrationDetials = () => {
 
   if (!hasAdvancedAccess) {
     return (
-      <div className="@container">
-        <div className="flex flex-col gap-6 bg-gray-50 min-h-screen">
-          <div className="rounded border border-gray-200 bg-white p-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Apps &amp; Integrations
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Connect your AI assistant to the channels your customers already
-              use
-            </p>
-          </div>
+      <div className="@container flex flex-col gap-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Apps &amp; Integrations</h1>
+          <p className="mt-0.5 text-sm text-gray-500">
+            Connect your AI assistant to the channels your customers already use
+          </p>
+        </div>
 
-          <div className="flex flex-col items-center gap-4 rounded border border-gray-200 bg-white p-12 text-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-10 text-center">
+          <div className="pointer-events-none absolute -top-16 left-1/2 h-40 w-72 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+          <div className="relative flex flex-col items-center gap-4">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <BiLockAlt size={26} />
             </span>
             <div>
-              <h2 className="text-lg font-bold text-gray-900">
-                Available on the Advanced plan
-              </h2>
+              <h2 className="text-lg font-bold text-gray-900">Available on the Advanced plan</h2>
               <p className="mx-auto mt-1 max-w-sm text-sm text-gray-500">
-                Connect Messenger, Instagram, and WhatsApp to your AI
-                assistant by upgrading to the Advanced plan.
+                Connect Messenger, Instagram, and WhatsApp to your AI assistant by upgrading to the
+                Advanced plan.
               </p>
+            </div>
+            <div className="flex items-center gap-3 text-gray-300">
+              {CHANNEL_CHECKLIST.map((channel) => {
+                const Icon = CHANNEL_ICON[channel];
+                return <Icon key={channel} size={20} />;
+              })}
             </div>
             <Link
               href="/pricing"
@@ -515,241 +541,279 @@ const AppsIntegrationDetials = () => {
     );
   }
 
-  return (
-    <div className="@container">
-      <div className="flex flex-col gap-6 bg-gray-50 min-h-screen">
-        {/* Header */}
-        <div className="rounded border border-gray-200 bg-white p-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Apps &amp; Integrations
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Connect your AI assistant to the channels your customers already
-            use
-          </p>
+  const renderStatusBadge = (status: ChannelConnectionSummary["status"]) => {
+    if (status === "active") {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-700">
+          <BiCheckCircle size={12} />
+          Connected
+        </span>
+      );
+    }
+    if (status === "token_expired") {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+          <BiErrorCircle size={12} />
+          Reconnect needed
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500">
+        Disconnected
+      </span>
+    );
+  };
+
+  const renderChannelCard = (channel: ChannelType) => {
+    const meta = CHANNEL_META[channel];
+    const Icon = CHANNEL_ICON[channel];
+    const items = connections.filter((c) => c.channel === channel);
+    const connect = channel === "whatsapp" ? handleConnectWhatsApp : handleConnectFacebookPage;
+    const connecting = channel === "whatsapp" ? connectingWhatsApp : startingOAuth;
+    const hasActive = items.some((c) => c.status === "active");
+    const needsReconnect = items.some((c) => c.status === "token_expired");
+
+    return (
+      <div
+        key={channel}
+        className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-sm"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <span
+            className="flex h-11 w-11 items-center justify-center rounded-xl"
+            style={{ backgroundColor: `${meta.color}14`, color: meta.color }}
+          >
+            <Icon size={22} />
+          </span>
+          {hasActive ? (
+            renderStatusBadge("active")
+          ) : needsReconnect ? (
+            renderStatusBadge("token_expired")
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500">
+              Not connected
+            </span>
+          )}
         </div>
 
-        {/* Connected Channels — single Facebook connect flow covers both
-            Messenger and any Instagram account linked to the same Page. */}
-        <div className="rounded border border-gray-200 bg-white p-6">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-gray-900">
-                  Connected Channels
-                </h2>
-                <FaFacebookMessenger size={16} className="text-gray-400" />
-                <FaInstagram size={16} className="text-gray-400" />
-                <FaWhatsapp size={16} className="text-gray-400" />
-              </div>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Connect a Facebook Page to bring your AI assistant to
-                Messenger — any Instagram account linked to that Page
-                connects automatically alongside it. Connect WhatsApp
-                separately below.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleConnectFacebookPage}
-                disabled={startingOAuth || connectingWhatsApp}
-                className="flex items-center justify-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1877F2]/90 disabled:opacity-50"
-              >
-                {startingOAuth ? (
-                  <BiLoaderAlt className="animate-spin" size={16} />
-                ) : (
-                  <FaFacebookF size={14} />
-                )}
-                {startingOAuth ? "Redirecting…" : "Connect Facebook"}
-              </button>
-              <button
-                type="button"
-                onClick={handleConnectWhatsApp}
-                disabled={connectingWhatsApp || startingOAuth}
-                className="flex items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#25D366]/90 disabled:opacity-50"
-              >
-                {connectingWhatsApp ? (
-                  <BiLoaderAlt className="animate-spin" size={16} />
-                ) : (
-                  <FaWhatsapp size={14} />
-                )}
-                {connectingWhatsApp ? "Connecting…" : "Connect WhatsApp"}
-              </button>
-            </div>
-          </div>
+        <h3 className="mt-4 text-base font-bold text-gray-900">{CHANNEL_LABEL[channel]}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-gray-500">{meta.description}</p>
 
-          {(startingOAuth || connectingWhatsApp) && (
-            <p className="mb-3 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700">
-              A Facebook popup window should appear now. If nothing shows up,
-              your browser likely blocked it — look for a blocked-popup icon
-              in the address bar, allow popups for this site, then try again.
-            </p>
-          )}
-
-          {/* Temporary — visible debug trail for the WhatsApp signup flow,
-              so a stuck connection can be diagnosed from a screenshot. */}
-          {whatsappDebugLog.length > 0 && (
-            <div className="mb-3 rounded-lg bg-gray-900 px-3 py-2 font-mono text-[11px] leading-relaxed text-gray-200">
-              {whatsappDebugLog.map((line, i) => (
-                <div key={i}>{line}</div>
-              ))}
-            </div>
-          )}
-
+        <div className="mt-4 flex-1">
           {loadingConnections ? (
-            <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-400">
-              <BiLoaderAlt className="animate-spin" size={18} />
-              Loading connected channels…
+            <div className="space-y-2">
+              <div className="h-9 animate-pulse rounded-lg bg-gray-100" />
             </div>
-          ) : connectionsError ? (
-            <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <p className="text-sm text-red-600">{connectionsError}</p>
-              <button
-                type="button"
-                onClick={loadConnections}
-                className="text-xs font-medium text-primary hover:underline"
-              >
-                Try again
-              </button>
-            </div>
+          ) : items.length > 0 ? (
+            <ul className="space-y-2">
+              {items.map((connection) => (
+                <li
+                  key={connection.id}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-gray-100 bg-gray-50/60 px-3 py-2"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-gray-900">
+                      {connection.page_name || connection.external_id}
+                    </p>
+                    {connection.status !== "active" && (
+                      <div className="mt-0.5">{renderStatusBadge(connection.status)}</div>
+                    )}
+                  </div>
+                  <div className="shrink-0">
+                    {connection.status === "active" && (
+                      <button
+                        type="button"
+                        onClick={() => requestDisconnect(connection)}
+                        className="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                      >
+                        Disconnect
+                      </button>
+                    )}
+                    {connection.status === "token_expired" && (
+                      <button
+                        type="button"
+                        onClick={connect}
+                        disabled={busy}
+                        className="rounded-lg bg-amber-500 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
+                      >
+                        Reconnect
+                      </button>
+                    )}
+                    {connection.status === "disconnected" && (
+                      <button
+                        type="button"
+                        onClick={connect}
+                        disabled={busy}
+                        className="rounded-lg bg-thunder-black px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-thunder-black/90 disabled:opacity-50"
+                      >
+                        Connect
+                      </button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : (
-            <div className="divide-y divide-gray-100">
-              {connections.map((connection) => {
-                const Icon = CHANNEL_ICON[connection.channel];
-                return (
-                  <div
-                    key={connection.id}
-                    className="flex flex-wrap items-center justify-between gap-3 py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
-                        <Icon size={18} className="text-black" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-gray-900">
-                            {connection.page_name || connection.external_id}
-                          </span>
-                          {connection.status === "active" && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-700">
-                              <BiCheckCircle size={12} />
-                              Connected
-                            </span>
-                          )}
-                          {connection.status === "token_expired" && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                              <BiErrorCircle size={12} />
-                              Reconnect needed
-                            </span>
-                          )}
-                          {connection.status === "disconnected" && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
-                              Disconnected
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-400">
-                          {CHANNEL_LABEL[connection.channel]}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {connection.status === "active" && (
-                        <button
-                          type="button"
-                          onClick={() => requestDisconnect(connection)}
-                          className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                        >
-                          Disconnect
-                        </button>
-                      )}
-                      {connection.status === "token_expired" && (
-                        <button
-                          type="button"
-                          onClick={
-                            connection.channel === "whatsapp"
-                              ? handleConnectWhatsApp
-                              : handleConnectFacebookPage
-                          }
-                          disabled={startingOAuth || connectingWhatsApp}
-                          className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
-                        >
-                          Reconnect
-                        </button>
-                      )}
-                      {connection.status === "disconnected" && (
-                        <button
-                          type="button"
-                          onClick={
-                            connection.channel === "whatsapp"
-                              ? handleConnectWhatsApp
-                              : handleConnectFacebookPage
-                          }
-                          disabled={startingOAuth || connectingWhatsApp}
-                          className="rounded-lg bg-thunder-black px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-thunder-black/90 disabled:opacity-50"
-                        >
-                          Connect
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-              {CHANNEL_CHECKLIST.filter(
-                (channel) => !connections.some((c) => c.channel === channel),
-              ).map((channel) => {
-                const Icon = CHANNEL_ICON[channel];
-                return (
-                  <div
-                    key={`missing-${channel}`}
-                    className="flex flex-wrap items-center justify-between gap-3 py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
-                        <Icon size={18} className="text-gray-300" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-gray-400">
-                            {CHANNEL_LABEL[channel]}
-                          </span>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
-                            Not connected
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-400">
-                          {channel === "instagram"
-                            ? "Connects automatically with a linked Facebook Page"
-                            : `Click Connect ${CHANNEL_LABEL[channel]} above to add it`}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <p className="text-xs text-gray-400">{meta.hint}</p>
           )}
+        </div>
+
+        <button
+          type="button"
+          onClick={connect}
+          disabled={busy}
+          className={
+            items.length > 0
+              ? "mt-4 flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+              : "mt-4 flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          }
+          style={items.length > 0 ? undefined : { backgroundColor: meta.color }}
+        >
+          {connecting ? (
+            <BiLoaderAlt className="animate-spin" size={16} />
+          ) : items.length > 0 ? (
+            <BiPlus size={16} />
+          ) : channel === "whatsapp" ? (
+            <FaWhatsapp size={15} />
+          ) : (
+            <FaFacebookF size={13} />
+          )}
+          {connecting
+            ? channel === "whatsapp"
+              ? "Connecting…"
+              : "Redirecting…"
+            : items.length > 0
+              ? channel === "whatsapp"
+                ? "Add another number"
+                : channel === "instagram"
+                  ? "Connect another account"
+                  : "Connect another Page"
+              : channel === "whatsapp"
+                ? "Connect WhatsApp"
+                : channel === "instagram"
+                  ? "Connect via Facebook"
+                  : "Connect Facebook"}
+        </button>
+      </div>
+    );
+  };
+
+  return (
+    <div className="@container flex flex-col gap-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Apps &amp; Integrations</h1>
+          <p className="mt-0.5 text-sm text-gray-500">
+            Connect your AI assistant to the channels your customers already use
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600">
+          <span
+            className={`h-2 w-2 rounded-full ${connectedCount > 0 ? "bg-green-500" : "bg-gray-300"}`}
+          />
+          {connectedCount} of {CHANNEL_CHECKLIST.length} channels live
         </div>
       </div>
 
+      {(startingOAuth || connectingWhatsApp) && (
+        <p className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs leading-relaxed text-blue-700">
+          A Facebook popup window should appear now. If nothing shows up, your browser likely
+          blocked it — look for a blocked-popup icon in the address bar, allow popups for this
+          site, then try again.
+        </p>
+      )}
+
+      {connectionsError && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3">
+          <p className="text-sm text-red-700">{connectionsError}</p>
+          <button
+            type="button"
+            onClick={loadConnections}
+            className="rounded-lg border border-red-200 bg-white px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {/* Channel cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {CHANNEL_CHECKLIST.map((channel) => renderChannelCard(channel))}
+      </div>
+
+      {/* How it works */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+        <h2 className="text-sm font-bold text-gray-900">How it works</h2>
+        <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-3">
+          {[
+            {
+              title: "Connect a channel",
+              text: "Sign in with Facebook to link your Page — a linked Instagram account comes along automatically. WhatsApp connects separately.",
+            },
+            {
+              title: "Your AI replies",
+              text: "Messages from customers are answered automatically, using everything you've trained your assistant on.",
+            },
+            {
+              title: "Follow every conversation",
+              text: "Chats and leads from every channel show up in your dashboard, in one place.",
+            },
+          ].map((step, index) => (
+            <div key={step.title} className="flex gap-3">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                {index + 1}
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">{step.title}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-gray-500">{step.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Temporary — visible debug trail for the WhatsApp signup flow, so a
+          stuck connection can be diagnosed from a screenshot. */}
+      {whatsappDebugLog.length > 0 && (
+        <details className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+          <summary className="cursor-pointer text-xs font-medium text-gray-500">
+            WhatsApp connection log
+          </summary>
+          <div className="mt-2 rounded-lg bg-gray-900 px-3 py-2 font-mono text-[11px] leading-relaxed text-gray-200">
+            {whatsappDebugLog.map((line, i) => (
+              <div key={i}>{line}</div>
+            ))}
+          </div>
+        </details>
+      )}
+
       {/* Page picker — shown after Meta redirects back with ?selection_id= */}
       {pendingSelectionId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={closePicker}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]"
+          onClick={closePicker}
+        >
           <div
-            className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-1 flex items-center justify-between">
-              <h3 className="text-base font-bold text-gray-900">
-                Choose Page(s) to connect
-              </h3>
+            <div className="mb-1 flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: "#1877F214", color: "#1877F2" }}
+                >
+                  <FaFacebookF size={15} />
+                </span>
+                <h3 className="text-base font-bold text-gray-900">Choose Page(s) to connect</h3>
+              </div>
               <button
                 type="button"
                 onClick={closePicker}
                 disabled={confirmingSelection}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
               >
                 <BiX size={20} />
               </button>
@@ -765,32 +829,39 @@ const AppsIntegrationDetials = () => {
               </div>
             ) : (
               <div className="mb-4 max-h-64 space-y-2 overflow-y-auto">
-                {pendingPages.map((page) => (
-                  <label
-                    key={page.external_id}
-                    className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedExternalIds.has(page.external_id)}
-                      onChange={() => toggleSelectedPage(page.external_id)}
-                      className="mt-0.5"
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{page.page_name}</p>
-                      {page.linked_instagram_id ? (
-                        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-                          <FaInstagram size={12} />
-                          Instagram detected
-                          {page.linked_instagram_name ? `: @${page.linked_instagram_name}` : ""}
-                          {" — will connect automatically"}
-                        </p>
-                      ) : (
-                        <p className="mt-0.5 text-xs text-gray-400">No Instagram account linked</p>
-                      )}
-                    </div>
-                  </label>
-                ))}
+                {pendingPages.map((page) => {
+                  const selected = selectedExternalIds.has(page.external_id);
+                  return (
+                    <label
+                      key={page.external_id}
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${
+                        selected
+                          ? "border-thunder-black bg-gray-50"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => toggleSelectedPage(page.external_id)}
+                        className="mt-0.5 accent-black"
+                      />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{page.page_name}</p>
+                        {page.linked_instagram_id ? (
+                          <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                            <FaInstagram size={12} className="text-[#E1306C]" />
+                            Instagram detected
+                            {page.linked_instagram_name ? `: @${page.linked_instagram_name}` : ""}
+                            {" — will connect automatically"}
+                          </p>
+                        ) : (
+                          <p className="mt-0.5 text-xs text-gray-400">No Instagram account linked</p>
+                        )}
+                      </div>
+                    </label>
+                  );
+                })}
               </div>
             )}
 
@@ -812,19 +883,21 @@ const AppsIntegrationDetials = () => {
       {/* Disconnect confirmation */}
       {disconnectTarget && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]"
           onClick={() => !disconnectingTarget && setDisconnectTarget(null)}
         >
           <div
-            className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="mb-2 text-base font-bold text-gray-900">
+            <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <BiErrorCircle size={22} />
+            </span>
+            <h3 className="mb-1 text-base font-bold text-gray-900">
               Disconnect {disconnectTarget.pageName}?
             </h3>
             <p className="mb-5 text-sm text-gray-500">
-              Your chatbot will stop replying to messages on this channel
-              until you reconnect it.
+              Your chatbot will stop replying to messages on this channel until you reconnect it.
             </p>
             <div className="flex gap-2">
               <button
