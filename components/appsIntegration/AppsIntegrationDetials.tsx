@@ -13,6 +13,7 @@ import {
 } from "@/app/actions/appsintegrations";
 import { getSubscriptionAction } from "@/app/actions/subscriptions";
 import Link from "next/link";
+import AppsIntegrationSkeleton from "./AppsIntegrationSkeleton";
 import { useEffect, useState } from "react";
 import type { IconType } from "react-icons";
 import { BiCheckCircle, BiErrorCircle, BiLoaderAlt, BiLockAlt, BiPlus, BiX } from "react-icons/bi";
@@ -493,11 +494,7 @@ const AppsIntegrationDetials = () => {
   const busy = startingOAuth || connectingWhatsApp;
 
   if (checkingAccess) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <BiLoaderAlt className="animate-spin text-gray-400" size={24} />
-      </div>
-    );
+    return <AppsIntegrationSkeleton />;
   }
 
   if (!hasAdvancedAccess) {
