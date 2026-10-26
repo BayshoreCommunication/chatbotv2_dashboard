@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import { Suspense } from "react";
 import { ToastProvider } from "@/components/providers/ToastProvider";
+import AuthNotice from "@/components/providers/AuthNotice";
 import { OG_IMAGE, SITE_URL } from "@/config/seo";
 import "./globals.css";
 
@@ -55,6 +57,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <Suspense fallback={null}>
+          <AuthNotice />
+        </Suspense>
         <ToastProvider />
         <Toaster
           position="bottom-right"

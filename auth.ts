@@ -1,5 +1,25 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { CredentialsSignin } from "next-auth";
+import { loginErrorCode } from "@/lib/authMessages";
+
+// Carries a LOGIN_ERRORS key back to the sign-in action (as the `code` query
+// param on the failure redirect) instead of the generic "CredentialsSignin".
+class LoginError extends CredentialsSignin {
+  constructor(code: string) {
+    super();
+    this.code = code;
+  }
+}
+
+async function failureFrom(res: Response): Promise<LoginError> {
+  let detail = "";
+  try {
+    const body = await res.json();
+    detail = typeof body?.detail === "string" ? body.detail : "";
+  } catch {}
+  return new LoginError(loginErrorCode(res.status, detail));
+}
 
 const TOKEN_REFRESH_AFTER_MS = 24 * 60 * 60 * 1000;
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
@@ -24,8 +44,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           });
 
           if (!res.ok) {
-            console.error("Sign-in failed:", res.status, await res.text());
-            return null;
+            console.error("Sign-in failed:", res.status);
+            throw await failureFrom(res);
           }
 
           const data = await res.json();
@@ -48,8 +68,9 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             team_member_name:     data.team_member_name ?? null,
           };
         } catch (error) {
+          if (error instanceof LoginError) throw error;
           console.error("Authorize crashed:", error);
-          return null;
+          throw new LoginError("server_error");
         }
       },
     }),
@@ -74,8 +95,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           });
 
           if (!res.ok) {
-            console.error("OTP sign-in failed:", res.status, await res.text());
-            return null;
+            console.error("OTP sign-in failed:", res.status);
+            throw await failureFrom(res);
           }
 
           const data = await res.json();
@@ -97,8 +118,9 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             team_member_name:     data.team_member_name ?? null,
           };
         } catch (error) {
+          if (error instanceof LoginError) throw error;
           console.error("OTP authorize crashed:", error);
-          return null;
+          throw new LoginError("server_error");
         }
       },
     }),

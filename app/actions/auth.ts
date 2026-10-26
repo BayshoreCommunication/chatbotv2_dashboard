@@ -3,6 +3,22 @@
 import { signIn, signOut } from "@/auth";
 import { cookies } from "next/headers";
 import { updateTag } from "next/cache";
+import { LOGIN_ERRORS } from "@/lib/authMessages";
+
+// signIn(..., { redirect: false }) never throws on bad credentials — it returns
+// the failure redirect URL (?error=CredentialsSignin&code=<our code>). Read the
+// reason from there, otherwise a wrong code looks like a successful sign-in.
+function signInFailure(resultUrl: unknown): string | null {
+  if (typeof resultUrl !== "string") return null;
+  try {
+    const params = new URL(resultUrl, "http://localhost").searchParams;
+    if (!params.get("error")) return null;
+    const code = params.get("code") ?? "";
+    return LOGIN_ERRORS[code] ?? "Sign-in failed. Please check your details and try again.";
+  } catch {
+    return null;
+  }
+}
 
 const API = `${process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com"}/api/v1`;
 
@@ -101,11 +117,13 @@ export async function signinAction(
   }
 
   try {
-    await signIn("credentials", {
+    const resultUrl = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
+    const failure = signInFailure(resultUrl);
+    if (failure) return { ok: false, error: failure };
     // Force the navbar's cached user-details fetch to refetch on the next render
     // instead of serving up to 120s of stale data from the previous session/user.
     updateTag("user_full_details");
@@ -171,11 +189,13 @@ export async function otpSigninAction(
   }
 
   try {
-    await signIn("otp-credentials", {
+    const resultUrl = await signIn("otp-credentials", {
       email,
       otp_code,
       redirect: false,
     });
+    const failure = signInFailure(resultUrl);
+    if (failure) return { ok: false, error: failure };
     updateTag("user_full_details");
     return { ok: true, redirectTo: callbackUrl };
   } catch (error: any) {

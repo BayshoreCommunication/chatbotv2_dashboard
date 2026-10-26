@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { auth } from "./auth";
-import { fetchUserProfile } from "./lib/fetchUserProfile";
+import { fetchUserProfile, fetchUserProfileWithStatus } from "./lib/fetchUserProfile";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -96,7 +96,13 @@ export async function proxy(request: NextRequest) {
 
     // --- AUTH PAGE REDIRECT (UX Improvement) ---
     // If user is already logged in, don't let them see Sign-In/Up pages
-    if (session?.user && (pathname === "/sign-in" || pathname === "/sign-up")) {
+    // (Skipped when we just bounced them here with a ?notice= — otherwise a
+    // session the backend rejects would loop /sign-in <-> /dashboard.)
+    if (
+      session?.user &&
+      (pathname === "/sign-in" || pathname === "/sign-up") &&
+      !request.nextUrl.searchParams.has("notice")
+    ) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
@@ -160,14 +166,37 @@ export async function proxy(request: NextRequest) {
     // For all other protected paths, require active subscription (checked fresh from API)
     const token = (session.user as { accessToken?: string }).accessToken;
 
+    const signInWithNotice = (notice: string, dropSession: boolean) => {
+      const url = new URL("/sign-in", request.url);
+      url.searchParams.set("notice", notice);
+      url.searchParams.set("callbackUrl", pathname + request.nextUrl.search);
+      const response = NextResponse.redirect(url);
+      if (dropSession) {
+        // The cookie is still well-formed but the backend no longer accepts
+        // it — clear it so the sign-in page doesn't think they're logged in.
+        for (const cookie of request.cookies.getAll()) {
+          if (cookie.name.includes("session-token")) response.cookies.delete(cookie.name);
+        }
+      }
+      return response;
+    };
+
     if (!token) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      return signInWithNotice("session_expired", true);
     }
 
-    const user = await fetchUserProfile(token);
+    const { user, status } = await fetchUserProfileWithStatus(token);
 
-    if (!user?.is_subscribed) {
-      return NextResponse.redirect(new URL("/", request.url));
+    if (!user) {
+      return status === 401 || status === 403
+        ? signInWithNotice("session_expired", true)
+        : signInWithNotice("server_unavailable", false);
+    }
+
+    if (!user.is_subscribed) {
+      const url = new URL("/", request.url);
+      url.searchParams.set("notice", "subscription_required");
+      return NextResponse.redirect(url);
     }
 
     return NextResponse.next();
