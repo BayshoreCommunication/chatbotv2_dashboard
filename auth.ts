@@ -143,4 +143,19 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
   },
+
+  // Cookies aren't isolated per port, so on localhost another app's (or an
+  // older run's) default `authjs.session-token` cookie — encrypted with a
+  // different secret — keeps colliding with this one and the session fails
+  // to decrypt, bouncing every dashboard click back to "/". Use an
+  // app-specific name in development only; production keeps the defaults so
+  // live sessions are unaffected.
+  ...(process.env.NODE_ENV !== "production" && {
+    cookies: {
+      sessionToken: {
+        name: "goconverto-dev.session-token",
+        options: { httpOnly: true, sameSite: "lax" as const, path: "/", secure: false },
+      },
+    },
+  }),
 });
