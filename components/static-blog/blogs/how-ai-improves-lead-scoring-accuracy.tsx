@@ -522,23 +522,23 @@ export default function HowAiImprovesLeadScoringAccuracy() {
                     <tbody className="divide-y divide-gray-200">
                       <tr className="bg-white hover:bg-gray-50/80 transition-colors">
                         <td className="p-4 text-gray-700">Fixed point values set once, rarely revisited</td>
-                        <td className="p-4 font-semibold text-primary bg-primary/5">Weights learned from actual closed-won and closed-lost outcomes</td>
+                        <td className="p-4 font-semibold text-gray-900 bg-primary/5">Weights learned from actual closed-won and closed-lost outcomes</td>
                       </tr>
                       <tr className="bg-gray-50/40 hover:bg-gray-50/80 transition-colors">
                         <td className="p-4 text-gray-700">15 to 25 percent prediction accuracy</td>
-                        <td className="p-4 font-semibold text-primary bg-primary/5">40 to 60 percent prediction accuracy</td>
+                        <td className="p-4 font-semibold text-gray-900 bg-primary/5">40 to 60 percent prediction accuracy</td>
                       </tr>
                       <tr className="bg-white hover:bg-gray-50/80 transition-colors">
                         <td className="p-4 text-gray-700">Treats every visit the same regardless of timing</td>
-                        <td className="p-4 font-semibold text-primary bg-primary/5">Decays stale signals and prioritizes fresh intent</td>
+                        <td className="p-4 font-semibold text-gray-900 bg-primary/5">Decays stale signals and prioritizes fresh intent</td>
                       </tr>
                       <tr className="bg-gray-50/40 hover:bg-gray-50/80 transition-colors">
                         <td className="p-4 text-gray-700">Requires manual rule updates after every offer change</td>
-                        <td className="p-4 font-semibold text-primary bg-primary/5">Reweights automatically as new data arrives</td>
+                        <td className="p-4 font-semibold text-gray-900 bg-primary/5">Reweights automatically as new data arrives</td>
                       </tr>
                       <tr className="bg-white hover:bg-gray-50/80 transition-colors">
                         <td className="p-4 text-gray-700">Scores sit in a dashboard, waiting for a rep to check</td>
-                        <td className="p-4 font-semibold text-primary bg-primary/5">Scores can trigger instant chat, routing, or booking</td>
+                        <td className="p-4 font-semibold text-gray-900 bg-primary/5">Scores can trigger instant chat, routing, or booking</td>
                       </tr>
                     </tbody>
                   </table>
