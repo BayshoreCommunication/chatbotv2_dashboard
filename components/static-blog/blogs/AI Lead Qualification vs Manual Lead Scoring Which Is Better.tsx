@@ -416,7 +416,7 @@ export default function AiLeadQualificationVsManualLeadScoringWhichIsBetter() {
             {/* --- CTA Box 1 --- */}
             <div className="mb-12 rounded-2xl bg-gradient-to-r from-primary-dark via-primary to-blue-600 p-6 sm:p-8 text-white shadow-xl text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="space-y-2">
-                <h3 className="text-xl sm:text-2xl font-bold">Stop Losing Leads While You Sleep</h3>
+                <h2 className="text-xl sm:text-2xl font-bold">Stop Losing Leads While You Sleep</h2>
                 <p className="text-sm text-blue-100 max-w-lg">
                   Go Converto scans your site, learns your business, and starts qualifying visitors in minutes.
                 </p>
@@ -514,9 +514,9 @@ export default function AiLeadQualificationVsManualLeadScoringWhichIsBetter() {
 
             {/* --- CTA Box 2 --- */}
             <div className="mb-12 rounded-2xl bg-thunder-black p-8 text-white shadow-xl text-center space-y-4">
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
                 See Your Own Website Qualify Leads in Minutes
-              </h3>
+              </h2>
               <p className="text-base text-gray-300 max-w-md mx-auto">
                 Paste your URL. Go Converto learns your business and starts talking to visitors the way your best rep would, at 2am included.
               </p>

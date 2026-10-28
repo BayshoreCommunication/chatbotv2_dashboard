@@ -69,6 +69,119 @@ function AnimatedCounter({
   );
 }
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://www.goconverto.com/blog/why-every-business-needs-an-ai-lead-generation-chatbot#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://www.goconverto.com/",
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://www.goconverto.com/blog",
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Why Every Business Needs An AI Lead Generation Chatbot",
+          "item": "https://www.goconverto.com/blog/why-every-business-needs-an-ai-lead-generation-chatbot",
+        },
+      ],
+    },
+    {
+      "@type": "BlogPosting",
+      "@id": "https://www.goconverto.com/blog/why-every-business-needs-an-ai-lead-generation-chatbot#blogposting",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.goconverto.com/blog/why-every-business-needs-an-ai-lead-generation-chatbot",
+      },
+      "headline": "Why Every Business Needs An AI Lead Generation Chatbot",
+      "name": "Why Florida Businesses Need AI Lead Gen Chatbots",
+      "description":
+        "Convert website traffic faster with an AI lead generation chatbot. Compare 2026 data on response times and static form conversion rates.",
+      "url": "https://www.goconverto.com/blog/why-every-business-needs-an-ai-lead-generation-chatbot",
+      "image": {
+        "@type": "ImageObject",
+        "url":
+          "https://www.goconverto.com/_next/image?url=%2Fassets%2Fstatic-blog%2Fwhy-every-business-needs-an-ai-lead-generation-chatbot.webp&w=1920&q=75&dpl=dpl_82GSYk1SCKSczrSpW96u1Et7e7ND",
+      },
+      "isPartOf": {
+        "@type": "Blog",
+        "@id": "https://www.goconverto.com/blog#blog",
+      },
+      "about": {
+        "@type": "Thing",
+        "name": "AI Lead Generation Chatbots",
+      },
+      "keywords": [
+        "AI lead generation chatbot",
+        "AI chatbot for lead generation",
+        "lead generation chatbot",
+        "AI chatbot for business",
+        "AI sales chatbot",
+        "chatbot for lead generation",
+        "AI customer engagement",
+        "automated lead qualification",
+        "AI appointment scheduling",
+        "conversational AI",
+      ],
+      "author": {
+        "@type": "Organization",
+        "name": "Go Converto",
+        "url": "https://www.goconverto.com/",
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Go Converto",
+        "url": "https://www.goconverto.com/",
+      },
+      "datePublished": "2026-09-27",
+      "dateModified": "2026-09-27",
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://www.goconverto.com/blog/why-every-business-needs-an-ai-lead-generation-chatbot#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is an AI chatbot the same as live chat?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text":
+              "No. Live chat requires the involvement of a person, whereas an AI chatbot replies based on the learning process on the business’s data.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Will people know they are chatting with a bot?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text":
+              "Most platforms disclose this somewhere in the widget, and honestly, most visitors don't mind once the answers are fast and accurate. What frustrates people is a slow answer, not an honest one.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can a chatbot handle appointment scheduling directly?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text":
+              "Yes, modern platforms connect directly to calendar tools so a visitor can book a slot inside the chat itself, no separate scheduling email required.",
+          },
+        },
+      ],
+    },
+  ],
+};
+
 export default function WhyEveryBusinessNeedsAnAiLeadGenerationChatbot() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -93,6 +206,12 @@ export default function WhyEveryBusinessNeedsAnAiLeadGenerationChatbot() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
+      />
       {/* --- Page Hero & Breadcrumb --- */}
       <PageHero
         breadcrumbs={[
@@ -694,9 +813,9 @@ export default function WhyEveryBusinessNeedsAnAiLeadGenerationChatbot() {
 
               {/* IN-ARTICLE CTA BOX */}
               <div className="my-10 rounded-2xl bg-gradient-to-r from-primary-dark via-primary to-blue-600 p-8 text-white shadow-xl text-center space-y-4">
-                <h3 className="text-2xl sm:text-3xl font-black text-white">
+                <h2 className="text-2xl sm:text-3xl font-black text-white">
                   See What Your Website Is Missing
-                </h3>
+                </h2>
                 <p className="text-sm sm:text-base text-blue-100 max-w-lg mx-auto">
                   Paste your URL and Go Converto starts learning your business in minutes.
                 </p>

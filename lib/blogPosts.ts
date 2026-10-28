@@ -30,6 +30,86 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-ai-improves-lead-scoring-accuracy",
+    tag: "Sales Intelligence",
+    title: "How AI Improves Lead Scoring Accuracy & Conversion",
+    description:
+      "See how AI lead scoring lifts prediction accuracy from 25% to 60%, and how Go Converto qualifies leads through real conversation, not forms.",
+    author: "Go Converto Team",
+    authorRole: "Editorial Team",
+    authorBio: "",
+    initials: "GC",
+    avatarColor: "bg-blue-600",
+    date: "October 28, 2026",
+    readTime: "8 min read",
+    gradient: "from-blue-700 via-blue-600 to-blue-400",
+    image: "/assets/static-blog/how-ai-improves-lead-scoring-accuracy-guide.webp",
+    intro:
+      "Artificial intelligence uses machine learning models in place of fixed point values to increase lead scoring accuracy. It studies thousands of closed deals, then rank new leads on conversion pattern. Traditional manual scoring hits 15 to 25% accuracy. AI models trained on historical outcomes reach 40 to 60%, cutting wasted sales hours.",
+    sections: [
+      {
+        heading: "What Is AI Lead Scoring and Why Does Accuracy Matter?",
+        body: "AI lead scoring uses machine learning models to rank conversion probability based on historical CRM outcomes, lifting prediction accuracy to 40-60% compared to 15-25% for static spreadsheets.",
+      },
+      {
+        heading: "How AI Actually Raises Lead Scoring Accuracy",
+        body: "Three core drivers fuel the accuracy jump: real-time behavioral signal processing, weighing firmographic fit against actual buyer action, and automatic decay of stale engagement signals.",
+      },
+      {
+        heading: "Traditional Scoring vs. AI Scoring (The Real Difference)",
+        body: "Unlike fixed-point rules that drift when pricing or products change, AI models continuously reweight scores as fresh closed-won and closed-lost data flows in from your pipeline.",
+      },
+      {
+        heading: "What Signals Matter Most for Accurate AI Lead Scoring",
+        body: "Conversational intent, five-minute response velocity, firmographic customer fit, and unstructured chat data combine to deliver 43% higher prediction accuracy than structured form data alone.",
+      },
+    ],
+    outro: {
+      heading: "The takeaway",
+      body: "Go Converto scans your site, learns your business in minutes, and qualifies every incoming visitor through intelligent conversation 24/7 without manual forms.",
+    },
+  },
+  {
+    slug: "why-every-law-firm-website-needs-an-ai-chatbot",
+    tag: "Legal Tech",
+    title: "Why Every Law Firm Website Needs an AI Chatbot",
+    description:
+      "40% of legal inquiries happen after hours. Learn how Florida law firms use compliant AI chatbots to answer instantly and capture more signed cases.",
+    author: "Go Converto Team",
+    authorRole: "Editorial Team",
+    authorBio: "",
+    initials: "GC",
+    avatarColor: "bg-blue-600",
+    date: "October 21, 2026",
+    readTime: "7 min read",
+    gradient: "from-blue-700 via-blue-600 to-blue-400",
+    image: "/assets/static-blog/why-every-law-firm-website-needs-an-ai-chatbot.webp",
+    intro:
+      "A law firm website needs an AI chatbot because most legal matters occur at night, weekends, and in between meetings, and Florida's consumer base will hire whoever can answer them first. A chatbot would triage the case, collect the intake information, and schedule the consultation while a human would still be asleep.",
+    sections: [
+      {
+        heading: "What the Research Actually Says About Response Time",
+        body: "Clio's 2025 Legal Trends Report reveals firms answering within 5 minutes are 67% more likely to convert leads. Yet average firm response time sits at 2.3 business days, while Tallahassee posted the slowest response average in Florida at over two hours.",
+      },
+      {
+        heading: "Florida Makes This Worse, or Better, Depending on Who's Ready",
+        body: "With more than 400 personal injury firms in Tampa Bay alone competing along the I-275 billboard corridor, response speed determines who signs the client standing in a parking lot after an accident.",
+      },
+      {
+        heading: "The Ethics Question, Answered Properly",
+        body: "Florida Bar Ethics Opinion 24-1 permits AI intake chatbots as long as they clearly disclose they are an AI program and not an attorney, while maintaining confidentiality under Rule 4-1.6.",
+      },
+      {
+        heading: "What This Looks Like on an Actual Florida Law Firm Site",
+        body: "When an inquiry lands, the chatbot captures key case facts (what happened, when, where), screens against actual practice areas, and books consultations directly to the calendar without telephone tag.",
+      },
+    ],
+    outro: {
+      heading: "The takeaway",
+      body: "Go Converto scans your law firm site, learns your practice areas and FAQs in minutes, and turns after-hours website traffic into retained cases 24/7 without code.",
+    },
+  },
+  {
     slug: "how-ai-personalizes-websites-to-increase-conversions",
     tag: "Strategy & Tech",
     title: "How AI Personalizes Websites to Increase Conversions",

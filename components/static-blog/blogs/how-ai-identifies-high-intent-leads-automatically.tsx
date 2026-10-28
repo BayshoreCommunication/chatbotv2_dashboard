@@ -69,6 +69,124 @@ function AnimatedCounter({
   );
 }
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://www.goconverto.com/blog/how-ai-identifies-high-intent-leads-automatically#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://www.goconverto.com/",
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://www.goconverto.com/blog",
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "How AI Identifies High-Intent Leads Automatically",
+          "item": "https://www.goconverto.com/blog/how-ai-identifies-high-intent-leads-automatically",
+        },
+      ],
+    },
+    {
+      "@type": "BlogPosting",
+      "@id": "https://www.goconverto.com/blog/how-ai-identifies-high-intent-leads-automatically#blogposting",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.goconverto.com/blog/how-ai-identifies-high-intent-leads-automatically",
+      },
+      "headline": "How AI Identifies High-Intent Leads Automatically",
+      "name": "How AI Identifies High-Intent Leads Faster",
+      "description":
+        "See how AI scores buyer intent in real time using behavior and language, and why a five-minute response can boost qualification 900%.",
+      "url": "https://www.goconverto.com/blog/how-ai-identifies-high-intent-leads-automatically",
+      "image": {
+        "@type": "ImageObject",
+        "url":
+          "https://www.goconverto.com/_next/image?url=%2Fassets%2Fblog%2Fhow-ai-identifies-high-intent-leads-automatically.webp&w=1920&q=75&dpl=dpl_82GSYk1SCKSczrSpW96u1Et7e7ND",
+        "caption": "How AI Identifies High-Intent Leads Automatically",
+      },
+      "isPartOf": {
+        "@type": "Blog",
+        "@id": "https://www.goconverto.com/blog#blog",
+        "name": "Go Converto Blog",
+        "url": "https://www.goconverto.com/blog",
+      },
+      "about": {
+        "@type": "Thing",
+        "name": "AI Lead Qualification and High-Intent Lead Detection",
+      },
+      "keywords": [
+        "AI lead scoring",
+        "AI lead qualification",
+        "high-intent leads",
+        "high-intent lead detection",
+        "AI lead generation",
+        "automated lead qualification",
+        "lead intent",
+        "AI lead scoring software",
+        "conversational AI",
+        "AI chatbot for lead generation",
+        "sales lead qualification",
+        "automated lead scoring",
+      ],
+      "author": {
+        "@type": "Organization",
+        "name": "Go Converto",
+        "url": "https://www.goconverto.com/",
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Go Converto",
+        "url": "https://www.goconverto.com/",
+      },
+      "datePublished": "2026-09-22",
+      "dateModified": "2026-09-22",
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://www.goconverto.com/blog/how-ai-identifies-high-intent-leads-automatically#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is AI lead scoring accurate for small businesses or large sales teams?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text":
+              "It works at small scale too. The model cares about consistent signal, not company size, and even modest traffic generates enough conversational data to score reliably within a few weeks.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Does AI lead qualification actually work outside normal business hours?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text":
+              "Yes, and that's arguably where it earns the most value. A meaningful share of high-intent traffic arrives evenings and weekends, hours when most teams have nobody watching chat at all.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can an AI chatbot integrate with the CRM a business already uses?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text":
+              "Most modern platforms integrate directly with common CRMs, so qualified leads land in the system a sales team already checks instead of a second inbox to manage.",
+          },
+        },
+      ],
+    },
+  ],
+};
+
 export default function HowAiIdentifiesHighIntentLeadsAutomatically() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -93,6 +211,12 @@ export default function HowAiIdentifiesHighIntentLeadsAutomatically() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
+      />
       {/* --- Page Hero & Breadcrumb --- */}
       <PageHero
         breadcrumbs={[
@@ -618,9 +742,9 @@ export default function HowAiIdentifiesHighIntentLeadsAutomatically() {
 
               {/* CTA Box 2 */}
               <div className="mb-12 rounded-2xl bg-thunder-black p-8 text-white shadow-xl text-center space-y-4">
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
                   Tired Of Slow Response Times?
-                </h3>
+                </h2>
                 <p className="text-base text-gray-300 max-w-md mx-auto">
                   See how it works on your site.
                 </p>
