@@ -554,7 +554,7 @@ export default function HowAiImprovesLeadScoringAccuracy() {
             {/* --- CTA Box 1 --- */}
             <div className="mb-12 rounded-2xl bg-gradient-to-r from-primary-dark via-primary to-blue-600 p-6 sm:p-8 text-white shadow-xl text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">See What Go Converto Learns From Your Site in Minutes</h3>
+                <h2 className="text-xl font-bold">See What Go Converto Learns From Your Site in Minutes</h2>
                 <p className="text-sm text-blue-100 max-w-lg">
                   Paste your URL. Watch it scan your services, pricing, and FAQs automatically to qualify high-intent buyers 24/7.
                 </p>
