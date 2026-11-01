@@ -97,6 +97,13 @@ function watchForBlockedPopup(onBlocked: () => void): () => void {
   };
 }
 
+// Business details from a connected Facebook Page, used to prefill Meta's
+// WhatsApp signup form.
+function whatsAppPrefillFrom(page?: ChannelConnectionSummary) {
+  if (!page) return undefined;
+  return { businessName: page.page_name.trim(), website: page.website };
+}
+
 // WhatsApp Embedded Signup posts a window "message" event partway through
 // the popup flow (event "WA_EMBEDDED_SIGNUP", data.event "FINISH") carrying
 // the phone_number_id/waba_id Meta's own wizard just created or picked —
@@ -612,9 +619,18 @@ const AppsIntegrationDetials = () => {
     const meta = CHANNEL_META[channel];
     const Icon = CHANNEL_ICON[channel];
     const items = connections.filter((c) => c.channel === channel);
+    // Any connected Facebook Page — its name and website prefill Meta's
+    // WhatsApp signup form even when we couldn't find a WhatsApp number on
+    // it (Meta doesn't expose the number behind a Page's WhatsApp button).
+    const connectedPage =
+      channel === "whatsapp"
+        ? connections.find((c) => c.channel === "messenger" && c.status === "active")
+        : undefined;
     // Wrapped so the click event never gets passed through as `prefill`.
     const connect =
-      channel === "whatsapp" ? () => handleConnectWhatsApp() : handleConnectFacebookPage;
+      channel === "whatsapp"
+        ? () => handleConnectWhatsApp(whatsAppPrefillFrom(connectedPage))
+        : handleConnectFacebookPage;
     // A connected Facebook Page that lists a WhatsApp number — offered as a
     // one-click starting point on the WhatsApp card. Meta still makes the
     // owner verify the number inside its own signup popup.
@@ -719,12 +735,7 @@ const AppsIntegrationDetials = () => {
               </p>
               <button
                 type="button"
-                onClick={() =>
-                  handleConnectWhatsApp({
-                    businessName: pageWithWhatsApp.page_name,
-                    website: pageWithWhatsApp.website,
-                  })
-                }
+                onClick={() => handleConnectWhatsApp(whatsAppPrefillFrom(pageWithWhatsApp))}
                 disabled={busy}
                 className="mt-2 rounded-lg bg-[#25D366] px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
               >
