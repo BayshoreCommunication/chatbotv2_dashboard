@@ -57,6 +57,7 @@ const ChatHistoryView = ({
       role: string,
       content: string,
       timestamp: string | null,
+      channel?: string | null,
     ) => {
       const now = timestamp ?? new Date().toISOString();
       setLiveSessions((prev) => {
@@ -93,6 +94,7 @@ const ChatHistoryView = ({
             updated_at: now,
             tools_used_history: [],
             messages: [{ role, content, timestamp }],
+            channel: channel && channel !== "widget" ? channel : null,
           },
         };
       });

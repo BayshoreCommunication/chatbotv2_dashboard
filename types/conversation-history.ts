@@ -16,6 +16,9 @@ export type ConversationHistoryItem = {
   updated_at: string | null;
   tools_used_history: string[][];
   messages: ConversationHistoryMessage[];
+  // "messenger" | "instagram" | "whatsapp"; null/absent for website-widget chats.
+  channel?: string | null;
+  human_takeover?: boolean;
 };
 
 export type ConversationHistoryResponse = {

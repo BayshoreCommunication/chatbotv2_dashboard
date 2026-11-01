@@ -2,16 +2,47 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BiDownArrowAlt, BiSend } from "react-icons/bi";
+import { toast } from "react-hot-toast";
 import { sendOwnerReplyAction, toggleTakeoverAction } from "@/app/actions/conversationHistory";
 import type { ConversationHistoryItem, ConversationHistoryMessage } from "@/types/conversation-history";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bayshorecommunication.com";
 const WS_BASE = API_URL.replace(/^https/, "wss").replace(/^http/, "ws");
 
+// Where a conversation came in from — sessions without a channel are
+// website-widget chats.
+const CHANNEL_BADGES: Record<string, { label: string; className: string }> = {
+  messenger: { label: "Messenger", className: "bg-blue-50 text-blue-700" },
+  instagram: { label: "Instagram", className: "bg-pink-50 text-pink-700" },
+  whatsapp: { label: "WhatsApp", className: "bg-green-50 text-green-700" },
+};
+const WIDGET_BADGE = { label: "Website", className: "bg-gray-100 text-gray-600" };
+
+// The dashboard websocket requires the signed-in user's token. Read fresh
+// on every (re)connect so a refreshed or re-issued token is picked up. A
+// plain GET to NextAuth's session endpoint, deliberately not a server
+// action: Next.js discards in-flight server actions on navigation, which
+// would leave the socket never connecting.
+async function fetchRealtimeToken(): Promise<string> {
+  try {
+    const res = await fetch("/api/auth/session", { cache: "no-store" });
+    const data = (await res.json()) as { user?: { accessToken?: string } } | null;
+    return data?.user?.accessToken ?? "";
+  } catch {
+    return "";
+  }
+}
+
 interface ChatHistoryBodyProps {
   companyId: string;
   selectedSession: ConversationHistoryItem | null;
-  onSessionActivity?: (sessionId: string, role: string, content: string, timestamp: string | null) => void;
+  onSessionActivity?: (
+    sessionId: string,
+    role: string,
+    content: string,
+    timestamp: string | null,
+    channel?: string | null,
+  ) => void;
 }
 
 type LiveMessage = ConversationHistoryMessage & { source?: string };
@@ -30,7 +61,12 @@ function formatTimestamp(value: string | null): string {
 
 const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: ChatHistoryBodyProps) => {
   const [replyText, setReplyText] = useState("");
-  const [isTakeover, setIsTakeover] = useState(false);
+  // Takeover toggles made in this page view, layered over each session's
+  // saved human_takeover so switching conversations shows the real state.
+  const [takeoverOverrides, setTakeoverOverrides] = useState<Record<string, boolean>>({});
+  const isTakeover = selectedSession
+    ? (takeoverOverrides[selectedSession.session_id] ?? selectedSession.human_takeover ?? false)
+    : false;
   const [isSending, setIsSending] = useState(false);
   const [liveMessages, setLiveMessages] = useState<LiveMessage[]>([]);
   const [isAiTyping, setIsAiTyping] = useState(false);
@@ -44,7 +80,6 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
   // Reset live messages and takeover state when session changes
   useEffect(() => {
     setLiveMessages([]);
-    setIsTakeover(false);
     setIsAiTyping(false);
     setReplyText("");
   }, [selectedSession?.session_id]);
@@ -56,8 +91,10 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
 
     const url = `${WS_BASE}/api/v1/chat/${companyId}/ws`;
 
-    function connect() {
-      const ws = new WebSocket(url);
+    async function connect() {
+      const token = await fetchRealtimeToken();
+      if (unmounted) return;
+      const ws = new WebSocket(`${url}?token=${encodeURIComponent(token)}`);
       wsRef.current = ws;
 
       ws.onopen = () => {
@@ -74,7 +111,7 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
 
           if (data.type === "new_message") {
             // Always notify list (creates new session row if unknown)
-            onSessionActivity?.(data.session_id, "user", data.content, data.timestamp ?? null);
+            onSessionActivity?.(data.session_id, "user", data.content, data.timestamp ?? null, data.channel);
             if (isSelected) {
               setLiveMessages((prev) => {
                 const newTs = data.timestamp ? new Date(data.timestamp).getTime() : 0;
@@ -94,7 +131,7 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
             setIsAiTyping(true);
             endRef.current?.scrollIntoView({ behavior: "smooth" });
           } else if (data.type === "ai_reply") {
-            onSessionActivity?.(data.session_id, "assistant", data.content, data.timestamp ?? null);
+            onSessionActivity?.(data.session_id, "assistant", data.content, data.timestamp ?? null, data.channel);
             if (isSelected) {
               setIsAiTyping(false);
               setLiveMessages((prev) => {
@@ -143,12 +180,13 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
     try {
       const result = await toggleTakeoverAction(companyId, selectedSession.session_id, next);
       if (!result.ok) {
-        console.error("Takeover toggle failed", result.error);
+        toast.error(result.error || "Couldn't change takeover — please try again.");
         return;
       }
-      setIsTakeover(next);
+      setTakeoverOverrides((prev) => ({ ...prev, [selectedSession.session_id]: next }));
     } catch (err) {
       console.error("Takeover toggle failed", err);
+      toast.error("Couldn't change takeover — please try again.");
     }
   };
 
@@ -161,7 +199,10 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
     try {
       const result = await sendOwnerReplyAction(companyId, selectedSession.session_id, content);
       if (!result.ok) {
-        console.error("Owner reply failed", result.error);
+        // e.g. Meta's 24-hour reply window closed, or the channel needs
+        // reconnecting — say so, and give the owner their text back.
+        toast.error(result.error || "Message not sent — please try again.", { duration: 8000 });
+        setReplyText(content);
         return;
       }
       setLiveMessages((prev) => [
@@ -171,6 +212,8 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
       endRef.current?.scrollIntoView({ behavior: "smooth" });
     } catch (err) {
       console.error("Owner reply failed", err);
+      toast.error("Message not sent — please try again.");
+      setReplyText(content);
     } finally {
       setIsSending(false);
     }
@@ -214,7 +257,14 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
             {getSessionTitle(selectedSession).charAt(0).toUpperCase()}
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">{getSessionTitle(selectedSession)}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold text-gray-900">{getSessionTitle(selectedSession)}</p>
+              <span
+                className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${(selectedSession.channel && CHANNEL_BADGES[selectedSession.channel] || WIDGET_BADGE).className}`}
+              >
+                {(selectedSession.channel && CHANNEL_BADGES[selectedSession.channel] || WIDGET_BADGE).label}
+              </span>
+            </div>
             {isTakeover && (
               <p className="text-xs text-amber-600 font-medium">Human takeover active</p>
             )}
