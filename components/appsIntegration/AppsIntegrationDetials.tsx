@@ -124,6 +124,22 @@ const CHANNEL_META: Record<ChannelType, { color: string; description: string; hi
 // instead of one ambiguous "no channels connected" sentence.
 const CHANNEL_CHECKLIST: ChannelType[] = ["messenger", "instagram", "whatsapp"];
 
+// Reasons the backend's /oauth/callback can redirect back with
+// (?oauth_error=<code>) — one message per failed step, so a stuck connect
+// can be diagnosed from the toast alone.
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  denied: "Facebook login was cancelled.",
+  invalid_state:
+    "This connection link expired or came from a different session — please click Connect Facebook again.",
+  token_exchange_failed:
+    "Facebook didn't confirm the login — please try connecting again.",
+  pages_lookup_failed:
+    "We couldn't read your Facebook Pages — make sure you allowed Page access, then try again.",
+  no_pages:
+    "No Facebook Page was shared — make sure this Facebook account manages a Page and select it in the Facebook popup.",
+};
+const OAUTH_ERROR_FALLBACK = "Failed to connect via Facebook — please try again.";
+
 const AppsIntegrationDetials = () => {
   // Advanced-plan gate — checked client-side for a friendly upgrade prompt;
   // the backend enforces the real block on every endpoint regardless.
@@ -215,11 +231,9 @@ const AppsIntegrationDetials = () => {
     window.history.replaceState({}, "", url.toString());
 
     if (oauthError) {
-      toast.error(
-        oauthError === "denied"
-          ? "Facebook login was cancelled."
-          : "Failed to connect via Facebook — please try again.",
-      );
+      toast.error(OAUTH_ERROR_MESSAGES[oauthError] ?? OAUTH_ERROR_FALLBACK, {
+        duration: 8000,
+      });
       return;
     }
 
