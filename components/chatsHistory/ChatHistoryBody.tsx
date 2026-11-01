@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BiDownArrowAlt, BiSend } from "react-icons/bi";
+import { BiDownArrowAlt, BiLoaderAlt, BiSend } from "react-icons/bi";
 import { toast } from "react-hot-toast";
 import { sendOwnerReplyAction, toggleTakeoverAction } from "@/app/actions/conversationHistory";
 import type { ConversationHistoryItem, ConversationHistoryMessage } from "@/types/conversation-history";
@@ -43,6 +43,8 @@ interface ChatHistoryBodyProps {
     timestamp: string | null,
     channel?: string | null,
   ) => void;
+  takeoverOverrides: Record<string, boolean>;
+  onTakeoverChange: (changes: Record<string, boolean>) => void;
 }
 
 type LiveMessage = ConversationHistoryMessage & { source?: string };
@@ -59,11 +61,15 @@ function formatTimestamp(value: string | null): string {
   return dt.toLocaleString();
 }
 
-const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: ChatHistoryBodyProps) => {
+const ChatHistoryBody = ({
+  companyId,
+  selectedSession,
+  onSessionActivity,
+  takeoverOverrides,
+  onTakeoverChange,
+}: ChatHistoryBodyProps) => {
   const [replyText, setReplyText] = useState("");
-  // Takeover toggles made in this page view, layered over each session's
-  // saved human_takeover so switching conversations shows the real state.
-  const [takeoverOverrides, setTakeoverOverrides] = useState<Record<string, boolean>>({});
+  const [takeoverPending, setTakeoverPending] = useState(false);
   const isTakeover = selectedSession
     ? (takeoverOverrides[selectedSession.session_id] ?? selectedSession.human_takeover ?? false)
     : false;
@@ -76,6 +82,8 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
   // Ref so WS onmessage always sees the current selected session (no stale closure)
   const selectedSessionRef = useRef(selectedSession);
   useEffect(() => { selectedSessionRef.current = selectedSession; }, [selectedSession]);
+  const onTakeoverChangeRef = useRef(onTakeoverChange);
+  useEffect(() => { onTakeoverChangeRef.current = onTakeoverChange; }, [onTakeoverChange]);
 
   // Reset live messages and takeover state when session changes
   useEffect(() => {
@@ -127,6 +135,9 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
               });
               endRef.current?.scrollIntoView({ behavior: "smooth" });
             }
+          } else if (data.type === "takeover_changed") {
+            // Another tab or team member took over / released a chat.
+            onTakeoverChangeRef.current({ [data.session_id]: Boolean(data.active) });
           } else if (data.type === "typing_start" && isSelected) {
             setIsAiTyping(true);
             endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -175,18 +186,35 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
     : "bg-gray-100 text-gray-700 hover:bg-gray-200";
 
   const handleToggleTakeover = async () => {
-    if (!selectedSession) return;
+    if (!selectedSession || takeoverPending) return;
+    const sessionId = selectedSession.session_id;
     const next = !isTakeover;
+    setTakeoverPending(true);
     try {
-      const result = await toggleTakeoverAction(companyId, selectedSession.session_id, next);
+      const result = await toggleTakeoverAction(companyId, sessionId, next);
       if (!result.ok) {
         toast.error(result.error || "Couldn't change takeover — please try again.");
         return;
       }
-      setTakeoverOverrides((prev) => ({ ...prev, [selectedSession.session_id]: next }));
+      // Only one chat can be taken over at a time — the backend hands any
+      // other taken-over chat back to the AI.
+      const released = result.releasedSessionIds ?? [];
+      onTakeoverChange({
+        [sessionId]: next,
+        ...Object.fromEntries(released.map((id) => [id, false])),
+      });
+      if (!next) {
+        toast.success("AI is back on for this chat.");
+      } else if (released.length > 0) {
+        toast.success("You're now replying here. Your previous chat was handed back to the AI.");
+      } else {
+        toast.success("You're now replying — AI is paused for this chat.");
+      }
     } catch (err) {
       console.error("Takeover toggle failed", err);
       toast.error("Couldn't change takeover — please try again.");
+    } finally {
+      setTakeoverPending(false);
     }
   };
 
@@ -285,10 +313,22 @@ const ChatHistoryBody = ({ companyId, selectedSession, onSessionActivity }: Chat
           <button
             type="button"
             onClick={handleToggleTakeover}
-            className={`flex items-center gap-2 rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${takeoverBtnClass}`}
+            disabled={takeoverPending}
+            aria-busy={takeoverPending}
+            className={`flex min-w-[9.5rem] items-center justify-center gap-2 rounded-lg px-4 py-1.5 text-sm font-medium transition-colors disabled:cursor-wait disabled:opacity-70 ${takeoverBtnClass}`}
           >
-            <span className={`h-2 w-2 rounded-full ${isTakeover ? "bg-amber-500" : "bg-gray-400"}`} />
-            {isTakeover ? "Release Control" : "Take Over"}
+            {takeoverPending ? (
+              <BiLoaderAlt size={15} className="animate-spin" />
+            ) : (
+              <span className={`h-2 w-2 rounded-full ${isTakeover ? "bg-amber-500" : "bg-gray-400"}`} />
+            )}
+            {takeoverPending
+              ? isTakeover
+                ? "Releasing…"
+                : "Taking over…"
+              : isTakeover
+                ? "Release Control"
+                : "Take Over"}
           </button>
         </div>
       </div>

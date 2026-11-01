@@ -91,6 +91,9 @@ export type SimpleActionResult = {
   error?: string;
   statusCode?: number;
   timestamp?: string;
+  // toggleTakeoverAction only: other chats the backend handed back to the
+  // AI, since only one chat can be taken over at a time.
+  releasedSessionIds?: string[];
 };
 
 export async function toggleTakeoverAction(
@@ -126,7 +129,12 @@ export async function toggleTakeoverAction(
       };
     }
 
-    return { ok: true, statusCode: response.status };
+    const released = (payload as { released_session_ids?: unknown } | null)?.released_session_ids;
+    return {
+      ok: true,
+      statusCode: response.status,
+      releasedSessionIds: Array.isArray(released) ? released.map(String) : [],
+    };
   } catch (error: unknown) {
     return {
       ok: false,

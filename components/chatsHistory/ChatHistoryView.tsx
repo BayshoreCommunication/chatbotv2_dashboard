@@ -34,6 +34,14 @@ const ChatHistoryView = ({
 
   const [liveSessions, setLiveSessions] = useState<LiveSessions>({});
 
+  // Takeover changes made since the page loaded (by this tab, another tab,
+  // or a team member — see the takeover_changed websocket event), layered
+  // over each session's saved human_takeover.
+  const [takeoverOverrides, setTakeoverOverrides] = useState<Record<string, boolean>>({});
+  const applyTakeoverChanges = useCallback((changes: Record<string, boolean>) => {
+    setTakeoverOverrides((prev) => ({ ...prev, ...changes }));
+  }, []);
+
   const sessions = useMemo(() => {
     const live = Object.values(liveSessions).filter(
       (s) => !initialSessions.some((i) => i.session_id === s.session_id),
@@ -118,12 +126,15 @@ const ChatHistoryView = ({
         sessions={sessions}
         onChatSelect={setSelectedSessionId}
         selectedSessionId={selectedSessionId}
+        takeoverOverrides={takeoverOverrides}
       />
 
       <ChatHistoryBody
         companyId={companyId}
         selectedSession={selectedSession}
         onSessionActivity={handleSessionActivity}
+        takeoverOverrides={takeoverOverrides}
+        onTakeoverChange={applyTakeoverChanges}
       />
 
       <div className="hidden items-start pl-4 @7xl:flex">

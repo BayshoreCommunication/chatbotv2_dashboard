@@ -11,6 +11,7 @@ interface ChatHistoryListProps {
   onChatSelect: (sessionId: string) => void;
   selectedSessionId: string | null;
   liveActivity?: LiveActivity;
+  takeoverOverrides?: Record<string, boolean>;
 }
 
 function formatTitle(session: ConversationHistoryItem): string {
@@ -40,6 +41,7 @@ const ChatHistoryList = ({
   onChatSelect,
   selectedSessionId,
   liveActivity = {},
+  takeoverOverrides = {},
 }: ChatHistoryListProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
@@ -95,6 +97,7 @@ const ChatHistoryList = ({
           const live = liveActivity[chat.session_id];
           const lastMessage = live?.lastMessage ?? chat.messages[chat.messages.length - 1]?.content ?? "";
           const updatedAt = live?.updatedAt ?? chat.updated_at;
+          const takenOver = takeoverOverrides[chat.session_id] ?? chat.human_takeover ?? false;
           return (
             <div
               key={chat.session_id}
@@ -109,8 +112,14 @@ const ChatHistoryList = ({
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between mb-1">
+                <div className="flex items-start justify-between gap-2 mb-1">
                   <h3 className="text-sm font-semibold text-gray-900 truncate">{title}</h3>
+                  {takenOver && (
+                    <span className="flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+                      You
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <p className="truncate flex-1">{lastMessage}</p>
