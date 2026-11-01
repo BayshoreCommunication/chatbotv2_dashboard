@@ -348,6 +348,10 @@ export interface ChannelConnectionSummary {
   page_name: string;
   status: ConnectionStatus;
   connected_at: string;
+  // Messenger connections only: read off the Facebook Page at connect time,
+  // used to suggest and prefill connecting WhatsApp.
+  whatsapp_number?: string;
+  website?: string;
 }
 
 export interface OAuthCandidatePage {

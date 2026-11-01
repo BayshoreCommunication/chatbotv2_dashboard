@@ -78,6 +78,25 @@ function loadFacebookSdk() {
   document.body.appendChild(script);
 }
 
+// FB.login() opens its popup via a plain window.open() call internally — if
+// the browser (or an ad-blocker/privacy extension) silently blocks it,
+// window.open returns null and neither FB.login callback ever fires, leaving
+// the button stuck on "Connecting…" for the full timeout with no
+// explanation. Wrapping window.open for the duration of one call lets us
+// detect that immediately instead. Returns a function that undoes the wrap.
+function watchForBlockedPopup(onBlocked: () => void): () => void {
+  const originalOpen = window.open;
+  window.open = (...args) => {
+    const popup = originalOpen.apply(window, args);
+    window.open = originalOpen;
+    if (!popup || popup.closed) onBlocked();
+    return popup;
+  };
+  return () => {
+    window.open = originalOpen;
+  };
+}
+
 // WhatsApp Embedded Signup posts a window "message" event partway through
 // the popup flow (event "WA_EMBEDDED_SIGNUP", data.event "FINISH") carrying
 // the phone_number_id/waba_id Meta's own wizard just created or picked —
@@ -284,7 +303,10 @@ const AppsIntegrationDetials = () => {
     window.location.href = result.authorizeUrl;
   };
 
-  const handleConnectWhatsApp = () => {
+  // `prefill` comes from a connected Facebook Page (see pageWithWhatsApp in
+  // renderChannelCard) and fills in the business details on Meta's signup
+  // form — the phone number itself is still entered and verified there.
+  const handleConnectWhatsApp = (prefill?: { businessName: string; website?: string }) => {
     if (!META_WHATSAPP_CONFIG_ID) {
       toast.error("WhatsApp connect isn't configured yet.");
       return;
@@ -398,24 +420,12 @@ const AppsIntegrationDetials = () => {
     };
     window.addEventListener("message", onMessage);
 
-    // FB.login() opens its popup via a plain window.open() call internally
-    // — if the browser (or an ad-blocker/privacy extension) silently blocks
-    // it, window.open returns null and neither of our callbacks ever fires,
-    // leaving the button stuck on "Connecting…" for the full timeout with
-    // no explanation. Wrapping window.open for the duration of this one
-    // call lets us detect that immediately instead.
-    const originalOpen = window.open;
-    window.open = (...args) => {
-      const popup = originalOpen.apply(window, args);
-      window.open = originalOpen;
-      if (!popup || popup.closed) {
-        cleanup();
-        toast.error(
-          "The Facebook popup was blocked by your browser — please allow popups for this site (check your address bar or ad-blocker) and try again.",
-        );
-      }
-      return popup;
-    };
+    const restoreWindowOpen = watchForBlockedPopup(() => {
+      cleanup();
+      toast.error(
+        "The Facebook popup was blocked by your browser — please allow popups for this site (check your address bar or ad-blocker) and try again.",
+      );
+    });
 
     window.FB.login(
       (response) => {
@@ -437,14 +447,24 @@ const AppsIntegrationDetials = () => {
         // Meta's wizard can complete normally but send back a bare FINISH
         // event with no data, which looks identical to this flow just
         // hanging forever.
-        extras: { setup: {}, featureType: "whatsapp_business_app_onboarding", sessionInfoVersion: "3" },
+        extras: {
+          setup: prefill
+            ? {
+                business: {
+                  name: prefill.businessName,
+                  // Meta's prefill only accepts a full URL here.
+                  ...(prefill.website?.startsWith("http") ? { website: prefill.website } : {}),
+                },
+              }
+            : {},
+          featureType: "whatsapp_business_app_onboarding",
+          sessionInfoVersion: "3",
+        },
       },
     );
     // Safety net in case FB.login() never calls window.open synchronously
     // (e.g. it defers a tick) — don't leave the real window.open patched.
-    setTimeout(() => {
-      window.open = originalOpen;
-    }, 3000);
+    setTimeout(restoreWindowOpen, 3000);
   };
 
   const toggleSelectedPage = (externalId: string) => {
@@ -592,7 +612,18 @@ const AppsIntegrationDetials = () => {
     const meta = CHANNEL_META[channel];
     const Icon = CHANNEL_ICON[channel];
     const items = connections.filter((c) => c.channel === channel);
-    const connect = channel === "whatsapp" ? handleConnectWhatsApp : handleConnectFacebookPage;
+    // Wrapped so the click event never gets passed through as `prefill`.
+    const connect =
+      channel === "whatsapp" ? () => handleConnectWhatsApp() : handleConnectFacebookPage;
+    // A connected Facebook Page that lists a WhatsApp number — offered as a
+    // one-click starting point on the WhatsApp card. Meta still makes the
+    // owner verify the number inside its own signup popup.
+    const pageWithWhatsApp =
+      channel === "whatsapp"
+        ? connections.find(
+            (c) => c.channel === "messenger" && c.status === "active" && c.whatsapp_number,
+          )
+        : undefined;
     const connecting = channel === "whatsapp" ? connectingWhatsApp : startingOAuth;
     const hasActive = items.some((c) => c.status === "active");
     const needsReconnect = items.some((c) => c.status === "token_expired");
@@ -677,6 +708,32 @@ const AppsIntegrationDetials = () => {
                 </li>
               ))}
             </ul>
+          ) : pageWithWhatsApp ? (
+            <div className="rounded-lg border border-green-100 bg-green-50/60 px-3 py-2.5">
+              <p className="text-xs text-gray-500">
+                WhatsApp number found on your Page{" "}
+                <span className="font-medium text-gray-700">{pageWithWhatsApp.page_name}</span>
+              </p>
+              <p className="mt-0.5 text-sm font-semibold text-gray-900">
+                {pageWithWhatsApp.whatsapp_number}
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  handleConnectWhatsApp({
+                    businessName: pageWithWhatsApp.page_name,
+                    website: pageWithWhatsApp.website,
+                  })
+                }
+                disabled={busy}
+                className="mt-2 rounded-lg bg-[#25D366] px-2.5 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                Connect this number
+              </button>
+              <p className="mt-1.5 text-[11px] leading-snug text-gray-400">
+                You&apos;ll confirm this number in WhatsApp&apos;s own popup.
+              </p>
+            </div>
           ) : (
             <p className="text-xs text-gray-400">{meta.hint}</p>
           )}
