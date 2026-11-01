@@ -47,12 +47,14 @@ interface ChatHistoryBodyProps {
   onTakeoverChange: (changes: Record<string, boolean>) => void;
 }
 
-// Messages added while the conversation is open. `id` marks them as live
-// (stable React key + slide-in animation); `status: "sending"` is an owner
-// reply shown immediately, before the backend confirms it was delivered.
+// Messages that arrived since the page loaded. `id` is a stable React key;
+// `fresh` plays the slide-in animation once (cleared when it ends, so
+// switching back to a chat doesn't replay it); `status: "sending"` is an
+// owner reply shown immediately, before the backend confirms delivery.
 type LiveMessage = ConversationHistoryMessage & {
   source?: string;
   id?: string;
+  fresh?: boolean;
   status?: "sending";
 };
 
@@ -86,7 +88,18 @@ const ChatHistoryBody = ({
   const isTakeover = selectedSession
     ? (takeoverOverrides[selectedSession.session_id] ?? selectedSession.human_takeover ?? false)
     : false;
-  const [liveMessages, setLiveMessages] = useState<LiveMessage[]>([]);
+  // Kept per conversation (not reset on switching chats) so messages that
+  // arrived live — in this chat or in one you weren't looking at — are
+  // still there when you open it, without a page refresh.
+  const [liveBySession, setLiveBySession] = useState<Record<string, LiveMessage[]>>({});
+  const updateLive = (sessionId: string, update: (prev: LiveMessage[]) => LiveMessage[]) => {
+    setLiveBySession((all) => ({ ...all, [sessionId]: update(all[sessionId] ?? []) }));
+  };
+  const selectedSessionId = selectedSession?.session_id;
+  const liveMessages = useMemo(
+    () => (selectedSessionId ? (liveBySession[selectedSessionId] ?? []) : []),
+    [liveBySession, selectedSessionId],
+  );
   const [isAiTyping, setIsAiTyping] = useState(false);
   const endRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -101,9 +114,8 @@ const ChatHistoryBody = ({
   const onTakeoverChangeRef = useRef(onTakeoverChange);
   useEffect(() => { onTakeoverChangeRef.current = onTakeoverChange; }, [onTakeoverChange]);
 
-  // Reset live messages and takeover state when session changes
+  // Reset per-view state when switching chats (live messages are kept)
   useEffect(() => {
-    setLiveMessages([]);
     setIsAiTyping(false);
     setReplyText("");
   }, [selectedSession?.session_id]);
@@ -136,8 +148,7 @@ const ChatHistoryBody = ({
           if (data.type === "new_message") {
             // Always notify list (creates new session row if unknown)
             onSessionActivity?.(data.session_id, "user", data.content, data.timestamp ?? null, data.channel);
-            if (isSelected) {
-              setLiveMessages((prev) => {
+            updateLive(data.session_id, (prev) => {
                 const newTs = data.timestamp ? new Date(data.timestamp).getTime() : 0;
                 // Dedup within 30 s — catches the same message re-broadcast when
                 // the widget re-sends a pending question after takeover is released
@@ -149,10 +160,9 @@ const ChatHistoryBody = ({
                 if (exists) return prev;
                 return [
                   ...prev,
-                  { id: newLiveMessageId(), role: "user", content: data.content, timestamp: data.timestamp ?? null },
+                  { id: newLiveMessageId(), fresh: true, role: "user", content: data.content, timestamp: data.timestamp ?? null },
                 ];
               });
-            }
           } else if (data.type === "takeover_changed") {
             // Another tab or team member took over / released a chat.
             onTakeoverChangeRef.current({ [data.session_id]: Boolean(data.active) });
@@ -160,19 +170,17 @@ const ChatHistoryBody = ({
             setIsAiTyping(true);
           } else if (data.type === "ai_reply") {
             onSessionActivity?.(data.session_id, "assistant", data.content, data.timestamp ?? null, data.channel);
-            if (isSelected) {
-              setIsAiTyping(false);
-              setLiveMessages((prev) => {
-                const exists = prev.some(
-                  (m) => m.role === "assistant" && m.content === data.content && m.timestamp === (data.timestamp ?? null)
-                );
-                if (exists) return prev;
-                return [
-                  ...prev,
-                  { id: newLiveMessageId(), role: "assistant", content: data.content, timestamp: data.timestamp ?? null },
-                ];
-              });
-            }
+            if (isSelected) setIsAiTyping(false);
+            updateLive(data.session_id, (prev) => {
+              const exists = prev.some(
+                (m) => m.role === "assistant" && m.content === data.content && m.timestamp === (data.timestamp ?? null)
+              );
+              if (exists) return prev;
+              return [
+                ...prev,
+                { id: newLiveMessageId(), fresh: true, role: "assistant", content: data.content, timestamp: data.timestamp ?? null },
+              ];
+            });
           }
         } catch {}
       };
@@ -241,16 +249,18 @@ const ChatHistoryBody = ({
   const handleSendReply = async () => {
     if (!replyText.trim() || !selectedSession) return;
     const content = replyText.trim();
+    const sessionId = selectedSession.session_id;
     const id = newLiveMessageId();
     setReplyText("");
     stickToBottomRef.current = true;
     // Show the reply right away (faded, "Sending…") instead of waiting for
     // the backend — for Messenger/Instagram/WhatsApp that wait includes
     // Meta's own send, which made the bubble pop in a second or two late.
-    setLiveMessages((prev) => [
+    updateLive(sessionId, (prev) => [
       ...prev,
       {
         id,
+        fresh: true,
         role: "assistant",
         content,
         timestamp: new Date().toISOString(),
@@ -260,7 +270,7 @@ const ChatHistoryBody = ({
     ]);
 
     const dropAndRestore = (message: string) => {
-      setLiveMessages((prev) => prev.filter((m) => m.id !== id));
+      updateLive(sessionId, (prev) => prev.filter((m) => m.id !== id));
       // e.g. Meta's 24-hour reply window closed, or the channel needs
       // reconnecting — say so, and give the owner their text back.
       toast.error(message, { duration: 8000 });
@@ -268,12 +278,12 @@ const ChatHistoryBody = ({
     };
 
     try {
-      const result = await sendOwnerReplyAction(companyId, selectedSession.session_id, content);
+      const result = await sendOwnerReplyAction(companyId, sessionId, content);
       if (!result.ok) {
         dropAndRestore(result.error || "Message not sent — please try again.");
         return;
       }
-      setLiveMessages((prev) => prev.map((m) => (m.id === id ? { ...m, status: undefined } : m)));
+      updateLive(sessionId, (prev) => prev.map((m) => (m.id === id ? { ...m, status: undefined } : m)));
     } catch (err) {
       console.error("Owner reply failed", err);
       dropAndRestore("Message not sent — please try again.");
@@ -400,7 +410,15 @@ const ChatHistoryBody = ({
           {allMessages.map((msg, index) => (
             <div
               key={msg.id ?? `${msg.role}-${index}-${msg.timestamp ?? "na"}`}
-              className={`flex ${msg.role === "assistant" ? "justify-end" : "justify-start"} ${msg.id ? "chat-message-in" : ""}`}
+              className={`flex ${msg.role === "assistant" ? "justify-end" : "justify-start"} ${msg.fresh ? "chat-message-in" : ""}`}
+              onAnimationEnd={
+                msg.fresh && msg.id && selectedSession
+                  ? () =>
+                      updateLive(selectedSession.session_id, (prev) =>
+                        prev.map((m) => (m.id === msg.id ? { ...m, fresh: false } : m)),
+                      )
+                  : undefined
+              }
             >
               {msg.role !== "assistant" && (
                 <div className="flex items-start gap-2">
