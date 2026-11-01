@@ -140,6 +140,10 @@ const OAUTH_ERROR_MESSAGES: Record<string, string> = {
 };
 const OAUTH_ERROR_FALLBACK = "Failed to connect via Facebook — please try again.";
 
+// The ?selection_id= / ?oauth_error= query this page load already handled,
+// so remounting the component doesn't reopen the picker or repeat the toast.
+let handledOAuthRedirect: string | null = null;
+
 const AppsIntegrationDetials = () => {
   // Advanced-plan gate — checked client-side for a friendly upgrade prompt;
   // the backend enforces the real block on every endpoint regardless.
@@ -224,11 +228,19 @@ const AppsIntegrationDetials = () => {
 
     if (!selectionId && !oauthError) return;
 
-    // Strip the query params so a refresh doesn't re-trigger this.
-    const url = new URL(window.location.href);
-    url.searchParams.delete("selection_id");
-    url.searchParams.delete("oauth_error");
-    window.history.replaceState({}, "", url.toString());
+    // Deliberately NOT stripping the query params with
+    // window.history.replaceState here: Next.js treats that as a navigation
+    // and discards any server action still in flight — including the
+    // getOAuthPendingSelection call below — whose promise then never
+    // settles, so the picker silently never opened. Instead, leave the URL
+    // alone and skip re-handling it on a refresh/back-forward or a remount
+    // within the same page load.
+    const navigation = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    if (navigation && navigation.type !== "navigate") return;
+    if (handledOAuthRedirect === window.location.search) return;
+    handledOAuthRedirect = window.location.search;
 
     if (oauthError) {
       toast.error(OAUTH_ERROR_MESSAGES[oauthError] ?? OAUTH_ERROR_FALLBACK, {
