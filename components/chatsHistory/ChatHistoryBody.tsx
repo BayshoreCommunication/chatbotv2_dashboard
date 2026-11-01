@@ -47,7 +47,20 @@ interface ChatHistoryBodyProps {
   onTakeoverChange: (changes: Record<string, boolean>) => void;
 }
 
-type LiveMessage = ConversationHistoryMessage & { source?: string };
+// Messages added while the conversation is open. `id` marks them as live
+// (stable React key + slide-in animation); `status: "sending"` is an owner
+// reply shown immediately, before the backend confirms it was delivered.
+type LiveMessage = ConversationHistoryMessage & {
+  source?: string;
+  id?: string;
+  status?: "sending";
+};
+
+let liveMessageSeq = 0;
+function newLiveMessageId(): string {
+  liveMessageSeq += 1;
+  return `live-${Date.now()}-${liveMessageSeq}`;
+}
 
 function getSessionTitle(session: ConversationHistoryItem): string {
   if (session.lead_captured && session.lead_name?.trim()) return session.lead_name.trim();
@@ -73,10 +86,13 @@ const ChatHistoryBody = ({
   const isTakeover = selectedSession
     ? (takeoverOverrides[selectedSession.session_id] ?? selectedSession.human_takeover ?? false)
     : false;
-  const [isSending, setIsSending] = useState(false);
   const [liveMessages, setLiveMessages] = useState<LiveMessage[]>([]);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const endRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  // Follow new messages only while the owner is already at the bottom, so
+  // scrolling up to read older messages isn't yanked back down.
+  const stickToBottomRef = useRef(true);
   const wsRef = useRef<WebSocket | null>(null);
   const pingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Ref so WS onmessage always sees the current selected session (no stale closure)
@@ -131,16 +147,17 @@ const ChatHistoryBody = ({
                   return Math.abs(new Date(m.timestamp).getTime() - newTs) < 30_000;
                 });
                 if (exists) return prev;
-                return [...prev, { role: "user", content: data.content, timestamp: data.timestamp ?? null }];
+                return [
+                  ...prev,
+                  { id: newLiveMessageId(), role: "user", content: data.content, timestamp: data.timestamp ?? null },
+                ];
               });
-              endRef.current?.scrollIntoView({ behavior: "smooth" });
             }
           } else if (data.type === "takeover_changed") {
             // Another tab or team member took over / released a chat.
             onTakeoverChangeRef.current({ [data.session_id]: Boolean(data.active) });
           } else if (data.type === "typing_start" && isSelected) {
             setIsAiTyping(true);
-            endRef.current?.scrollIntoView({ behavior: "smooth" });
           } else if (data.type === "ai_reply") {
             onSessionActivity?.(data.session_id, "assistant", data.content, data.timestamp ?? null, data.channel);
             if (isSelected) {
@@ -150,9 +167,11 @@ const ChatHistoryBody = ({
                   (m) => m.role === "assistant" && m.content === data.content && m.timestamp === (data.timestamp ?? null)
                 );
                 if (exists) return prev;
-                return [...prev, { role: "assistant", content: data.content, timestamp: data.timestamp ?? null }];
+                return [
+                  ...prev,
+                  { id: newLiveMessageId(), role: "assistant", content: data.content, timestamp: data.timestamp ?? null },
+                ];
               });
-              endRef.current?.scrollIntoView({ behavior: "smooth" });
             }
           }
         } catch {}
@@ -175,9 +194,10 @@ const ChatHistoryBody = ({
     };
   }, [companyId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-scroll when session changes
+  // Jump straight to the latest message when a conversation is opened.
   useEffect(() => {
     if (!selectedSession) return;
+    stickToBottomRef.current = true;
     endRef.current?.scrollIntoView({ behavior: "auto" });
   }, [selectedSession?.session_id]);
 
@@ -219,31 +239,44 @@ const ChatHistoryBody = ({
   };
 
   const handleSendReply = async () => {
-    if (!replyText.trim() || !selectedSession || isSending) return;
+    if (!replyText.trim() || !selectedSession) return;
     const content = replyText.trim();
+    const id = newLiveMessageId();
     setReplyText("");
-    setIsSending(true);
+    stickToBottomRef.current = true;
+    // Show the reply right away (faded, "Sending…") instead of waiting for
+    // the backend — for Messenger/Instagram/WhatsApp that wait includes
+    // Meta's own send, which made the bubble pop in a second or two late.
+    setLiveMessages((prev) => [
+      ...prev,
+      {
+        id,
+        role: "assistant",
+        content,
+        timestamp: new Date().toISOString(),
+        source: "human",
+        status: "sending",
+      },
+    ]);
+
+    const dropAndRestore = (message: string) => {
+      setLiveMessages((prev) => prev.filter((m) => m.id !== id));
+      // e.g. Meta's 24-hour reply window closed, or the channel needs
+      // reconnecting — say so, and give the owner their text back.
+      toast.error(message, { duration: 8000 });
+      setReplyText((current) => current || content);
+    };
 
     try {
       const result = await sendOwnerReplyAction(companyId, selectedSession.session_id, content);
       if (!result.ok) {
-        // e.g. Meta's 24-hour reply window closed, or the channel needs
-        // reconnecting — say so, and give the owner their text back.
-        toast.error(result.error || "Message not sent — please try again.", { duration: 8000 });
-        setReplyText(content);
+        dropAndRestore(result.error || "Message not sent — please try again.");
         return;
       }
-      setLiveMessages((prev) => [
-        ...prev,
-        { role: "assistant", content, timestamp: result.timestamp ?? new Date().toISOString(), source: "human" },
-      ]);
-      endRef.current?.scrollIntoView({ behavior: "smooth" });
+      setLiveMessages((prev) => prev.map((m) => (m.id === id ? { ...m, status: undefined } : m)));
     } catch (err) {
       console.error("Owner reply failed", err);
-      toast.error("Message not sent — please try again.");
-      setReplyText(content);
-    } finally {
-      setIsSending(false);
+      dropAndRestore("Message not sent — please try again.");
     }
   };
 
@@ -267,6 +300,23 @@ const ChatHistoryBody = ({
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
   }, [selectedSession?.messages, liveMessages]);
+
+  // Glide down to new messages / the typing dots — after they've rendered,
+  // so the scroll lands on them instead of on the old bottom.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !stickToBottomRef.current) return;
+    const frame = requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [allMessages.length, isAiTyping]);
+
+  const handleMessagesScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    stickToBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+  };
 
   if (!selectedSession) {
     return (
@@ -302,7 +352,10 @@ const ChatHistoryBody = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => endRef.current?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() => {
+              stickToBottomRef.current = true;
+              endRef.current?.scrollIntoView({ behavior: "smooth" });
+            }}
             className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 transition-colors"
           >
             <BiDownArrowAlt size={16} />
@@ -342,12 +395,12 @@ const ChatHistoryBody = ({
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
+      <div ref={scrollRef} onScroll={handleMessagesScroll} className="flex-1 overflow-y-auto bg-gray-50 p-6">
         <div className="space-y-4">
           {allMessages.map((msg, index) => (
             <div
-              key={`${msg.role}-${index}-${msg.timestamp ?? "na"}`}
-              className={`flex ${msg.role === "assistant" ? "justify-end" : "justify-start"}`}
+              key={msg.id ?? `${msg.role}-${index}-${msg.timestamp ?? "na"}`}
+              className={`flex ${msg.role === "assistant" ? "justify-end" : "justify-start"} ${msg.id ? "chat-message-in" : ""}`}
             >
               {msg.role !== "assistant" && (
                 <div className="flex items-start gap-2">
@@ -367,12 +420,21 @@ const ChatHistoryBody = ({
               {msg.role === "assistant" && (
                 <div className="flex flex-row-reverse items-start gap-2">
                   <div className="flex flex-col items-end">
-                    <div className="max-w-md rounded-2xl rounded-tr-sm bg-gray-200 px-4 py-2 text-gray-900">
+                    <div
+                      className={`max-w-md rounded-2xl rounded-tr-sm bg-gray-200 px-4 py-2 text-gray-900 transition-opacity duration-300 ${msg.status === "sending" ? "opacity-60" : "opacity-100"}`}
+                    >
                       {msg.content}
                     </div>
                     <div className="mt-1 flex items-center gap-1.5">
-                      <span className="text-xs text-gray-400">{formatTimestamp(msg.timestamp)}</span>
-                      {(msg as LiveMessage).source === "human" ? (
+                      {msg.status === "sending" ? (
+                        <span className="flex items-center gap-1 text-xs text-gray-400">
+                          <BiLoaderAlt size={12} className="animate-spin" />
+                          Sending…
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">{formatTimestamp(msg.timestamp)}</span>
+                      )}
+                      {msg.source === "human" ? (
                         <span className="rounded px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium">
                           You
                         </span>
@@ -393,7 +455,7 @@ const ChatHistoryBody = ({
 
           {/* AI typing indicator */}
           {isAiTyping && (
-            <div className="flex justify-end">
+            <div className="chat-message-in flex justify-end">
               <div className="flex flex-row-reverse items-start gap-2">
                 <div className="flex flex-col items-end">
                   <div className="max-w-md rounded-2xl rounded-tr-sm bg-gray-200 px-4 py-3">
@@ -422,13 +484,13 @@ const ChatHistoryBody = ({
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendReply()}
-            disabled={!isTakeover || isSending}
+            disabled={!isTakeover}
             className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
           />
           <button
             type="button"
             onClick={handleSendReply}
-            disabled={!isTakeover || !replyText.trim() || isSending}
+            disabled={!isTakeover || !replyText.trim()}
             className="rounded-lg bg-gray-900 p-2 text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <BiSend size={20} />
