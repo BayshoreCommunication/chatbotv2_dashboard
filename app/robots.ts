@@ -21,6 +21,11 @@ const DISALLOWED_PATHS = [
   "/create-assistent",
   "/chatbot",
   "/api/",
+  // Auth and one-time token pages — no crawl value, only crawl budget.
+  "/sign-in",
+  "/sign-up",
+  "/accept-invite",
+  "/verify-team-access",
 ];
 
 export default function robots(): MetadataRoute.Robots {

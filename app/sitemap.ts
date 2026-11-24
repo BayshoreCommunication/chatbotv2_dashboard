@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next";
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { SITE_URL } from "@/config/seo";
 import { BLOG_POSTS } from "@/lib/blogPosts";
 import { INDUSTRIES } from "@/lib/industriesData";
@@ -31,6 +33,28 @@ function parsePostDate(date: string): Date {
   return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
 }
 
+// SEO service landing pages live as one folder each under app/(seo-service).
+// They are discovered from the filesystem so simply adding a new service
+// page folder puts its URL in /sitemap.xml automatically — no edit here.
+// If the directory can't be read (unexpected deploy layout) we return an
+// empty list rather than failing the whole sitemap.
+function getSeoServiceSlugs(): string[] {
+  try {
+    const dir = join(process.cwd(), "app", "(seo-service)");
+    return readdirSync(dir, { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isDirectory() &&
+          !entry.name.startsWith(".") &&
+          !entry.name.startsWith("(")
+      )
+      .map((entry) => entry.name)
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticEntries: MetadataRoute.Sitemap = STATIC_PAGES.map((page) => ({
     url: `${SITE_URL}${page.path}`,
@@ -53,5 +77,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...blogEntries, ...industryEntries];
+  const seoServiceEntries: MetadataRoute.Sitemap = getSeoServiceSlugs().map(
+    (slug) => ({
+      url: `${SITE_URL}/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })
+  );
+
+  return [
+    ...staticEntries,
+    ...seoServiceEntries,
+    ...blogEntries,
+    ...industryEntries,
+  ];
 }
